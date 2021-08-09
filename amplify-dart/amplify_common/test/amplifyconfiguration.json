@@ -1,0 +1,121 @@
+{
+    "UserAgent": "aws-amplify-cli/2.0",
+    "Version": "1.0",
+    "api": {
+        "plugins": {
+            "awsAPIPlugin": {
+                "habitr": {
+                    "endpointType": "GraphQL",
+                    "endpoint": "https://erwya6udtvgenibxo5mr2viwqa.appsync-api.us-west-2.amazonaws.com/graphql",
+                    "region": "us-west-2",
+                    "authorizationType": "AMAZON_COGNITO_USER_POOLS",
+                    "apiKey": "da2-t3gfrcaenrdstlphhfwsmtgiqq"
+                },
+                "habitrAPI": {
+                    "endpointType": "REST",
+                    "endpoint": "https://4ccix50n24.execute-api.us-west-2.amazonaws.com/dev",
+                    "region": "us-west-2",
+                    "authorizationType": "AWS_IAM"
+                }
+            }
+        }
+    },
+    "auth": {
+        "plugins": {
+            "awsCognitoAuthPlugin": {
+                "UserAgent": "aws-amplify-cli/0.1.0",
+                "Version": "0.1.0",
+                "IdentityManager": {
+                    "Default": {}
+                },
+                "CredentialsProvider": {
+                    "CognitoIdentity": {
+                        "Default": {
+                            "PoolId": "us-west-2:8a221f86-53b5-45a3-b07b-1886a5c7cbca",
+                            "Region": "us-west-2"
+                        }
+                    }
+                },
+                "CognitoUserPool": {
+                    "Default": {
+                        "PoolId": "us-west-2_MozFZ5SZh",
+                        "AppClientId": "b914elgvi0a9ruinh8uflevo8",
+                        "Region": "us-west-2"
+                    }
+                },
+                "Auth": {
+                    "Default": {
+                        "OAuth": {
+                            "WebDomain": "habitr277c3719-277c3719-dev.auth.us-west-2.amazoncognito.com",
+                            "AppClientId": "b914elgvi0a9ruinh8uflevo8",
+                            "SignInRedirectURI": "habitr://",
+                            "SignOutRedirectURI": "habitr://",
+                            "Scopes": [
+                                "phone",
+                                "email",
+                                "openid",
+                                "profile",
+                                "aws.cognito.signin.user.admin"
+                            ]
+                        },
+                        "authenticationFlowType": "USER_SRP_AUTH"
+                    }
+                },
+                "AppSync": {
+                    "Default": {
+                        "ApiUrl": "https://erwya6udtvgenibxo5mr2viwqa.appsync-api.us-west-2.amazonaws.com/graphql",
+                        "Region": "us-west-2",
+                        "AuthMode": "AMAZON_COGNITO_USER_POOLS",
+                        "ClientDatabasePrefix": "habitr_AMAZON_COGNITO_USER_POOLS"
+                    },
+                    "habitr_API_KEY": {
+                        "ApiUrl": "https://erwya6udtvgenibxo5mr2viwqa.appsync-api.us-west-2.amazonaws.com/graphql",
+                        "Region": "us-west-2",
+                        "AuthMode": "API_KEY",
+                        "ApiKey": "da2-t3gfrcaenrdstlphhfwsmtgiqq",
+                        "ClientDatabasePrefix": "habitr_API_KEY"
+                    }
+                },
+                "S3TransferUtility": {
+                    "Default": {
+                        "Bucket": "habitre3ab6fe4e7224159befd361b21757733142414-dev",
+                        "Region": "us-west-2"
+                    }
+                },
+                "PinpointAnalytics": {
+                    "Default": {
+                        "AppId": "53f3495160f8454ea4d03ae4e7f228a6",
+                        "Region": "us-west-2"
+                    }
+                },
+                "PinpointTargeting": {
+                    "Default": {
+                        "Region": "us-west-2"
+                    }
+                }
+            }
+        }
+    },
+    "storage": {
+        "plugins": {
+            "awsS3StoragePlugin": {
+                "bucket": "habitre3ab6fe4e7224159befd361b21757733142414-dev",
+                "region": "us-west-2",
+                "defaultAccessLevel": "guest"
+            }
+        }
+    },
+    "analytics": {
+        "plugins": {
+            "awsPinpointAnalyticsPlugin": {
+                "pinpointAnalytics": {
+                    "appId": "53f3495160f8454ea4d03ae4e7f228a6",
+                    "region": "us-west-2"
+                },
+                "pinpointTargeting": {
+                    "region": "us-west-2"
+                }
+            }
+        }
+    }
+}
