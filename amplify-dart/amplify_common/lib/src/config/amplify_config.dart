@@ -6,7 +6,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'amplify_config.g.dart';
 
-@awsSerializable
+@amplifySerializable
 class AmplifyConfig with EquatableMixin {
   @JsonKey(name: 'UserAgent')
   final String userAgent;

@@ -4,7 +4,7 @@ import 'package:equatable/equatable.dart';
 
 part 'api_config.g.dart';
 
-@awsSerializable
+@amplifySerializable
 class ApiConfig with EquatableMixin {
   final Map<String, Map<String, ApiPluginConfig>> plugins;
 
@@ -18,7 +18,7 @@ class ApiConfig with EquatableMixin {
   Map<String, dynamic> toJson() => _$ApiConfigToJson(this);
 }
 
-@awsSerializable
+@amplifySerializable
 class ApiPluginConfig with EquatableMixin {
   final ApiEndpointType endpointType;
   final String endpoint;
