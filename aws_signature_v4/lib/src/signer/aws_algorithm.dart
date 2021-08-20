@@ -1,4 +1,3 @@
-import 'package:aws_signature_v4/src/request/aws_date_time.dart';
 import 'package:aws_signature_v4/src/credentials/aws_credential_scope.dart';
 import 'package:aws_signature_v4/src/credentials/aws_credentials.dart';
 import 'package:convert/convert.dart';
@@ -60,7 +59,7 @@ class _AWSHmacSha256 extends AWSAlgorithm {
 
   @override
   String sign(String stringToSign, List<int> signingKey) {
-    return hex
-        .encode(Hmac(_hash, signingKey).convert(stringToSign.codeUnits).bytes);
+    final signature = Hmac(_hash, signingKey).convert(stringToSign.codeUnits);
+    return hex.encode(signature.bytes);
   }
 }

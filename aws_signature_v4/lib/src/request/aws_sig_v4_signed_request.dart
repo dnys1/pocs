@@ -2,9 +2,7 @@ import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:aws_signature_v4/src/credentials/aws_credential_scope.dart';
 import 'package:aws_signature_v4/src/request/aws_headers.dart';
 import 'package:aws_signature_v4/src/request/canonical_request/canonical_request.dart';
-import 'package:aws_signature_v4/src/request/http_method.dart';
 import 'package:aws_signature_v4/src/signer/aws_algorithm.dart';
-import 'package:equatable/equatable.dart';
 
 export 'package:aws_signature_v4/src/request/http_method.dart';
 
