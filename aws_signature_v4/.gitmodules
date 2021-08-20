@@ -1,0 +1,3 @@
+[submodule "external/aws-c-auth"]
+	path = external/aws-c-auth
+	url = https://github.com/awslabs/aws-c-auth.git
