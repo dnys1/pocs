@@ -4,12 +4,12 @@ const amplifyconfig = ''' {
     "api": {
         "plugins": {
             "awsAPIPlugin": {
-                "flutterapigraphql": {
+                "evanys": {
                     "endpointType": "GraphQL",
-                    "endpoint": "https://tyfh7pnl2jhbvcu3w3aio5uh4y.appsync-api.us-west-2.amazonaws.com/graphql",
+                    "endpoint": "https://eafc5u73ajdhbcrxcg272f5k3u.appsync-api.us-west-2.amazonaws.com/graphql",
                     "region": "us-west-2",
                     "authorizationType": "API_KEY",
-                    "apiKey": "da2-ft7e47rmxfacbdxlfcuiubhsfi"
+                    "apiKey": "da2-ptnvrxlzdzc6pnisdib4oqim5u"
                 }
             }
         }

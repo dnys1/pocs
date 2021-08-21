@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:amplify_appsync/src/graphql/request.dart';
+import 'package:amplify_appsync/src/graphql/graphql_request.dart';
 import 'package:amplify_appsync/src/ws/websocket_connection_header.dart';
 import 'package:amplify_common/amplify_common.dart';
 import 'package:uuid/uuid.dart';
@@ -23,6 +23,7 @@ class MessageType {
     data,
     stop,
     keepAlive,
+    complete,
   ];
 
   static const connectionInit = MessageType._('connection_init');
@@ -34,6 +35,7 @@ class MessageType {
   static const data = MessageType._('data');
   static const stop = MessageType._('stop');
   static const keepAlive = MessageType._('ka');
+  static const complete = MessageType._('complete');
 
   @override
   String toString() => type;
@@ -49,7 +51,7 @@ abstract class WebSocketMessagePayload {
       {
     MessageType.connectionAck: ConnectionAckMessagePayload.fromJson,
     MessageType.data: SubscriptionDataPayload.fromJson,
-    MessageType.error: ErrorPayload.fromJson,
+    MessageType.error: WebSocketError.fromJson,
   };
 
   static WebSocketMessagePayload? fromJson(Map json, MessageType type) {
@@ -57,6 +59,9 @@ abstract class WebSocketMessagePayload {
   }
 
   Map<String, dynamic> toJson();
+
+  @override
+  String toString() => prettyPrintJson(toJson());
 }
 
 class ConnectionAckMessagePayload extends WebSocketMessagePayload {
@@ -109,14 +114,14 @@ class SubscriptionDataPayload extends WebSocketMessagePayload {
       };
 }
 
-class ErrorPayload extends WebSocketMessagePayload {
+class WebSocketError extends WebSocketMessagePayload implements Exception {
   final List<Map> errors;
 
-  const ErrorPayload(this.errors);
+  const WebSocketError(this.errors);
 
-  static ErrorPayload fromJson(Map json) {
+  static WebSocketError fromJson(Map json) {
     final errors = json['errors'] as List?;
-    return ErrorPayload(errors?.cast() ?? []);
+    return WebSocketError(errors?.cast() ?? []);
   }
 
   @override
@@ -145,7 +150,7 @@ class WebSocketMessage {
     this.payload,
   });
 
-  factory WebSocketMessage.fromJson(Map json) {
+  static WebSocketMessage fromJson(Map json) {
     final id = json['id'] as String?;
     final type = json['type'] as String;
     final messageType = MessageType.fromJson(type);

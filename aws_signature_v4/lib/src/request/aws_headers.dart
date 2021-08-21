@@ -2,7 +2,10 @@
 abstract class AWSHeaders {
   const AWSHeaders._();
 
+  static const accept = 'Accept';
   static const algorithm = 'X-Amz-Algorithm';
+  static const authorization = 'Authorization';
+  static const contentEncoding = 'Content-Encoding';
   static const contentLength = 'Content-Length';
   static const contentType = 'Content-Type';
   static const contentSHA256 = 'x-amz-content-sha256';

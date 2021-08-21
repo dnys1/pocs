@@ -7,6 +7,7 @@ export 'src/config/amplify_config.dart';
 // API
 export 'src/config/api/api_config.dart';
 export 'src/config/api/endpoint_type.dart';
+export 'src/config/api/api_authorization.dart';
 
 // Auth
 export 'src/config/auth/auth_config.dart';

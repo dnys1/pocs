@@ -63,10 +63,9 @@ class AWSSigV4Signer {
     final signature = algorithm.sign(sts, signingKey);
 
     return AWSSigV4SignedRequest(
-      accessKeyId: credentials.accessKeyId,
-      sessionToken: credentials.token,
-      algorithm: algorithm,
+      credentials: credentials,
       credentialScope: credentialScope,
+      algorithm: algorithm,
       signature: signature,
       canonicalRequest: canonicalRequest,
     );

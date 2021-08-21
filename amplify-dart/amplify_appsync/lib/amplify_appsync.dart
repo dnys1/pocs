@@ -4,7 +4,7 @@
 library amplify_appsync;
 
 export 'src/config/appsync_config.dart';
-export 'src/graphql/request.dart';
+export 'src/graphql/graphql_request.dart';
 export 'src/graphql/graphql_response_error.dart';
 export 'src/ws/websocket_connection.dart';
 

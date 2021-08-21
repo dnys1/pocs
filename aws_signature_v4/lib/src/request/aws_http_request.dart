@@ -1,5 +1,6 @@
 import 'package:aws_signature_v4/src/request/http_method.dart';
 import 'package:http/http.dart' as http;
+import 'package:meta/meta.dart';
 
 export 'package:aws_signature_v4/src/request/http_method.dart';
 
@@ -28,6 +29,15 @@ class AWSHttpRequest {
   })  : queryParameters = queryParameters ?? const {},
         headers = headers ?? const {},
         body = body ?? const [];
+
+  @protected
+  AWSHttpRequest.delegate(AWSHttpRequest request)
+      : httpMethod = request.httpMethod,
+        host = request.host,
+        path = request.path,
+        queryParameters = request.queryParameters,
+        headers = request.headers,
+        body = request.body;
 
   factory AWSHttpRequest.fromHttpRequest(
     http.BaseRequest request, {

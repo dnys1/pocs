@@ -2,32 +2,22 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:amplify_appsync/src/config/appsync_config.dart';
-import 'package:amplify_appsync/src/graphql/request.dart';
+import 'package:amplify_appsync/src/graphql/graphql_request.dart';
 import 'package:amplify_appsync/src/ws/websocket_message.dart';
 import 'package:amplify_appsync/src/ws/websocket_connection_header.dart';
 import 'package:async/async.dart';
-import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'websocket_connection_payload.dart';
+import 'websocket_message_stream_transformer.dart';
 
-class WebSocketMessageStreamTransformer
-    extends StreamTransformerBase<dynamic, WebSocketMessage> {
-  const WebSocketMessageStreamTransformer();
-
-  @override
-  Stream<WebSocketMessage> bind(Stream stream) {
-    return stream.map((dynamic data) {
-      final json = jsonDecode(data as String) as Map;
-      return WebSocketMessage.fromJson(json);
-    });
-  }
-}
-
+/// {@template websocket_connection}
+/// Manages connection with an AppSync backend and subscription routing.
+/// {@endtemplate}
 class WebSocketConnection {
   static const webSocketProtocols = ['graphql-ws'];
 
-  late final WebSocketConnectionHeader _authorization;
+  late final WebSocketConnectionHeader _authorizationHeader;
   late final WebSocketChannel _channel;
   late final StreamSubscription<WebSocketMessage> _subscription;
   late final RestartableTimer _timeoutTimer;
@@ -41,14 +31,16 @@ class WebSocketConnection {
   /// after the first `connection_ack` message.
   Future<void> get ready => _connectionReady.future;
 
-  final StreamController<WebSocketMessage> _messageController =
+  /// Re-broadcasts messages for child streams.
+  final StreamController<WebSocketMessage> _rebroadcastController =
       StreamController<WebSocketMessage>.broadcast();
 
-  /// Re-broadcast message stream.
-  Stream<WebSocketMessage> get _messageStream => _messageController.stream;
+  /// Incoming message stream for all events.
+  Stream<WebSocketMessage> get _messageStream => _rebroadcastController.stream;
 
+  /// {@macro websocket_connection}
   WebSocketConnection(AppSyncConfig config) {
-    _authorization = WebSocketConnectionHeader.fromConfig(config);
+    _authorizationHeader = WebSocketConnectionHeader.fromConfig(config);
     _connect(config);
   }
 
@@ -57,10 +49,10 @@ class WebSocketConnection {
     final payload = WebSocketConnectionPayload.fromConfig(config);
 
     final connectionUri = config.realTimeGraphQLUri.replace(queryParameters: {
-      'header': _authorization.encode(),
+      'header': _authorizationHeader.encode(),
       'payload': payload.encode(),
     });
-    _channel = IOWebSocketChannel.connect(
+    _channel = WebSocketChannel.connect(
       connectionUri,
       protocols: webSocketProtocols,
     );
@@ -87,32 +79,32 @@ class WebSocketConnection {
 
   /// Subscribes to the given GraphQL request. Returns the subscription object,
   /// or throws an [Exception] if there's an error.
-  Future<Stream<SubscriptionDataPayload>> subscribe(
-      GraphQLRequest request) async {
+  Stream<SubscriptionDataPayload> subscribe(
+    GraphQLRequest request,
+  ) {
     final subRegistration = WebSocketMessage(
       messageType: MessageType.start,
       payload: SubscriptionRegistrationPayload(
         request: request,
-        authorization: _authorization,
+        authorization: _authorizationHeader,
       ),
     );
-    final subscriptionId = subRegistration.id;
-    _send(subRegistration);
-    final subscription = _messageStream
-        .where(
-          (msg) =>
-              msg.messageType == MessageType.data && msg.id == subscriptionId,
-        )
-        .map((msg) => msg.payload as SubscriptionDataPayload);
-    await Future.any([
-      _messageStream.firstWhere((msg) =>
-          msg.messageType == MessageType.startAck && msg.id == subscriptionId),
-      _messageStream
-          .firstWhere((msg) =>
-              msg.messageType == MessageType.error && msg.id == subscriptionId)
-          .then((msg) => throw Exception(msg.toString())),
-    ]);
-    return subscription;
+    final subscriptionId = subRegistration.id!;
+    return _messageStream
+        .where((msg) => msg.id == subscriptionId)
+        .transform(const WebSocketSubscriptionStreamTransformer())
+        .asBroadcastStream(
+          onListen: (_) => _send(subRegistration),
+          onCancel: (_) => _cancel(subscriptionId),
+        );
+  }
+
+  /// Cancels a subscription.
+  void _cancel(String subscriptionId) {
+    _send(WebSocketMessage(
+      id: subscriptionId,
+      messageType: MessageType.stop,
+    ));
   }
 
   /// Sends a structured message over the WebSocket.
@@ -129,39 +121,52 @@ class WebSocketConnection {
   }
 
   /// Times out the connection (usually if a keep alive has not been received in time).
-  void _timeout() {
-    print('Connection timeout');
-    close();
+  void _timeout(Duration timeoutDuration) {
+    _rebroadcastController.addError(
+      TimeoutException(
+        'Connection timeout',
+        timeoutDuration,
+      ),
+    );
   }
 
   /// Handles incoming data on the WebSocket.
   void _onData(WebSocketMessage message) {
     print('Received: $message');
-    _messageController.add(message);
     switch (message.messageType) {
       case MessageType.connectionAck:
         final messageAck = message.payload as ConnectionAckMessagePayload;
-        _timeoutTimer = RestartableTimer(
-          Duration(milliseconds: messageAck.connectionTimeoutMs),
-          _timeout,
+        final timeoutDuration = Duration(
+          milliseconds: messageAck.connectionTimeoutMs,
         );
-        if (!_connectionReady.isCompleted) {
-          _connectionReady.complete();
-        }
+        _timeoutTimer = RestartableTimer(
+          timeoutDuration,
+          () => _timeout(timeoutDuration),
+        );
+        _connectionReady.complete();
         print('Registered timer');
-        break;
+        return;
+      case MessageType.connectionError:
+        final wsError = message.payload as WebSocketError;
+        _connectionReady.completeError(wsError);
+        return;
       case MessageType.keepAlive:
         _timeoutTimer.reset();
         print('Reset timer');
-        break;
-      case MessageType.startAck:
-        print('Subscription registered: ${message.id}');
-        break;
-      case MessageType.data:
-        // final messageData = message.payload as SubscriptionDataPayload;
-        break;
+        return;
+      case MessageType.error:
+        // Only handle general messages, not subscription-specific ones
+        if (message.id != null) {
+          break;
+        }
+        final wsError = message.payload as WebSocketError;
+        _rebroadcastController.addError(wsError);
+        return;
       default:
-        print('Unhandled message: $message');
+        break;
     }
+
+    // Re-broadcast unhandled messages
+    _rebroadcastController.add(message);
   }
 }

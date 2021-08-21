@@ -6,24 +6,31 @@ import 'package:aws_signature_v4/src/signer/aws_algorithm.dart';
 
 export 'package:aws_signature_v4/src/request/http_method.dart';
 
-class AWSSigV4SignedRequest {
-  final String accessKeyId;
-  final String? sessionToken;
-  final AWSAlgorithm algorithm;
-  final AWSCredentialScope credentialScope;
-  final String signature;
+class AWSSigV4SignedRequest extends AWSHttpRequest {
   final CanonicalRequest canonicalRequest;
+  final String signature;
 
-  const AWSSigV4SignedRequest({
-    required this.accessKeyId,
-    required this.sessionToken,
-    required this.credentialScope,
-    required this.algorithm,
+  AWSSigV4SignedRequest({
+    required AWSCredentials credentials,
+    required AWSCredentialScope credentialScope,
+    required AWSAlgorithm algorithm,
     required this.signature,
     required this.canonicalRequest,
-  });
+  }) : super.delegate(buildRequest(
+          credentials: credentials,
+          credentialScope: credentialScope,
+          algorithm: algorithm,
+          signature: signature,
+          canonicalRequest: canonicalRequest,
+        ));
 
-  AWSHttpRequest get request {
+  static AWSHttpRequest buildRequest({
+    required AWSCredentials credentials,
+    required AWSCredentialScope credentialScope,
+    required AWSAlgorithm algorithm,
+    required String signature,
+    required CanonicalRequest canonicalRequest,
+  }) {
     // The signing process requires component keys be encoded. However, the actual
     // HTTP request should have the pre-encoded keys.
     final queryParameters = canonicalRequest.queryParameters;
@@ -34,6 +41,7 @@ class AWSSigV4SignedRequest {
     final headers = canonicalRequest.headers;
 
     // If the session token was omitted from signing, include it now.
+    var sessionToken = credentials.sessionToken;
     final includeSessionToken =
         sessionToken != null && canonicalRequest.omitSessionTokenFromSigning;
     if (canonicalRequest.presignedUrl) {
@@ -42,9 +50,9 @@ class AWSSigV4SignedRequest {
         if (includeSessionToken) AWSHeaders.securityToken: sessionToken!,
       });
     } else {
-      headers['Authorization'] = [
+      headers[AWSHeaders.authorization] = [
         algorithm.name,
-        'Credential=$accessKeyId/$credentialScope,',
+        'Credential=${credentials.accessKeyId}/$credentialScope,',
         'SignedHeaders=${canonicalRequest.signedHeaders.join(';')},',
         'Signature=$signature',
       ].join(' ');
@@ -58,8 +66,8 @@ class AWSSigV4SignedRequest {
       httpMethod: originalRequest.httpMethod,
       host: originalRequest.host,
       path: originalRequest.path,
-      headers: headers,
       body: originalRequest.body,
+      headers: headers,
 
       // Encode query components, if necessary (avoid double encoding here)
       queryParameters: queryParameters.map(

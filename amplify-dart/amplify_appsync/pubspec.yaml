@@ -10,6 +10,9 @@ dependencies:
   amplify_common:
     path: ../amplify_common
   async: ^2.6.0
+  aws_signature_v4:
+    path: ../../aws_signature_v4
+  collection: ^1.15.0
   equatable: ^2.0.0
   web_socket_channel: ^2.1.0
   uuid: ^3.0.0

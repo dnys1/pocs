@@ -128,8 +128,8 @@ class CanonicalRequest {
         AWSHeaders.expires: expiresIn.toString(),
       if (includeBodyHash && request.body.isNotEmpty)
         AWSHeaders.contentSHA256: hashRequest(request.body),
-      if (credentials.token != null && !omitSessionTokenFromSigning)
-        AWSHeaders.securityToken: credentials.token!,
+      if (credentials.sessionToken != null && !omitSessionTokenFromSigning)
+        AWSHeaders.securityToken: credentials.sessionToken!,
       if (presignedUrl) AWSHeaders.signedHeaders: signedHeaders.toString(),
     };
   }

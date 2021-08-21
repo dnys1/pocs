@@ -18,5 +18,5 @@ Map<String, dynamic> _$AWSCredentialsToJson(AWSCredentials instance) =>
     <String, dynamic>{
       'access_key_id': instance.accessKeyId,
       'secret_access_key': instance.secretAccessKey,
-      'token': instance.token,
+      'token': instance.sessionToken,
     };

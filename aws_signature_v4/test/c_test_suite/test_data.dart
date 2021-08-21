@@ -131,22 +131,21 @@ class SignerTest {
           expect(signedRequest.signature, equals(headerTestData.signature));
         });
         test('request', () {
-          final httpRequest = signedRequest.request;
           expect(
             const MapEquality<String, String>(keys: CaseInsensitiveEquality())
                 .equals(
-              httpRequest.headers,
+              signedRequest.headers,
               headerTestData.signedRequest.headers,
             ),
             isTrue,
           );
           expect(
-            httpRequest.path,
+            signedRequest.path,
             equals(headerTestData.signedRequest.path),
           );
           expect(
             const MapEquality<String, String>().equals(
-              httpRequest.queryParameters,
+              signedRequest.queryParameters,
               headerTestData.signedRequest.queryParameters,
             ),
             isTrue,
@@ -190,22 +189,21 @@ class SignerTest {
           expect(signedRequest.signature, equals(queryTestData.signature));
         });
         test('request', () {
-          final httpRequest = signedRequest.request;
           expect(
             const MapEquality<String, String>(keys: CaseInsensitiveEquality())
                 .equals(
-              httpRequest.headers,
+              signedRequest.headers,
               queryTestData.signedRequest.headers,
             ),
             isTrue,
           );
           expect(
-            httpRequest.path,
+            signedRequest.path,
             equals(queryTestData.signedRequest.path),
           );
           expect(
             const MapEquality<String, String>().equals(
-              httpRequest.queryParameters,
+              signedRequest.queryParameters,
               queryTestData.signedRequest.queryParameters,
             ),
             isTrue,

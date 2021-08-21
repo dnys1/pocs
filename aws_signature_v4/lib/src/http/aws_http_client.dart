@@ -31,6 +31,6 @@ class AWSHttpClient extends http.BaseClient {
       sigRequest,
       credentialScope: AWSCredentialScope(region: region, service: service),
     );
-    return _baseClient.send(signedRequest.request.toHttpRequest());
+    return _baseClient.send(signedRequest.toHttpRequest());
   }
 }

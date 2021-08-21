@@ -78,7 +78,6 @@ void main(List<String> args) async {
 
   final AWSSigV4SignedRequest signedRequest =
       signer.sign(sigRequest, credentialScope: scope);
-  final request = signedRequest.request;
-  final resp = await request.send();
+  final resp = await signedRequest.send();
   print(resp.body);
 }

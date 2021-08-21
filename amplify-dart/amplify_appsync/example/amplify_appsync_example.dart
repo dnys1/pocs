@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:amplify_appsync/src/config/appsync_config.dart';
-import 'package:amplify_appsync/src/graphql/request.dart';
+import 'package:amplify_appsync/src/graphql/graphql_request.dart';
 import 'package:amplify_appsync/src/ws/websocket_connection.dart';
 import 'package:amplify_common/amplify_common.dart';
 
@@ -13,15 +13,22 @@ void main() async {
   final appSyncConfig = AppSyncConfig.fromAmplifyConfig(amplifyConfig);
   final webSocketConnection = WebSocketConnection(appSyncConfig);
   await webSocketConnection.init();
-  await webSocketConnection.subscribe(GraphQLRequest(
+  final stream = webSocketConnection.subscribe(GraphQLRequest(
     '''
-    subscription OnUpdateTodo {
-      onUpdateTodo {
+    subscription OnShopifyEvent {
+      onCreateShopifyEvent {
         id
-        name
-        description
+        type
+        payload
       }
     }
     ''',
   ));
+  try {
+    await for (var payload in stream) {
+      print('Got data: $payload');
+    }
+  } on Exception catch (e) {
+    print('Got error: $e');
+  }
 }

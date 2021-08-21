@@ -1,3 +1,4 @@
+import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:aws_signature_v4/src/credentials/aws_credential_scope.dart';
 import 'package:aws_signature_v4/src/credentials/aws_credentials.dart';
 import 'package:convert/convert.dart';
@@ -51,8 +52,8 @@ class _AWSHmacSha256 extends AWSAlgorithm {
     final kService = Hmac(_hash, kRegion.bytes).convert(service.codeUnits);
 
     // kSigning = HMAC(kService, "aws4_request")
-    final kSigning =
-        Hmac(_hash, kService.bytes).convert('aws4_request'.codeUnits);
+    final kSigning = Hmac(_hash, kService.bytes)
+        .convert(AWSSigV4Signer.terminationString.codeUnits);
 
     return kSigning.bytes;
   }
