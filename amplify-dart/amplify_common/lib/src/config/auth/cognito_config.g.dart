@@ -6,16 +6,17 @@ part of 'cognito_config.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-AWSCognitoAuthPlugin _$AWSCognitoAuthPluginFromJson(Map json) {
+AWSCognitoAuthPlugin _$AWSCognitoAuthPluginFromJson(Map<String, dynamic> json) {
   return AWSCognitoAuthPlugin(
     userAgent: json['UserAgent'] as String,
     version: json['Version'] as String,
-    userPool: (json['CognitoUserPool'] as Map?)?.map(
-      (k, e) =>
-          MapEntry(k as String, AWSCognitoUserPoolConfig.fromJson(e as Map)),
+    userPool: (json['CognitoUserPool'] as Map<String, dynamic>?)?.map(
+      (k, e) => MapEntry(
+          k, AWSCognitoUserPoolConfig.fromJson(e as Map<String, dynamic>)),
     ),
-    auth: (json['Auth'] as Map?)?.map(
-      (k, e) => MapEntry(k as String, AWSCognitoAuthConfig.fromJson(e as Map)),
+    auth: (json['Auth'] as Map<String, dynamic>?)?.map(
+      (k, e) =>
+          MapEntry(k, AWSCognitoAuthConfig.fromJson(e as Map<String, dynamic>)),
     ),
   );
 }
@@ -29,7 +30,8 @@ Map<String, dynamic> _$AWSCognitoAuthPluginToJson(
       'Auth': instance.auth,
     };
 
-AWSCognitoUserPoolConfig _$AWSCognitoUserPoolConfigFromJson(Map json) {
+AWSCognitoUserPoolConfig _$AWSCognitoUserPoolConfigFromJson(
+    Map<String, dynamic> json) {
   return AWSCognitoUserPoolConfig(
     poolId: json['PoolId'] as String,
     appClientId: json['AppClientId'] as String,
@@ -45,11 +47,11 @@ Map<String, dynamic> _$AWSCognitoUserPoolConfigToJson(
       'Region': instance.region,
     };
 
-AWSCognitoAuthConfig _$AWSCognitoAuthConfigFromJson(Map json) {
+AWSCognitoAuthConfig _$AWSCognitoAuthConfigFromJson(Map<String, dynamic> json) {
   return AWSCognitoAuthConfig(
     oauth: json['OAuth'] == null
         ? null
-        : AWSCognitoOAuthConfig.fromJson(json['OAuth'] as Map),
+        : AWSCognitoOAuthConfig.fromJson(json['OAuth'] as Map<String, dynamic>),
   );
 }
 
@@ -59,7 +61,8 @@ Map<String, dynamic> _$AWSCognitoAuthConfigToJson(
       'OAuth': instance.oauth,
     };
 
-AWSCognitoOAuthConfig _$AWSCognitoOAuthConfigFromJson(Map json) {
+AWSCognitoOAuthConfig _$AWSCognitoOAuthConfigFromJson(
+    Map<String, dynamic> json) {
   return AWSCognitoOAuthConfig(
     webDomain: json['WebDomain'] as String,
     appClientId: json['AppClientId'] as String,

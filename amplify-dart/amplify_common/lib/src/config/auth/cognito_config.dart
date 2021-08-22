@@ -1,6 +1,6 @@
 import 'package:amplify_common/amplify_common.dart';
-import 'package:amplify_common/src/serializable.dart';
-import 'package:equatable/equatable.dart';
+import 'package:amplify_common/src/util/equatable.dart';
+import 'package:amplify_common/src/util/serializable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'cognito_config.g.dart';
@@ -26,7 +26,7 @@ extension AuthConfigCognitoX on AuthConfig {
 }
 
 @awsSerializable
-class AWSCognitoAuthPlugin with EquatableMixin {
+class AWSCognitoAuthPlugin with AmplifyEquatable, AmplifySerializable {
   final String userAgent;
   final String version;
 
@@ -49,14 +49,15 @@ class AWSCognitoAuthPlugin with EquatableMixin {
         auth,
       ];
 
-  factory AWSCognitoAuthPlugin.fromJson(Map json) =>
+  factory AWSCognitoAuthPlugin.fromJson(Map<String, dynamic> json) =>
       _$AWSCognitoAuthPluginFromJson(json);
 
+  @override
   Map<String, dynamic> toJson() => _$AWSCognitoAuthPluginToJson(this);
 }
 
 @awsSerializable
-class AWSCognitoUserPoolConfig with EquatableMixin {
+class AWSCognitoUserPoolConfig with AmplifyEquatable, AmplifySerializable {
   final String poolId;
   final String appClientId;
   final String region;
@@ -70,14 +71,15 @@ class AWSCognitoUserPoolConfig with EquatableMixin {
   @override
   List<Object?> get props => [poolId, appClientId, region];
 
-  factory AWSCognitoUserPoolConfig.fromJson(Map json) =>
+  factory AWSCognitoUserPoolConfig.fromJson(Map<String, dynamic> json) =>
       _$AWSCognitoUserPoolConfigFromJson(json);
 
+  @override
   Map<String, dynamic> toJson() => _$AWSCognitoUserPoolConfigToJson(this);
 }
 
 @amplifySerializable
-class AWSCognitoAuthConfig with EquatableMixin {
+class AWSCognitoAuthConfig with AmplifyEquatable, AmplifySerializable {
   @JsonKey(name: 'OAuth')
   final AWSCognitoOAuthConfig? oauth;
 
@@ -88,14 +90,15 @@ class AWSCognitoAuthConfig with EquatableMixin {
   @override
   List<Object?> get props => [oauth];
 
-  factory AWSCognitoAuthConfig.fromJson(Map json) =>
+  factory AWSCognitoAuthConfig.fromJson(Map<String, dynamic> json) =>
       _$AWSCognitoAuthConfigFromJson(json);
 
+  @override
   Map<String, dynamic> toJson() => _$AWSCognitoAuthConfigToJson(this);
 }
 
 @awsSerializable
-class AWSCognitoOAuthConfig with EquatableMixin {
+class AWSCognitoOAuthConfig with AmplifyEquatable, AmplifySerializable {
   final String webDomain;
   final String appClientId;
 
@@ -123,8 +126,9 @@ class AWSCognitoOAuthConfig with EquatableMixin {
         scopes,
       ];
 
-  factory AWSCognitoOAuthConfig.fromJson(Map json) =>
+  factory AWSCognitoOAuthConfig.fromJson(Map<String, dynamic> json) =>
       _$AWSCognitoOAuthConfigFromJson(json);
 
+  @override
   Map<String, dynamic> toJson() => _$AWSCognitoOAuthConfigToJson(this);
 }

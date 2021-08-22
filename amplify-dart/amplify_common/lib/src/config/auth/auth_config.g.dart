@@ -6,10 +6,10 @@ part of 'auth_config.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-AuthConfig _$AuthConfigFromJson(Map json) {
+AuthConfig _$AuthConfigFromJson(Map<String, dynamic> json) {
   return AuthConfig(
-    (json['plugins'] as Map).map(
-      (k, e) => MapEntry(k as String, Map<String, dynamic>.from(e as Map)),
+    (json['plugins'] as Map<String, dynamic>).map(
+      (k, e) => MapEntry(k, e as Map<String, dynamic>),
     ),
   );
 }

@@ -6,9 +6,9 @@ part of 'api_config.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ApiConfig _$ApiConfigFromJson(Map json) {
+ApiConfig _$ApiConfigFromJson(Map<String, dynamic> json) {
   return ApiConfig(
-    plugins: _apiPluginsFromJson(json['plugins']),
+    plugins: AmplifyPluginRegistry.pluginsFromJson(json['plugins']),
   );
 }
 
@@ -16,7 +16,7 @@ Map<String, dynamic> _$ApiConfigToJson(ApiConfig instance) => <String, dynamic>{
       'plugins': instance.plugins,
     };
 
-AppSyncApiConfig _$AppSyncApiConfigFromJson(Map json) {
+AppSyncApiConfig _$AppSyncApiConfigFromJson(Map<String, dynamic> json) {
   return AppSyncApiConfig(
     endpointType: _$enumDecode(_$ApiEndpointTypeEnumMap, json['endpointType']),
     endpoint: json['endpoint'] as String,

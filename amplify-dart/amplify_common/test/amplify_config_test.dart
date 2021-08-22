@@ -7,7 +7,8 @@ import 'package:test/test.dart';
 void main() {
   final amplifyConfigStr =
       File('test/amplifyconfiguration.json').readAsStringSync();
-  final amplifyConfigJson = json.decode(amplifyConfigStr) as Map;
+  final amplifyConfigJson =
+      json.decode(amplifyConfigStr) as Map<String, dynamic>;
 
   group('AmplifyConfig', () {
     group('API', () {

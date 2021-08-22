@@ -1,16 +1,36 @@
 part of 'api_config.dart';
 
-/// A map of api names to their config.
+/// Factory for [AppSyncPlugin].
+class AppSyncPluginFactory extends AmplifyPluginFactory<AppSyncPlugin> {
+  const AppSyncPluginFactory();
+
+  @override
+  AppSyncPlugin build(Map<String, dynamic> json) {
+    return AppSyncPlugin.fromJson(json);
+  }
+
+  @override
+  String get name => 'awsAPIPlugin';
+}
+
+/// A map of AppSync plugins keyed by the API name.
 class AppSyncPlugin extends DelegatingMap<String, AppSyncApiConfig>
-    implements ApiPlugin {
+    with AmplifySerializable, AmplifyEquatable
+    implements AmplifyPlugin {
   const AppSyncPlugin(Map<String, AppSyncApiConfig> configs) : super(configs);
+
+  @override
+  String get name => 'awsAPIPlugin';
+
+  @override
+  List<Object?> get props => [this];
 
   factory AppSyncPlugin.fromJson(Map<String, dynamic> json) {
     final map = json.map((k, v) {
       if (v is! Map) {
         throw ArgumentError.value(v);
       }
-      return MapEntry(k, AppSyncApiConfig.fromJson(v));
+      return MapEntry(k, AppSyncApiConfig.fromJson(v.cast()));
     });
     return AppSyncPlugin(map);
   }
@@ -34,7 +54,7 @@ class AppSyncPlugin extends DelegatingMap<String, AppSyncApiConfig>
 }
 
 @amplifySerializable
-class AppSyncApiConfig with EquatableMixin {
+class AppSyncApiConfig with AmplifyEquatable, AmplifySerializable {
   final ApiEndpointType endpointType;
   final String endpoint;
   final String region;
@@ -58,8 +78,9 @@ class AppSyncApiConfig with EquatableMixin {
         apiKey,
       ];
 
-  factory AppSyncApiConfig.fromJson(Map json) =>
+  factory AppSyncApiConfig.fromJson(Map<String, dynamic> json) =>
       _$AppSyncApiConfigFromJson(json);
 
+  @override
   Map<String, dynamic> toJson() => _$AppSyncApiConfigToJson(this);
 }

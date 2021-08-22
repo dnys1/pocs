@@ -8,7 +8,7 @@ import 'package:amplify_common/amplify_common.dart';
 import 'amplifyconfiguration.dart';
 
 void main() async {
-  final amplifyConfigMap = jsonDecode(amplifyconfig) as Map;
+  final amplifyConfigMap = jsonDecode(amplifyconfig) as Map<String, dynamic>;
   final amplifyConfig = AmplifyConfig.fromJson(amplifyConfigMap);
   final appSyncConfig = AppSyncConfig.fromAmplifyConfig(amplifyConfig);
   final webSocketConnection = WebSocketConnection(appSyncConfig);

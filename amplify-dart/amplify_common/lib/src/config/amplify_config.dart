@@ -1,13 +1,13 @@
 import 'package:amplify_common/src/config/api/api_config.dart';
 import 'package:amplify_common/src/config/auth/auth_config.dart';
-import 'package:amplify_common/src/serializable.dart';
-import 'package:equatable/equatable.dart';
+import 'package:amplify_common/src/util/equatable.dart';
+import 'package:amplify_common/src/util/serializable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'amplify_config.g.dart';
 
 @amplifySerializable
-class AmplifyConfig with EquatableMixin {
+class AmplifyConfig with AmplifyEquatable, AmplifySerializable {
   @JsonKey(name: 'UserAgent')
   final String userAgent;
 
@@ -27,7 +27,9 @@ class AmplifyConfig with EquatableMixin {
   @override
   List<Object?> get props => [userAgent, version, api, auth];
 
-  factory AmplifyConfig.fromJson(Map json) => _$AmplifyConfigFromJson(json);
+  factory AmplifyConfig.fromJson(Map<String, dynamic> json) =>
+      _$AmplifyConfigFromJson(json);
 
+  @override
   Map<String, dynamic> toJson() => _$AmplifyConfigToJson(this);
 }

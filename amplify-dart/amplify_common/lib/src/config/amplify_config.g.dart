@@ -6,13 +6,16 @@ part of 'amplify_config.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-AmplifyConfig _$AmplifyConfigFromJson(Map json) {
+AmplifyConfig _$AmplifyConfigFromJson(Map<String, dynamic> json) {
   return AmplifyConfig(
     userAgent: json['UserAgent'] as String,
     version: json['Version'] as String,
-    api: json['api'] == null ? null : ApiConfig.fromJson(json['api'] as Map),
-    auth:
-        json['auth'] == null ? null : AuthConfig.fromJson(json['auth'] as Map),
+    api: json['api'] == null
+        ? null
+        : ApiConfig.fromJson(json['api'] as Map<String, dynamic>),
+    auth: json['auth'] == null
+        ? null
+        : AuthConfig.fromJson(json['auth'] as Map<String, dynamic>),
   );
 }
 
