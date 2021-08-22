@@ -8,9 +8,10 @@ class WebSocketMessageStreamTransformer
   const WebSocketMessageStreamTransformer();
 
   @override
-  Stream<WebSocketMessage> bind(Stream stream) {
+  Stream<WebSocketMessage> bind(Stream<dynamic> stream) {
     return stream
-        .transform(json.decoder)
+        .cast<String>()
+        .map((str) => json.decode(str))
         .cast<Map>()
         .map(WebSocketMessage.fromJson);
   }
