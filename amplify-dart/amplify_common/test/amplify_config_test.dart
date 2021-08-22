@@ -16,8 +16,8 @@ void main() {
           final amplifyConfig = AmplifyConfig.fromJson(amplifyConfigJson);
           final expectedConfig = ApiConfig(
             plugins: {
-              'awsAPIPlugin': {
-                'habitr': ApiPluginConfig(
+              'awsAPIPlugin': AppSyncPlugin({
+                'habitr': AppSyncApiConfig(
                   endpointType: ApiEndpointType.GraphQL,
                   endpoint:
                       'https://erwya6udtvgenibxo5mr2viwqa.appsync-api.us-west-2.amazonaws.com/graphql',
@@ -25,14 +25,14 @@ void main() {
                   authorizationType: ApiAuthorizationType.userPool,
                   apiKey: 'da2-t3gfrcaenrdstlphhfwsmtgiqq',
                 ),
-                'habitrAPI': ApiPluginConfig(
+                'habitrAPI': AppSyncApiConfig(
                   endpointType: ApiEndpointType.REST,
                   endpoint:
                       'https://4ccix50n24.execute-api.us-west-2.amazonaws.com/dev',
                   region: 'us-west-2',
                   authorizationType: ApiAuthorizationType.awsIAM,
                 ),
-              },
+              }),
             },
           );
           expect(amplifyConfig.api, expectedConfig);

@@ -8,13 +8,7 @@ part of 'api_config.dart';
 
 ApiConfig _$ApiConfigFromJson(Map json) {
   return ApiConfig(
-    plugins: (json['plugins'] as Map).map(
-      (k, e) => MapEntry(
-          k as String,
-          (e as Map).map(
-            (k, e) => MapEntry(k as String, ApiPluginConfig.fromJson(e as Map)),
-          )),
-    ),
+    plugins: _apiPluginsFromJson(json['plugins']),
   );
 }
 
@@ -22,8 +16,8 @@ Map<String, dynamic> _$ApiConfigToJson(ApiConfig instance) => <String, dynamic>{
       'plugins': instance.plugins,
     };
 
-ApiPluginConfig _$ApiPluginConfigFromJson(Map json) {
-  return ApiPluginConfig(
+AppSyncApiConfig _$AppSyncApiConfigFromJson(Map json) {
+  return AppSyncApiConfig(
     endpointType: _$enumDecode(_$ApiEndpointTypeEnumMap, json['endpointType']),
     endpoint: json['endpoint'] as String,
     region: json['region'] as String,
@@ -33,7 +27,7 @@ ApiPluginConfig _$ApiPluginConfigFromJson(Map json) {
   );
 }
 
-Map<String, dynamic> _$ApiPluginConfigToJson(ApiPluginConfig instance) =>
+Map<String, dynamic> _$AppSyncApiConfigToJson(AppSyncApiConfig instance) =>
     <String, dynamic>{
       'endpointType': _$ApiEndpointTypeEnumMap[instance.endpointType],
       'endpoint': instance.endpoint,

@@ -21,21 +21,21 @@ class AppSyncConfig {
     String? apiName,
     ApiAuthorization? authorization,
   }) {
-    final apiPlugins = amplifyConfig.api!.plugins['awsAPIPlugin']!;
-    final ApiPluginConfig appSyncPlugin =
-        apiName == null ? apiPlugins.values.single : apiPlugins[apiName]!;
-    final authType = appSyncPlugin.authorizationType;
+    final appSyncPlugin = amplifyConfig.api!.appSyncPlugin!;
+    final AppSyncApiConfig appSyncConfig =
+        apiName == null ? appSyncPlugin.values.single : appSyncPlugin[apiName]!;
+    final authType = appSyncConfig.authorizationType;
     if (authType == ApiAuthorizationType.apiKey) {
-      ArgumentError.checkNotNull(appSyncPlugin.apiKey);
-      authorization ??= ApiKeyAuthorization(appSyncPlugin.apiKey!);
+      ArgumentError.checkNotNull(appSyncConfig.apiKey);
+      authorization ??= ApiKeyAuthorization(appSyncConfig.apiKey!);
     } else {
       ArgumentError.checkNotNull(
         authorization,
         'Authorization required for all but API_KEY',
       );
     }
-    final Uri graphQLUri = Uri.parse(appSyncPlugin.endpoint);
-    final String realTimeGraphQLUrl = appSyncPlugin.endpoint
+    final Uri graphQLUri = Uri.parse(appSyncConfig.endpoint);
+    final String realTimeGraphQLUrl = appSyncConfig.endpoint
         .replaceFirst('appsync-api', 'appsync-realtime-api');
     final Uri realTimeGraphQLUri =
         Uri.parse(realTimeGraphQLUrl).replace(scheme: 'wss');
