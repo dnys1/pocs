@@ -1,34 +1,48 @@
 import 'package:amplify_common/amplify_common.dart';
+import 'package:amplify_common/src/config/amplify_plugin.dart';
+import 'package:amplify_common/src/config/amplify_plugin_registry.dart';
 import 'package:amplify_common/src/util/equatable.dart';
 import 'package:amplify_common/src/util/serializable.dart';
+import 'package:collection/collection.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'cognito_config.g.dart';
 
+/// Factory for [CognitoPlugin].
+class CognitoPluginFactory extends AmplifyPluginFactory<AWSCognitoAuthPlugin> {
+  const CognitoPluginFactory();
+
+  @override
+  AWSCognitoAuthPlugin build(Map<String, dynamic> json) {
+    return AWSCognitoAuthPlugin.fromJson(json);
+  }
+
+  @override
+  String get name => 'awsCognitoAuthPlugin';
+}
+
 typedef AWSCognitoUserPoolConfigs = Map<String, AWSCognitoUserPoolConfig>;
 
 extension AWSCognitoUserPoolConfigsX on AWSCognitoUserPoolConfigs {
-  AWSCognitoUserPoolConfig? get defaultConfig => this['Default'];
+  AWSCognitoUserPoolConfig? get $default => this['Default'];
 }
 
 typedef AWSCognitoAuthConfigs = Map<String, AWSCognitoAuthConfig>;
 
 extension AWSCognitoAuthConfigsX on AWSCognitoAuthConfigs {
-  AWSCognitoAuthConfig? get defaultConfig => this['Default'];
-}
-
-extension AuthConfigCognitoX on AuthConfig {
-  AWSCognitoAuthPlugin? get awsCognitoAuthPlugin {
-    final json = plugins['awsCognitoAuthPlugin'];
-    if (json == null) return null;
-    return AWSCognitoAuthPlugin.fromJson(json);
-  }
+  AWSCognitoAuthConfig? get $default => this['Default'];
 }
 
 @awsSerializable
-class AWSCognitoAuthPlugin with AmplifyEquatable, AmplifySerializable {
+class AWSCognitoAuthPlugin
+    with AmplifyEquatable, AmplifySerializable
+    implements AmplifyPlugin {
+  @override
+  String get name => 'awsCognitoAuthPlugin';
+
   final String userAgent;
   final String version;
+  final AWSCredentialsProvider? credentialsProvider;
 
   @JsonKey(name: 'CognitoUserPool')
   final AWSCognitoUserPoolConfigs? userPool;
@@ -37,6 +51,7 @@ class AWSCognitoAuthPlugin with AmplifyEquatable, AmplifySerializable {
   const AWSCognitoAuthPlugin({
     required this.userAgent,
     required this.version,
+    this.credentialsProvider,
     this.userPool,
     this.auth,
   });
@@ -54,6 +69,54 @@ class AWSCognitoAuthPlugin with AmplifyEquatable, AmplifySerializable {
 
   @override
   Map<String, dynamic> toJson() => _$AWSCognitoAuthPluginToJson(this);
+}
+
+@awsSerializable
+class AWSCognitoIdentityCredentialsProvider
+    with AmplifyEquatable, AmplifySerializable {
+  final String poolId;
+  final String region;
+
+  const AWSCognitoIdentityCredentialsProvider({
+    required this.poolId,
+    required this.region,
+  });
+
+  @override
+  List<Object> get props => [poolId, region];
+
+  factory AWSCognitoIdentityCredentialsProvider.fromJson(
+    Map<String, dynamic> json,
+  ) =>
+      _$AWSCognitoIdentityCredentialsProviderFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$AWSCognitoIdentityCredentialsProviderToJson(this);
+}
+
+typedef AWSCredentialsProvider = Map<String, Map<String, dynamic>>;
+
+extension AWSCredentialsProviderX on AWSCredentialsProvider {
+  AWSCognitoCredentialsProviders? get cognitoIdentity {
+    final cognitoIdentityMap = this['CognitoIdentity'];
+    if (cognitoIdentityMap == null) {
+      return null;
+    }
+    return cognitoIdentityMap.map(
+      (key, json) => MapEntry(
+        key,
+        AWSCognitoIdentityCredentialsProvider.fromJson(json),
+      ),
+    );
+  }
+}
+
+typedef AWSCognitoCredentialsProviders
+    = Map<String, AWSCognitoIdentityCredentialsProvider>;
+
+extension AWSCognitoCredentialsProvidersX on AWSCognitoCredentialsProviders {
+  AWSCognitoIdentityCredentialsProvider? get $default => this['Default'];
 }
 
 @awsSerializable

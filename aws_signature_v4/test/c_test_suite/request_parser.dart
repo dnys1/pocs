@@ -64,7 +64,7 @@ class SignerRequestParser {
     final requestLine = request.split('\n').first;
     await httpRequest.response.close();
     return AWSHttpRequest(
-      httpMethod: HttpMethodX.fromString(httpRequest.method),
+      method: HttpMethodX.fromString(httpRequest.method),
       host: headers.host!,
       path: _parseRequestPath(requestLine),
       headers: mapHeaders,

@@ -1,3 +1,4 @@
+import 'package:amplify_common/amplify_common.dart';
 import 'package:amplify_common/src/config/amplify_plugin.dart';
 import 'package:amplify_common/src/config/api/api_config.dart';
 
@@ -5,6 +6,7 @@ import 'package:amplify_common/src/config/api/api_config.dart';
 /// through the [AmplifyPluginRegistry] interface.
 const _defaultPlugins = <AmplifyPluginFactory>[
   AppSyncPluginFactory(),
+  CognitoPluginFactory(),
 ];
 
 /// A builder for Amplify plugins.

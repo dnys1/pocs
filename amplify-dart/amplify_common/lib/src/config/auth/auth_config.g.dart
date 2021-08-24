@@ -8,9 +8,7 @@ part of 'auth_config.dart';
 
 AuthConfig _$AuthConfigFromJson(Map<String, dynamic> json) {
   return AuthConfig(
-    (json['plugins'] as Map<String, dynamic>).map(
-      (k, e) => MapEntry(k, e as Map<String, dynamic>),
-    ),
+    plugins: AmplifyPluginRegistry.pluginsFromJson(json['plugins']),
   );
 }
 

@@ -27,15 +27,24 @@ AppSyncApiConfig _$AppSyncApiConfigFromJson(Map<String, dynamic> json) {
   );
 }
 
-Map<String, dynamic> _$AppSyncApiConfigToJson(AppSyncApiConfig instance) =>
-    <String, dynamic>{
-      'endpointType': _$ApiEndpointTypeEnumMap[instance.endpointType],
-      'endpoint': instance.endpoint,
-      'region': instance.region,
-      'authorizationType':
-          _$ApiAuthorizationTypeEnumMap[instance.authorizationType],
-      'apiKey': instance.apiKey,
-    };
+Map<String, dynamic> _$AppSyncApiConfigToJson(AppSyncApiConfig instance) {
+  final val = <String, dynamic>{
+    'endpointType': _$ApiEndpointTypeEnumMap[instance.endpointType],
+    'endpoint': instance.endpoint,
+    'region': instance.region,
+    'authorizationType':
+        _$ApiAuthorizationTypeEnumMap[instance.authorizationType],
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('apiKey', instance.apiKey);
+  return val;
+}
 
 K _$enumDecode<K, V>(
   Map<K, V> enumValues,

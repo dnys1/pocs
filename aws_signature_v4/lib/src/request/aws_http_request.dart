@@ -5,7 +5,7 @@ import 'package:meta/meta.dart';
 export 'package:aws_signature_v4/src/request/http_method.dart';
 
 class AWSHttpRequest {
-  final HttpMethod httpMethod;
+  final HttpMethod method;
   final String host;
   final String path;
   final Map<String, String> queryParameters;
@@ -20,7 +20,7 @@ class AWSHttpRequest {
   );
 
   AWSHttpRequest({
-    required this.httpMethod,
+    required this.method,
     required this.host,
     required this.path,
     Map<String, String>? queryParameters,
@@ -32,7 +32,7 @@ class AWSHttpRequest {
 
   @protected
   AWSHttpRequest.delegate(AWSHttpRequest request)
-      : httpMethod = request.httpMethod,
+      : method = request.method,
         host = request.host,
         path = request.path,
         queryParameters = request.queryParameters,
@@ -44,7 +44,7 @@ class AWSHttpRequest {
     List<int>? body,
   }) {
     return AWSHttpRequest(
-      httpMethod: HttpMethodX.fromString(request.method),
+      method: HttpMethodX.fromString(request.method),
       host: request.url.authority,
       path: request.url.path,
       queryParameters: request.url.queryParameters,
@@ -54,7 +54,7 @@ class AWSHttpRequest {
   }
 
   http.BaseRequest toHttpRequest() {
-    final request = http.Request(httpMethod.value, uri);
+    final request = http.Request(method.value, uri);
     request.headers.addAll(headers);
     request.bodyBytes = body;
     return request;
@@ -63,7 +63,7 @@ class AWSHttpRequest {
   Future<http.Response> send() async {
     final client = http.Client();
     try {
-      switch (httpMethod) {
+      switch (method) {
         case HttpMethod.get:
           return await client.get(uri, headers: headers);
         case HttpMethod.head:

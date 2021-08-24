@@ -65,7 +65,7 @@ void main(List<String> args) async {
     'UserPoolId': userPoolId,
   }));
   final AWSHttpRequest sigRequest = AWSHttpRequest(
-    httpMethod: HttpMethod.post,
+    method: HttpMethod.post,
     host: 'cognito-idp.$region.amazonaws.com',
     path: '/',
     headers: {

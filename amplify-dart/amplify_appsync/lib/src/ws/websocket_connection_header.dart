@@ -28,7 +28,7 @@ class WebSocketConnectionHeader with EquatableMixin {
 
   Map<String, dynamic> toJson() => authorization.connectionHeaders(
         AWSHttpRequest(
-          httpMethod: HttpMethod.post,
+          method: HttpMethod.post,
           host: host,
           path: '/graphql/connect',
           headers: {

@@ -19,10 +19,19 @@ AmplifyConfig _$AmplifyConfigFromJson(Map<String, dynamic> json) {
   );
 }
 
-Map<String, dynamic> _$AmplifyConfigToJson(AmplifyConfig instance) =>
-    <String, dynamic>{
-      'UserAgent': instance.userAgent,
-      'Version': instance.version,
-      'api': instance.api,
-      'auth': instance.auth,
-    };
+Map<String, dynamic> _$AmplifyConfigToJson(AmplifyConfig instance) {
+  final val = <String, dynamic>{
+    'UserAgent': instance.userAgent,
+    'Version': instance.version,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('api', instance.api);
+  writeNotNull('auth', instance.auth);
+  return val;
+}

@@ -10,11 +10,13 @@ class AWSCredentials with EquatableMixin {
   final String accessKeyId;
   final String secretAccessKey;
   final String? sessionToken;
+  final DateTime? expiration;
 
   const AWSCredentials(
     this.accessKeyId,
     this.secretAccessKey, [
     this.sessionToken,
+    this.expiration,
   ]);
 
   @override

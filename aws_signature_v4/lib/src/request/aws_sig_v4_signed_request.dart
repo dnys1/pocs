@@ -63,7 +63,7 @@ class AWSSigV4SignedRequest extends AWSHttpRequest {
 
     final originalRequest = canonicalRequest.request;
     return AWSHttpRequest(
-      httpMethod: originalRequest.httpMethod,
+      method: originalRequest.method,
       host: originalRequest.host,
       path: originalRequest.path,
       body: originalRequest.body,

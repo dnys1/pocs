@@ -143,7 +143,7 @@ class CanonicalRequest {
   @override
   String toString() {
     final sb = StringBuffer();
-    sb.writeln(request.httpMethod.value);
+    sb.writeln(request.method.value);
     sb.writeln(requestPath);
     sb.writeln(canonicalQueryParameters);
     sb.writeln(canonicalHeaders);
