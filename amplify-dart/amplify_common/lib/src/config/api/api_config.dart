@@ -17,12 +17,14 @@ class ApiConfig with AmplifyEquatable, AmplifySerializable {
   @JsonKey(fromJson: AmplifyPluginRegistry.pluginConfigsFromJson)
   final AmplifyPlugins plugins;
 
-  AppSyncPlugin? get appSyncPlugin => plugins['awsAPIPlugin'] as AppSyncPlugin?;
+  AppSyncPluginConfig? get appSyncPlugin =>
+      plugins['awsAPIPlugin'] as AppSyncPluginConfig?;
 
   @override
   List<Object?> get props => [plugins];
 
-  factory ApiConfig.fromJson(Map<String, dynamic> json) => _$ApiConfigFromJson(json);
+  factory ApiConfig.fromJson(Map<String, dynamic> json) =>
+      _$ApiConfigFromJson(json);
 
   @override
   Map<String, dynamic> toJson() => _$ApiConfigToJson(this);

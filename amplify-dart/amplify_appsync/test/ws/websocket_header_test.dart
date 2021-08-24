@@ -11,26 +11,16 @@ final apiKeyConfig = AppSyncConfig(
       'wss://example1234567890000.appsync-realtime-api.us-east-1.amazonaws.com/graphql'),
   authorization: apiKey,
 );
-final apiKeyHeader = WebSocketConnectionHeader(
-  host: 'example1234567890000.appsync-api.us-east-1.amazonaws.com',
-  authorization: apiKey,
-);
+final apiKeyHeader = WebSocketConnectionHeader(apiKeyConfig);
 
 void main() {
-  group('fromConfig', () {
-    test('API_KEY', () {
-      final header = WebSocketConnectionHeader.fromConfig(apiKeyConfig);
-      expect(header, apiKeyHeader);
-    });
-  });
-
   group('encode', () {
     test('API_KEY', () {
       final expectedJson = {
         'host': 'example1234567890000.appsync-api.us-east-1.amazonaws.com',
         'x-api-key': 'da2-12345678901234567890123456',
       };
-      final expectedBase64 =
+      const expectedBase64 =
           'eyJob3N0IjoiZXhhbXBsZTEyMzQ1Njc4OTAwMDAuYXBwc3luYy1hcGkudXMtZWFzdC0xLmFtYXpvbmF3cy5jb20iLCJ4LWFwaS1rZXkiOiJkYTItMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTYifQ==';
       expect(apiKeyHeader.toJson(), equals(expectedJson));
       expect(apiKeyHeader.encode(), equals(expectedBase64));

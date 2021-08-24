@@ -15,5 +15,5 @@ class WebSocketConnectionPayload with EquatableMixin {
 
   String encode() => base64.encode(utf8.encode(json.encode(this)));
 
-  Map<String, dynamic> toJson() => {};
+  Map<String, dynamic> toJson() => <String, dynamic>{};
 }

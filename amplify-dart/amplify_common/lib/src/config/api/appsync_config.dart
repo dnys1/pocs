@@ -1,12 +1,13 @@
 part of 'api_config.dart';
 
-/// Factory for [AppSyncPlugin].
-class AppSyncPluginFactory extends AmplifyPluginConfigFactory<AppSyncPlugin> {
+/// Factory for [AppSyncPluginConfig].
+class AppSyncPluginFactory
+    extends AmplifyPluginConfigFactory<AppSyncPluginConfig> {
   const AppSyncPluginFactory();
 
   @override
-  AppSyncPlugin build(Map<String, dynamic> json) {
-    return AppSyncPlugin.fromJson(json);
+  AppSyncPluginConfig build(Map<String, dynamic> json) {
+    return AppSyncPluginConfig.fromJson(json);
   }
 
   @override
@@ -14,10 +15,11 @@ class AppSyncPluginFactory extends AmplifyPluginConfigFactory<AppSyncPlugin> {
 }
 
 /// A map of AppSync plugins keyed by the API name.
-class AppSyncPlugin extends DelegatingMap<String, AppSyncApiConfig>
+class AppSyncPluginConfig extends DelegatingMap<String, AppSyncApiConfig>
     with AmplifySerializable, AmplifyEquatable
     implements AmplifyPluginConfig {
-  const AppSyncPlugin(Map<String, AppSyncApiConfig> configs) : super(configs);
+  const AppSyncPluginConfig(Map<String, AppSyncApiConfig> configs)
+      : super(configs);
 
   @override
   String get name => 'awsAPIPlugin';
@@ -25,14 +27,14 @@ class AppSyncPlugin extends DelegatingMap<String, AppSyncApiConfig>
   @override
   List<Object?> get props => [this];
 
-  static AppSyncPlugin fromJson(Map<String, dynamic> json) {
+  static AppSyncPluginConfig fromJson(Map<String, dynamic> json) {
     final map = json.map((k, v) {
       if (v is! Map) {
         throw ArgumentError.value(v);
       }
       return MapEntry(k, AppSyncApiConfig.fromJson(v.cast()));
     });
-    return AppSyncPlugin(map);
+    return AppSyncPluginConfig(map);
   }
 
   @override
@@ -47,7 +49,7 @@ class AppSyncPlugin extends DelegatingMap<String, AppSyncApiConfig>
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is AppSyncPlugin && const MapEquality().equals(this, other);
+      other is AppSyncPluginConfig && const MapEquality().equals(this, other);
 
   @override
   int get hashCode => const MapEquality().hash(this);

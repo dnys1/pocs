@@ -17,7 +17,7 @@ import 'websocket_message_stream_transformer.dart';
 class WebSocketConnection {
   static const webSocketProtocols = ['graphql-ws'];
 
-  late final WebSocketConnectionHeader _authorizationHeader;
+  final AppSyncConfig _config;
   late final WebSocketChannel _channel;
   late final StreamSubscription<WebSocketMessage> _subscription;
   late final RestartableTimer _timeoutTimer;
@@ -39,19 +39,21 @@ class WebSocketConnection {
   Stream<WebSocketMessage> get _messageStream => _rebroadcastController.stream;
 
   /// {@macro websocket_connection}
-  WebSocketConnection(AppSyncConfig config) {
-    _authorizationHeader = WebSocketConnectionHeader.fromConfig(config);
-    _connect(config);
+  WebSocketConnection(this._config) {
+    _connect();
   }
 
   /// Connects to the real time WebSocket.
-  void _connect(AppSyncConfig config) {
-    final payload = WebSocketConnectionPayload.fromConfig(config);
+  void _connect() {
+    final payload = WebSocketConnectionPayload.fromConfig(_config);
 
-    final connectionUri = config.realTimeGraphQLUri.replace(queryParameters: {
-      'header': _authorizationHeader.encode(),
-      'payload': payload.encode(),
-    });
+    final authorizationHeader = WebSocketConnectionHeader(_config);
+    final connectionUri = _config.realTimeGraphQLUri.replace(
+      queryParameters: <String, String>{
+        'header': authorizationHeader.encode(),
+        'payload': payload.encode(),
+      },
+    );
     _channel = WebSocketChannel.connect(
       connectionUri,
       protocols: webSocketProtocols,
@@ -61,6 +63,7 @@ class WebSocketConnection {
         .listen(_onData);
   }
 
+  /// Closes the WebSocket connection.
   void close() {
     _subscription.cancel();
     _channel.sink.close();
@@ -86,7 +89,7 @@ class WebSocketConnection {
       messageType: MessageType.start,
       payload: SubscriptionRegistrationPayload(
         request: request,
-        authorization: _authorizationHeader,
+        config: _config,
       ),
     );
     final subscriptionId = subRegistration.id!;
@@ -147,8 +150,13 @@ class WebSocketConnection {
         print('Registered timer');
         return;
       case MessageType.connectionError:
-        final wsError = message.payload as WebSocketError;
-        _connectionReady.completeError(wsError);
+        final wsError = message.payload as WebSocketError?;
+        _connectionReady.completeError(
+          wsError ??
+              Exception(
+                'An unknown error occurred while connecting to the WebSocket',
+              ),
+        );
         return;
       case MessageType.keepAlive:
         _timeoutTimer.reset();

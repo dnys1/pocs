@@ -11,8 +11,7 @@ class WebSocketMessageStreamTransformer
   Stream<WebSocketMessage> bind(Stream<dynamic> stream) {
     return stream
         .cast<String>()
-        .map((str) => json.decode(str))
-        .cast<Map>()
+        .map<Map>((str) => json.decode(str) as Map)
         .map(WebSocketMessage.fromJson);
   }
 }

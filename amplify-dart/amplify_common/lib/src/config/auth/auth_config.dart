@@ -14,8 +14,8 @@ class AuthConfig with AmplifyEquatable, AmplifySerializable {
   @JsonKey(fromJson: AmplifyPluginRegistry.pluginConfigsFromJson)
   final AmplifyPlugins plugins;
 
-  AWSCognitoAuthPlugin? get cognitoPlugin =>
-      plugins['awsCognitoAuthPlugin'] as AWSCognitoAuthPlugin?;
+  CognitoPluginConfig? get cognitoPlugin =>
+      plugins[CognitoPluginConfig.pluginKey] as CognitoPluginConfig?;
 
   @override
   List<Object?> get props => [plugins];

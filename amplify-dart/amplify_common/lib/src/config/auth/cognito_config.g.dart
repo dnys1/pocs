@@ -6,8 +6,8 @@ part of 'cognito_config.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-AWSCognitoAuthPlugin _$AWSCognitoAuthPluginFromJson(Map<String, dynamic> json) {
-  return AWSCognitoAuthPlugin(
+CognitoPluginConfig _$CognitoPluginConfigFromJson(Map<String, dynamic> json) {
+  return CognitoPluginConfig(
     userAgent: json['UserAgent'] as String,
     version: json['Version'] as String,
     credentialsProvider:
@@ -16,17 +16,16 @@ AWSCognitoAuthPlugin _$AWSCognitoAuthPluginFromJson(Map<String, dynamic> json) {
     ),
     userPool: (json['CognitoUserPool'] as Map<String, dynamic>?)?.map(
       (k, e) => MapEntry(
-          k, AWSCognitoUserPoolConfig.fromJson(e as Map<String, dynamic>)),
+          k, CognitoUserPoolConfig.fromJson(e as Map<String, dynamic>)),
     ),
     auth: (json['Auth'] as Map<String, dynamic>?)?.map(
       (k, e) =>
-          MapEntry(k, AWSCognitoAuthConfig.fromJson(e as Map<String, dynamic>)),
+          MapEntry(k, CognitoAuthConfig.fromJson(e as Map<String, dynamic>)),
     ),
   );
 }
 
-Map<String, dynamic> _$AWSCognitoAuthPluginToJson(
-    AWSCognitoAuthPlugin instance) {
+Map<String, dynamic> _$CognitoPluginConfigToJson(CognitoPluginConfig instance) {
   final val = <String, dynamic>{
     'UserAgent': instance.userAgent,
     'Version': instance.version,
@@ -44,48 +43,47 @@ Map<String, dynamic> _$AWSCognitoAuthPluginToJson(
   return val;
 }
 
-AWSCognitoIdentityCredentialsProvider
-    _$AWSCognitoIdentityCredentialsProviderFromJson(Map<String, dynamic> json) {
-  return AWSCognitoIdentityCredentialsProvider(
+CognitoIdentityCredentialsProvider _$CognitoIdentityCredentialsProviderFromJson(
+    Map<String, dynamic> json) {
+  return CognitoIdentityCredentialsProvider(
     poolId: json['PoolId'] as String,
     region: json['Region'] as String,
   );
 }
 
-Map<String, dynamic> _$AWSCognitoIdentityCredentialsProviderToJson(
-        AWSCognitoIdentityCredentialsProvider instance) =>
+Map<String, dynamic> _$CognitoIdentityCredentialsProviderToJson(
+        CognitoIdentityCredentialsProvider instance) =>
     <String, dynamic>{
       'PoolId': instance.poolId,
       'Region': instance.region,
     };
 
-AWSCognitoUserPoolConfig _$AWSCognitoUserPoolConfigFromJson(
+CognitoUserPoolConfig _$CognitoUserPoolConfigFromJson(
     Map<String, dynamic> json) {
-  return AWSCognitoUserPoolConfig(
+  return CognitoUserPoolConfig(
     poolId: json['PoolId'] as String,
     appClientId: json['AppClientId'] as String,
     region: json['Region'] as String,
   );
 }
 
-Map<String, dynamic> _$AWSCognitoUserPoolConfigToJson(
-        AWSCognitoUserPoolConfig instance) =>
+Map<String, dynamic> _$CognitoUserPoolConfigToJson(
+        CognitoUserPoolConfig instance) =>
     <String, dynamic>{
       'PoolId': instance.poolId,
       'AppClientId': instance.appClientId,
       'Region': instance.region,
     };
 
-AWSCognitoAuthConfig _$AWSCognitoAuthConfigFromJson(Map<String, dynamic> json) {
-  return AWSCognitoAuthConfig(
+CognitoAuthConfig _$CognitoAuthConfigFromJson(Map<String, dynamic> json) {
+  return CognitoAuthConfig(
     oauth: json['OAuth'] == null
         ? null
-        : AWSCognitoOAuthConfig.fromJson(json['OAuth'] as Map<String, dynamic>),
+        : CognitoOAuthConfig.fromJson(json['OAuth'] as Map<String, dynamic>),
   );
 }
 
-Map<String, dynamic> _$AWSCognitoAuthConfigToJson(
-    AWSCognitoAuthConfig instance) {
+Map<String, dynamic> _$CognitoAuthConfigToJson(CognitoAuthConfig instance) {
   final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {
@@ -98,9 +96,8 @@ Map<String, dynamic> _$AWSCognitoAuthConfigToJson(
   return val;
 }
 
-AWSCognitoOAuthConfig _$AWSCognitoOAuthConfigFromJson(
-    Map<String, dynamic> json) {
-  return AWSCognitoOAuthConfig(
+CognitoOAuthConfig _$CognitoOAuthConfigFromJson(Map<String, dynamic> json) {
+  return CognitoOAuthConfig(
     webDomain: json['WebDomain'] as String,
     appClientId: json['AppClientId'] as String,
     signInRedirectUri: Uri.parse(json['SignInRedirectURI'] as String),
@@ -109,8 +106,7 @@ AWSCognitoOAuthConfig _$AWSCognitoOAuthConfigFromJson(
   );
 }
 
-Map<String, dynamic> _$AWSCognitoOAuthConfigToJson(
-        AWSCognitoOAuthConfig instance) =>
+Map<String, dynamic> _$CognitoOAuthConfigToJson(CognitoOAuthConfig instance) =>
     <String, dynamic>{
       'WebDomain': instance.webDomain,
       'AppClientId': instance.appClientId,

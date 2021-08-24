@@ -1,4 +1,8 @@
+import 'dart:convert';
+
+import 'package:amplify_appsync/amplify_appsync.dart';
 import 'package:amplify_common/amplify_common.dart';
+import 'package:aws_signature_v4/aws_signature_v4.dart';
 
 class AppSyncConfig {
   /// The GraphQL URI
@@ -9,6 +13,32 @@ class AppSyncConfig {
 
   /// The endpoint authorization.
   final ApiAuthorization authorization;
+
+  AWSHttpRequest get connectionRequest => AWSHttpRequest(
+        method: HttpMethod.post,
+        host: graphQLUri.host,
+        path: '/graphql/connect',
+        headers: {
+          AWSHeaders.accept.toLowerCase(): 'application/json, text/javascript',
+          AWSHeaders.contentEncoding.toLowerCase(): 'amz-1.0',
+          AWSHeaders.contentType.toLowerCase():
+              'application/json; charset=UTF-8',
+        },
+        body: '{}'.codeUnits,
+      );
+
+  AWSHttpRequest subscriptionRequest(GraphQLRequest request) => AWSHttpRequest(
+        method: HttpMethod.post,
+        host: graphQLUri.host,
+        path: '/graphql',
+        headers: {
+          AWSHeaders.accept.toLowerCase(): 'application/json, text/javascript',
+          AWSHeaders.contentEncoding.toLowerCase(): 'amz-1.0',
+          AWSHeaders.contentType.toLowerCase():
+              'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(request).codeUnits,
+      );
 
   const AppSyncConfig({
     required this.graphQLUri,

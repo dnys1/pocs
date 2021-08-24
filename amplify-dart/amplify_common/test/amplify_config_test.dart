@@ -17,7 +17,7 @@ void main() {
           final amplifyConfig = AmplifyConfig.fromJson(amplifyConfigJson);
           final expectedConfig = ApiConfig(
             plugins: {
-              'awsAPIPlugin': AppSyncPlugin({
+              'awsAPIPlugin': AppSyncPluginConfig({
                 'habitr': AppSyncApiConfig(
                   endpointType: ApiEndpointType.GraphQL,
                   endpoint:

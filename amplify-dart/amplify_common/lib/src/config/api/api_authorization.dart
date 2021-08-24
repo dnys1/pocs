@@ -8,6 +8,7 @@ abstract class ApiAuthorization {
 
   final ApiAuthorizationType type;
   Map<String, String> connectionHeaders(AWSHttpRequest request);
+  Map<String, String> requestHeaders(AWSHttpRequest request);
 }
 
 class ApiKeyAuthorization extends ApiAuthorization {
@@ -18,6 +19,11 @@ class ApiKeyAuthorization extends ApiAuthorization {
   @override
   Map<String, String> connectionHeaders(AWSHttpRequest request) => {
         AWSHeaders.host.toLowerCase(): request.host,
+        'x-api-key': apiKey,
+      };
+
+  @override
+  Map<String, String> requestHeaders(AWSHttpRequest request) => {
         'x-api-key': apiKey,
       };
 
@@ -38,12 +44,19 @@ class AWSAuthorization extends ApiAuthorization {
   final AWSSigV4Signer _signer;
 
   @override
-  Map<String, String> connectionHeaders(AWSHttpRequest request) {
+  Map<String, String> connectionHeaders(AWSHttpRequest request) =>
+      _headers(request);
+
+  @override
+  Map<String, String> requestHeaders(AWSHttpRequest request) =>
+      _headers(request);
+
+  Map<String, String> _headers(AWSHttpRequest request) {
     final host = request.host;
     final region = host.split('.')[2];
     final credentialScope = AWSCredentialScope(
       region: region,
-      service: 'appsync-api',
+      service: 'appsync',
     );
     final signedRequest = _signer.sign(
       request,

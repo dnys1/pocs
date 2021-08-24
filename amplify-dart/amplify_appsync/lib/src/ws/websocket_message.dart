@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:amplify_appsync/amplify_appsync.dart';
 import 'package:amplify_appsync/src/graphql/graphql_request.dart';
 import 'package:amplify_appsync/src/ws/websocket_connection_header.dart';
 import 'package:amplify_common/amplify_common.dart';
@@ -75,25 +76,27 @@ class ConnectionAckMessagePayload extends WebSocketMessagePayload {
   }
 
   @override
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => <String, dynamic>{
         'connectionTimeoutMs': connectionTimeoutMs,
       };
 }
 
 class SubscriptionRegistrationPayload extends WebSocketMessagePayload {
   final GraphQLRequest request;
-  final WebSocketConnectionHeader authorization;
+  final AppSyncConfig config;
 
   const SubscriptionRegistrationPayload({
     required this.request,
-    required this.authorization,
+    required this.config,
   });
 
   @override
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => <String, dynamic>{
         'data': jsonEncode(request.toJson()),
         'extensions': {
-          'authorization': authorization.toJson(),
+          'authorization': config.authorization.requestHeaders(
+            config.subscriptionRequest(request),
+          ),
         },
       };
 }
@@ -105,11 +108,11 @@ class SubscriptionDataPayload extends WebSocketMessagePayload {
 
   static SubscriptionDataPayload fromJson(Map json) {
     final data = json['data'] as Map;
-    return SubscriptionDataPayload(data.cast());
+    return SubscriptionDataPayload(data.cast<String, dynamic>());
   }
 
   @override
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => <String, dynamic>{
         'data': data,
       };
 }
@@ -125,7 +128,7 @@ class WebSocketError extends WebSocketMessagePayload implements Exception {
   }
 
   @override
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => <String, dynamic>{
         'errors': errors,
       };
 }
@@ -168,7 +171,7 @@ class WebSocketMessage {
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => <String, dynamic>{
         if (id != null) 'id': id,
         'type': messageType.type,
         if (payload != null) 'payload': payload!.toJson(),
