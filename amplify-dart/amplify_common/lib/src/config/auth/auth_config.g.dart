@@ -8,7 +8,7 @@ part of 'auth_config.dart';
 
 AuthConfig _$AuthConfigFromJson(Map<String, dynamic> json) {
   return AuthConfig(
-    plugins: AmplifyPluginRegistry.pluginsFromJson(json['plugins']),
+    plugins: AmplifyPluginRegistry.pluginConfigsFromJson(json['plugins']),
   );
 }
 

@@ -1,15 +1,15 @@
 import 'package:amplify_common/amplify_common.dart';
-import 'package:amplify_common/src/config/amplify_plugin.dart';
+import 'package:amplify_common/src/config/amplify_plugin_config.dart';
 import 'package:amplify_common/src/config/amplify_plugin_registry.dart';
 import 'package:amplify_common/src/util/equatable.dart';
 import 'package:amplify_common/src/util/serializable.dart';
-import 'package:collection/collection.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'cognito_config.g.dart';
 
 /// Factory for [CognitoPlugin].
-class CognitoPluginFactory extends AmplifyPluginFactory<AWSCognitoAuthPlugin> {
+class CognitoPluginFactory
+    extends AmplifyPluginConfigFactory<AWSCognitoAuthPlugin> {
   const CognitoPluginFactory();
 
   @override
@@ -36,7 +36,7 @@ extension AWSCognitoAuthConfigsX on AWSCognitoAuthConfigs {
 @awsSerializable
 class AWSCognitoAuthPlugin
     with AmplifyEquatable, AmplifySerializable
-    implements AmplifyPlugin {
+    implements AmplifyPluginConfig {
   @override
   String get name => 'awsCognitoAuthPlugin';
 

@@ -1,6 +1,6 @@
 import 'package:amplify_common/amplify_common.dart';
-import 'package:amplify_common/src/config/amplify_plugin.dart';
 import 'package:amplify_common/src/config/amplify_plugin_registry.dart';
+import 'package:amplify_common/src/config/amplify_plugin_config.dart';
 import 'package:amplify_common/src/util/equatable.dart';
 import 'package:amplify_common/src/util/serializable.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -11,7 +11,7 @@ part 'auth_config.g.dart';
 class AuthConfig with AmplifyEquatable, AmplifySerializable {
   const AuthConfig({required this.plugins});
 
-  @JsonKey(fromJson: AmplifyPluginRegistry.pluginsFromJson)
+  @JsonKey(fromJson: AmplifyPluginRegistry.pluginConfigsFromJson)
   final AmplifyPlugins plugins;
 
   AWSCognitoAuthPlugin? get cognitoPlugin =>
