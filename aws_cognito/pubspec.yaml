@@ -8,7 +8,7 @@ environment:
 
 dependencies:
   amplify_common:
-    path: ../amplify-dart/amplify_common
+    path: ../amplify_common
   aws_signature_v4:
     path: ../aws_signature_v4
   json_annotation: ^4.0.0
