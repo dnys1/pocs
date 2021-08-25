@@ -1,0 +1,7 @@
+builders:
+  ast_builder:
+    import: 'package:json_schema_builder/json_schema_builder.dart'
+    builder_factories: ['jsonSchemaBuilder']
+    build_extensions: { '.schema.json': ['.schema.dart'] }
+    auto_apply: dependents
+    build_to: source
