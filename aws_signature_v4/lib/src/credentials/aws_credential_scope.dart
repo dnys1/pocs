@@ -1,12 +1,20 @@
 import 'package:aws_signature_v4/src/request/aws_date_time.dart';
-import 'package:aws_signature_v4/src/signer/signer.dart';
+import 'package:aws_signature_v4/src/signer/aws_signer.dart';
 
-/// The scope for a set of credentials, used to identify a request.
+/// {@template aws_credential_scope}
+/// The scope for a request.
+/// {@endtemplate}
 class AWSCredentialScope {
+  /// The time of the request.
   final AWSDateTime dateTime;
+
+  /// The region of the request.
   final String region;
+
+  /// The AWS service receiving the request.
   final String service;
 
+  /// {@macro aws_credential_scope}
   AWSCredentialScope({
     AWSDateTime? dateTime,
     required this.region,

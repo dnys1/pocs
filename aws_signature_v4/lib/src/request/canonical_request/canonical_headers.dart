@@ -1,6 +1,10 @@
 part of 'canonical_request.dart';
 
+/// {@template canonical_headers}
+/// A map of canonicalized headers.
+/// {@endtemplate}
 class CanonicalHeaders extends DelegatingMap<String, String> {
+  /// {@macro canonical_headers}
   CanonicalHeaders(Map<String, String> headers) : super(canonicalize(headers));
 
   /// Lowercases and sorts the headers.

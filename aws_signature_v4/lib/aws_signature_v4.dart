@@ -12,4 +12,4 @@ export 'src/request/http_method.dart';
 
 export 'src/signer/aws_algorithm.dart';
 export 'src/request/aws_date_time.dart';
-export 'src/signer/signer.dart';
+export 'src/signer/aws_signer.dart';

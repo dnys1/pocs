@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:aws_signature_v4/src/credentials/aws_credential_scope.dart';
 import 'package:aws_signature_v4/src/request/canonical_request/canonical_request.dart';
-import 'package:aws_signature_v4/src/signer/signer.dart';
+import 'package:aws_signature_v4/src/signer/aws_signer.dart';
 import 'package:aws_signature_v4/src/signer/aws_algorithm.dart';
 import 'package:collection/collection.dart';
 import 'package:path/path.dart' as path;
@@ -15,6 +15,15 @@ import 'request_parser.dart';
 
 enum SignerTestMethod { query, header }
 
+extension on SignerTestMethod {
+  String get string => toString().split('.')[1];
+}
+
+/// Test-specific data for verifiying.
+///
+/// Each test class carries two instances of `SignerTestMethodData`: one where
+/// the signature info should be attached to the headers and one where it should
+/// be attached via query parameters.
 class SignerTestMethodData {
   final SignerTestMethod method;
   final String canonicalRequest;
@@ -31,10 +40,11 @@ class SignerTestMethodData {
   });
 }
 
-class _SignerTestBuilder {
+/// Builder class to make it easy to lazily create a [SignerTest].
+class SignerTestBuilder {
   final String name;
 
-  _SignerTestBuilder(this.name);
+  SignerTestBuilder(this.name);
 
   late final Context context;
   late final AWSHttpRequest request;
@@ -70,221 +80,111 @@ class _SignerTestBuilder {
   }
 }
 
+/// A single signer test.
+///
+/// Each folder in the test suite is built into an instance of this class, where
+/// [name] is the name of the folder used.
 class SignerTest {
+  /// Only V4 (e.g. HMAC/SHA-2) is supported for signer tests.
+  static const algorithm = AWSAlgorithm.hmacSha256;
+
   final String name;
   final Context context;
   final AWSHttpRequest request;
   final SignerTestMethodData headerTestData;
   final SignerTestMethodData queryTestData;
 
-  const SignerTest({
+  final AWSSigV4Signer signer;
+  final AWSCredentialScope credentialScope;
+
+  SignerTest({
     required this.name,
     required this.context,
     required this.request,
     required this.headerTestData,
     required this.queryTestData,
-  });
+  })  : signer = AWSSigV4Signer(context.credentials, algorithm: algorithm),
+        credentialScope = AWSCredentialScope(
+          dateTime: context.awsDateTime,
+          region: context.region,
+          service: context.service,
+        );
+
+  void _runMethod(SignerTestMethod method) {
+    final testMethodData =
+        method == SignerTestMethod.header ? headerTestData : queryTestData;
+    final presignedUrl = method == SignerTestMethod.query;
+
+    group(method.string, () {
+      final canonicalRequest = CanonicalRequest(
+        request: request,
+        credentials: context.credentials,
+        credentialScope: credentialScope,
+        algorithm: algorithm,
+        presignedUrl: presignedUrl,
+        normalizePath: context.normalize,
+        omitSessionTokenFromSigning: context.omitSessionToken ?? false,
+        expiresIn: context.expirationInSeconds,
+      );
+      final stringToSign = signer.stringToSign(
+        algorithm: algorithm,
+        credentialScope: credentialScope,
+        canonicalRequestHash: canonicalRequest.hash,
+      );
+      final signedRequest = signer.sign(
+        request,
+        credentialScope: credentialScope,
+        presignedUrl: presignedUrl,
+        normalizePath: context.normalize,
+        omitSessionTokenFromSigning: context.omitSessionToken,
+        expiresIn: context.expirationInSeconds,
+      );
+      test('canonical request', () {
+        expect(
+          canonicalRequest.toString(),
+          equals(testMethodData.canonicalRequest),
+        );
+      });
+      test('sts', () {
+        expect(stringToSign, equals(testMethodData.stringToSign));
+      });
+      test('signature', () {
+        expect(signedRequest.signature, equals(testMethodData.signature));
+      });
+      group('signed request', () {
+        test('headers', () {
+          expect(
+            const MapEquality<String, String>(keys: CaseInsensitiveEquality())
+                .equals(
+              signedRequest.headers,
+              testMethodData.signedRequest.headers,
+            ),
+            isTrue,
+          );
+        });
+        test('path', () {
+          expect(
+            signedRequest.path,
+            equals(testMethodData.signedRequest.path),
+          );
+        });
+        test('query parameters', () {
+          expect(
+            const MapEquality<String, String>().equals(
+              signedRequest.queryParameters,
+              testMethodData.signedRequest.queryParameters,
+            ),
+            isTrue,
+          );
+        });
+      });
+    });
+  }
 
   void run() {
     group(name, () {
-      const algorithm = AWSAlgorithm.hmacSha256;
-      final signer = AWSSigV4Signer(context.credentials, algorithm: algorithm);
-      final requestBuilder = CanonicalRequestBuilder(request);
-      final dateTime = context.awsDateTime;
-      final credentialScope = AWSCredentialScope(
-        dateTime: dateTime,
-        region: context.region,
-        service: context.service,
-      );
-
-      group('header', () {
-        final headerRequest = requestBuilder.build(
-          credentials: context.credentials,
-          credentialScope: credentialScope,
-          algorithm: algorithm,
-          presignedUrl: false,
-          normalizeUriPath: context.normalize,
-          omitSessionToken: context.omitSessionToken ?? false,
-        );
-        final stringToSign = signer.stringToSign(
-          algorithm: algorithm,
-          credentialScope: credentialScope,
-          canonicalRequestHash: headerRequest.hash,
-        );
-        final signedRequest = signer.sign(
-          request,
-          credentialScope: credentialScope,
-          presignedUrl: false,
-          normalizeUriPath: context.normalize,
-          omitSessionToken: context.omitSessionToken,
-        );
-        test('canonical request', () {
-          expect(
-            headerRequest.toString(),
-            equals(headerTestData.canonicalRequest),
-          );
-        });
-        test('sts', () {
-          expect(stringToSign, equals(headerTestData.stringToSign));
-        });
-        test('signature', () {
-          expect(signedRequest.signature, equals(headerTestData.signature));
-        });
-        test('request', () {
-          expect(
-            const MapEquality<String, String>(keys: CaseInsensitiveEquality())
-                .equals(
-              signedRequest.headers,
-              headerTestData.signedRequest.headers,
-            ),
-            isTrue,
-          );
-          expect(
-            signedRequest.path,
-            equals(headerTestData.signedRequest.path),
-          );
-          expect(
-            const MapEquality<String, String>().equals(
-              signedRequest.queryParameters,
-              headerTestData.signedRequest.queryParameters,
-            ),
-            isTrue,
-          );
-        });
-      });
-
-      group('query', () {
-        final queryRequest = requestBuilder.build(
-          credentials: context.credentials,
-          credentialScope: credentialScope,
-          presignedUrl: true,
-          normalizeUriPath: context.normalize,
-          omitSessionToken: context.omitSessionToken ?? false,
-          algorithm: algorithm,
-          expiresIn: context.expirationInSeconds,
-        );
-        final stringToSign = signer.stringToSign(
-          algorithm: algorithm,
-          credentialScope: credentialScope,
-          canonicalRequestHash: queryRequest.hash,
-        );
-        final signedRequest = signer.sign(
-          request,
-          credentialScope: credentialScope,
-          presignedUrl: true,
-          normalizeUriPath: context.normalize,
-          omitSessionToken: context.omitSessionToken,
-          expiresIn: context.expirationInSeconds,
-        );
-        test('canonical request', () {
-          expect(
-            queryRequest.toString(),
-            equals(queryTestData.canonicalRequest),
-          );
-        });
-        test('sts', () {
-          expect(stringToSign, equals(queryTestData.stringToSign));
-        });
-        test('signature', () {
-          expect(signedRequest.signature, equals(queryTestData.signature));
-        });
-        test('request', () {
-          expect(
-            const MapEquality<String, String>(keys: CaseInsensitiveEquality())
-                .equals(
-              signedRequest.headers,
-              queryTestData.signedRequest.headers,
-            ),
-            isTrue,
-          );
-          expect(
-            signedRequest.path,
-            equals(queryTestData.signedRequest.path),
-          );
-          expect(
-            const MapEquality<String, String>().equals(
-              signedRequest.queryParameters,
-              queryTestData.signedRequest.queryParameters,
-            ),
-            isTrue,
-          );
-        });
-      });
-      // }, skip: name != 'get-header-key-duplicate');
-      // }, skip: context.credentials.token != null);
+      _runMethod(SignerTestMethod.header);
+      _runMethod(SignerTestMethod.query);
     }, skip: name == 'get-header-value-multiline');
   }
-}
-
-/// Loads all test cases in the C signer test suite.
-Future<List<SignerTest>> loadAllTests() async {
-  final testSuitePath = path.joinAll([
-    Directory.current.path,
-    'external',
-    'aws-c-auth',
-    'tests',
-    'aws-signing-test-suite',
-    'v4',
-  ]);
-  final testCases = <SignerTest>[];
-  final requestParser = SignerRequestParser();
-  await requestParser.init();
-  for (var entity in Directory(testSuitePath).listSync()) {
-    final stat = entity.statSync();
-    if (stat.type != FileSystemEntityType.directory) continue;
-    final testCaseDir = Directory(entity.path);
-    final testCaseName = path.basename(entity.path);
-    final testCase = _SignerTestBuilder(testCaseName);
-    final testFiles =
-        testCaseDir.listSync().map((fse) => File(fse.path)).toList()
-          ..sort(
-            (a, b) => path.basename(a.path).compareTo(
-                  path.basename(b.path),
-                ),
-          );
-    if (testFiles.length < 10) continue;
-    for (var testFile in testFiles) {
-      final data = testFile.readAsStringSync();
-      switch (path.basename(testFile.path)) {
-        case 'context.json':
-          final json = jsonDecode(data) as Map<String, dynamic>;
-          testCase.context = Context.fromJson(json);
-          break;
-        case 'request.txt':
-          testCase.request =
-              await requestParser.parse(data, context: testCase.context);
-          break;
-        case 'query-canonical-request.txt':
-          testCase.queryCanonicalRequest = data;
-          break;
-        case 'query-string-to-sign.txt':
-          testCase.queryStringToSign = data;
-          break;
-        case 'query-signature.txt':
-          testCase.querySignature = data;
-          break;
-        case 'query-signed-request.txt':
-          testCase.querySignedRequest =
-              await requestParser.parse(data, context: testCase.context);
-          break;
-        case 'header-canonical-request.txt':
-          testCase.headerCanonicalRequest = data;
-          break;
-        case 'header-string-to-sign.txt':
-          testCase.headerStringToSign = data;
-          break;
-        case 'header-signature.txt':
-          testCase.headerSignature = data;
-          break;
-        case 'header-signed-request.txt':
-          testCase.headerSignedRequest =
-              await requestParser.parse(data, context: testCase.context);
-          break;
-      }
-    }
-    testCases.add(testCase.build());
-  }
-  await requestParser.close();
-
-  return testCases;
 }

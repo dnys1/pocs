@@ -1,9 +1,14 @@
 import 'package:aws_signature_v4/src/request/http_method.dart';
 import 'package:http/http.dart' as http;
-import 'package:meta/meta.dart';
 
 export 'package:aws_signature_v4/src/request/http_method.dart';
 
+/// {@template aws_http_request}
+/// A parameterized HTTP request.
+///
+/// The request is typically passed to a signer for signing, although it can be
+/// used unsigned as well for sending unauthenticated requests.
+/// {@endtemplate}
 class AWSHttpRequest {
   final HttpMethod method;
   final String host;
@@ -19,6 +24,7 @@ class AWSHttpRequest {
     queryParameters: queryParameters,
   );
 
+  /// {@macro aws_http_request}
   AWSHttpRequest({
     required this.method,
     required this.host,
@@ -30,15 +36,7 @@ class AWSHttpRequest {
         headers = headers ?? const {},
         body = body ?? const [];
 
-  @protected
-  AWSHttpRequest.delegate(AWSHttpRequest request)
-      : method = request.method,
-        host = request.host,
-        path = request.path,
-        queryParameters = request.queryParameters,
-        headers = request.headers,
-        body = request.body;
-
+  /// Creates a request from a `package:http` request object.
   factory AWSHttpRequest.fromHttpRequest(
     http.BaseRequest request, {
     List<int>? body,
@@ -53,6 +51,7 @@ class AWSHttpRequest {
     );
   }
 
+  /// Creates a `package:http` request from this request.
   http.BaseRequest toHttpRequest() {
     final request = http.Request(method.value, uri);
     request.headers.addAll(headers);
@@ -60,25 +59,31 @@ class AWSHttpRequest {
     return request;
   }
 
-  Future<http.Response> send() async {
-    final client = http.Client();
+  /// Sends the HTTP request.
+  ///
+  /// If [client] is not provided, a short-lived one is created for this request.
+  Future<http.Response> send([http.Client? client]) async {
+    final _client = client ?? http.Client();
     try {
       switch (method) {
         case HttpMethod.get:
-          return await client.get(uri, headers: headers);
+          return await _client.get(uri, headers: headers);
         case HttpMethod.head:
-          return await client.head(uri, headers: headers);
+          return await _client.head(uri, headers: headers);
         case HttpMethod.post:
-          return await client.post(uri, headers: headers, body: body);
+          return await _client.post(uri, headers: headers, body: body);
         case HttpMethod.put:
-          return await client.put(uri, headers: headers, body: body);
+          return await _client.put(uri, headers: headers, body: body);
         case HttpMethod.patch:
-          return await client.patch(uri, headers: headers, body: body);
+          return await _client.patch(uri, headers: headers, body: body);
         case HttpMethod.delete:
-          return await client.delete(uri, headers: headers);
+          return await _client.delete(uri, headers: headers);
       }
     } finally {
-      client.close();
+      // Only close a client we created.
+      if (client == null) {
+        _client.close();
+      }
     }
   }
 

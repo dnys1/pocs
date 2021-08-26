@@ -3,8 +3,9 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'aws_credentials.g.dart';
 
-/// A set of credentials used for accessing AWS services. Temporary credentials
-/// should include an STS [sessionToken].
+/// A set of credentials used for accessing AWS services.
+///
+/// Temporary credentials must include an STS [sessionToken].
 @JsonSerializable(fieldRename: FieldRename.snake)
 class AWSCredentials with EquatableMixin {
   final String accessKeyId;

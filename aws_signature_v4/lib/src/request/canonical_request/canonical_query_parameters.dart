@@ -1,6 +1,10 @@
 part of 'canonical_request.dart';
 
+/// {@template canonical_query_parameters}
+/// A map of canonicalized query parameters.
+/// {@endtemplate}
 class CanonicalQueryParameters extends DelegatingMap<String, String> {
+  /// {@macro canonical_query_parameters}
   CanonicalQueryParameters(Map<String, String> queryParameters)
       : super(canonicalize(queryParameters));
 
