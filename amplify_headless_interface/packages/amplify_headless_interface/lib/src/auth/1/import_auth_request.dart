@@ -1,3 +1,6 @@
+import 'package:json_schema2/json_schema2.dart'
+    show ValidationError, JsonSchema;
+
 /// Defines acceptable payloads to amplify import auth --headless.
 class ImportAuthRequestVersion {
   const ImportAuthRequestVersion._(this._value);
@@ -35,6 +38,37 @@ class ImportAuthRequest {
   /// The id of the Cognito Identity Pool
   final String? identityPoolId;
 
+  static const Map<String, dynamic> _schema = {
+    "description":
+        "Defines acceptable payloads to amplify import auth --headless.",
+    "type": "object",
+    "properties": {
+      "version": {
+        "description": "The schema version.",
+        "type": "number",
+        "enum": [1]
+      },
+      "userPoolId": {
+        "description": "The id of the Cognito User Pool",
+        "type": "string"
+      },
+      "webClientId": {
+        "description": "The id of the Cognito Web Client",
+        "type": "string"
+      },
+      "nativeClientId": {
+        "description": "The id of the Cognito Native Client",
+        "type": "string"
+      },
+      "identityPoolId": {
+        "description": "The id of the Cognito Identity Pool",
+        "type": "string"
+      }
+    },
+    "required": ["version", "userPoolId", "webClientId", "nativeClientId"],
+    "\$schema": "http://json-schema.org/draft-06/schema#"
+  };
+
   Map<String, dynamic> toJson() => {
         'version': version,
         'userPoolId': userPoolId,
@@ -42,4 +76,8 @@ class ImportAuthRequest {
         'nativeClientId': nativeClientId,
         if (identityPoolId != null) 'identityPoolId': identityPoolId,
       };
+  List<ValidationError> validate() {
+    final schema = JsonSchema.createSchema(_schema);
+    return schema.validateWithErrors(toJson());
+  }
 }

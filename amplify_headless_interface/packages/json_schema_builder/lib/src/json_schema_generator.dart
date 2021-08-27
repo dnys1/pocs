@@ -105,6 +105,7 @@ class _Class {
 }
 
 class JsonSchemaModelBuilder {
+  static const jsonSchemaPackage = 'package:json_schema2/json_schema2.dart';
   static final _formatter = DartFormatter();
 
   final String libraryName;
@@ -113,7 +114,51 @@ class JsonSchemaModelBuilder {
   final Set<_Class> customTypes = {};
   final Map<Uri, Set<String>> packageImports = {};
 
-  JsonSchemaModelBuilder(this.libraryName, this.schema);
+  JsonSchemaModelBuilder(this.libraryName, this.schema) {
+    packageImports[Uri.parse(jsonSchemaPackage)] = {
+      'ValidationError',
+      'JsonSchema',
+    };
+  }
+
+  String _escapeDartString(String string) {
+    return string.replaceAll(r'$', r'\$');
+  }
+
+  Class _addValidator(Class $class) {
+    final schemaMap = schema.schemaMap;
+    return $class.rebuild(
+      (b) => b
+        ..fields.add(Field(
+          (f) => f
+            ..static = true
+            ..modifier = FieldModifier.constant
+            ..name = '_schema'
+            ..type = TypeReference(
+              (t) => t
+                ..symbol = 'Map'
+                ..types.replace([refer('String'), refer('dynamic')]),
+            )
+            ..assignment = Code(_escapeDartString(jsonEncode(schemaMap))),
+        ))
+        ..methods.add(Method(
+          (m) => m
+            ..name = 'validate'
+            ..returns = TypeReference(
+              (t) => t
+                ..symbol = 'List'
+                ..types.add(refer(
+                  'ValidationError',
+                  jsonSchemaPackage,
+                )),
+            )
+            ..body = Block.of([
+              Code(r'final schema = JsonSchema.createSchema(_schema);'),
+              Code(r'return schema.validateWithErrors(toJson());'),
+            ]),
+        )),
+    );
+  }
 
   String build() {
     _buildAll();
@@ -153,7 +198,8 @@ class JsonSchemaModelBuilder {
       }
     }
 
-    customTypes.add(_Class(_buildClass(schema, className)));
+    final libraryClass = _addValidator(_buildClass(schema, className));
+    customTypes.add(_Class(libraryClass));
     typeMap[className] = refer(className).type as TypeReference;
   }
 
