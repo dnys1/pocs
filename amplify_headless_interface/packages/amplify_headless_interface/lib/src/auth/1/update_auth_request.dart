@@ -102,7 +102,7 @@ class SocialProviderConfigurationsProvider {
 }
 
 class SocialProviderConfigurations {
-  SocialProviderConfigurations(
+  const SocialProviderConfigurations(
       {required this.provider,
       required this.clientId,
       this.clientSecret,
@@ -286,7 +286,7 @@ class MfaMfaTypes {
 
 /// If defined, specifies MFA configuration. Default is MFA off.
 class Mfa {
-  Mfa({required this.mode, this.mfaTypes, this.smsMessage});
+  const Mfa({required this.mode, this.mfaTypes, this.smsMessage});
 
   final MfaMode mode;
 
@@ -405,7 +405,7 @@ class PasswordRecoveryDeliveryMethod {
 
 /// If defined, specifies password recovery configiuration. Default is email recovery.
 class PasswordRecovery {
-  PasswordRecovery(
+  const PasswordRecovery(
       {required this.deliveryMethod,
       this.emailMessage,
       this.emailSubject,
@@ -710,7 +710,7 @@ class UserPoolModificationWriteAttributes {
 ///    Setting oAuth to {} (an empty object) will remove oAuth from the auth resource.
 ///    Including a non-empty oAuth configuration will overwrite the previous oAuth configuration.
 class UserPoolModification {
-  UserPoolModification(
+  const UserPoolModification(
       {this.domainPrefix,
       this.redirectSigninURIs,
       this.redirectSignoutURIs,
@@ -1359,7 +1359,7 @@ class ServiceModificationServiceName {
 }
 
 class ServiceModification {
-  ServiceModification(
+  const ServiceModification(
       {required this.userPoolModification,
       required this.includeIdentityPool,
       this.unauthenticatedLogin,

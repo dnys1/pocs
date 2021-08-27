@@ -624,6 +624,7 @@ class JsonSchemaModelBuilder {
 
       b.constructors.add(Constructor(
         (c) => c
+          ..constant = true
           ..optionalParameters.addAll([
             for (var property in properties.entries)
               if (!_isSingleEnum(property.value.property))

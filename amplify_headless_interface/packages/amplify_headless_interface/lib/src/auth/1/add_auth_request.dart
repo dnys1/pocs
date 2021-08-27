@@ -200,7 +200,7 @@ class MfaMfaTypes {
 
 /// If defined, specifies MFA configuration. Default is MFA off.
 class Mfa {
-  Mfa({required this.mode, this.mfaTypes, this.smsMessage});
+  const Mfa({required this.mode, this.mfaTypes, this.smsMessage});
 
   final MfaMode mode;
 
@@ -319,7 +319,7 @@ class PasswordRecoveryDeliveryMethod {
 
 /// If defined, specifies password recovery configiuration. Default is email recovery.
 class PasswordRecovery {
-  PasswordRecovery(
+  const PasswordRecovery(
       {required this.deliveryMethod,
       this.emailMessage,
       this.emailSubject,
@@ -919,7 +919,7 @@ class SocialProviderConfigurationsProvider {
 }
 
 class SocialProviderConfigurations {
-  SocialProviderConfigurations(
+  const SocialProviderConfigurations(
       {required this.provider,
       required this.clientId,
       this.clientSecret,
@@ -1261,7 +1261,7 @@ class ServiceConfigurationServiceName {
 
 /// The configuration that defines the auth resource.
 class ServiceConfiguration {
-  ServiceConfiguration(
+  const ServiceConfiguration(
       {this.userPoolConfiguration,
       required this.includeIdentityPool,
       this.identityPoolConfiguration});

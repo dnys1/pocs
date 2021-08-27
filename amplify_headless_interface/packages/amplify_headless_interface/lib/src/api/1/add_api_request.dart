@@ -47,7 +47,7 @@ class DefaultAuthTypeMode {
 
 /// The auth type that will be used by default.
 class DefaultAuthType {
-  DefaultAuthType(
+  const DefaultAuthType(
       {required this.mode,
       this.expirationTime,
       this.keyDescription,
@@ -304,7 +304,7 @@ class AdditionalAuthTypesMode {
 }
 
 class AdditionalAuthTypes {
-  AdditionalAuthTypes(
+  const AdditionalAuthTypes(
       {required this.mode,
       this.expirationTime,
       this.keyDescription,
@@ -434,7 +434,7 @@ class ResolverType {
 
 /// The lambda function used to resolve conflicts.
 class Resolver {
-  Resolver({required this.type, this.name, this.region, this.arn});
+  const Resolver({required this.type, this.name, this.region, this.arn});
 
   final ResolverType type;
 
@@ -527,7 +527,7 @@ class ExistingLambdaConflictResolver implements Resolver {
 
 /// The strategy that will be used for all models by default.
 class DefaultResolutionStrategy {
-  DefaultResolutionStrategy({required this.type, this.resolver});
+  const DefaultResolutionStrategy({required this.type, this.resolver});
 
   final DefaultResolutionStrategyType type;
 
@@ -628,7 +628,7 @@ class ResolutionStrategyType {
 
 /// The resolution strategy for the model.
 class ResolutionStrategy {
-  ResolutionStrategy({required this.type, this.resolver});
+  const ResolutionStrategy({required this.type, this.resolver});
 
   final ResolutionStrategyType type;
 
