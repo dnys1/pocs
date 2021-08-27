@@ -1,3 +1,5 @@
+import 'dart:convert' show jsonEncode;
+
 import 'package:json_schema2/json_schema2.dart'
     show ValidationError, JsonSchema;
 
@@ -20,19 +22,19 @@ class BaseCognitoServiceConfigurationServiceName {
 
 /// Configuration that applies to all Cognito configuration.
 class BaseCognitoServiceConfiguration {
-  const BaseCognitoServiceConfiguration({this.cognitoUserPoolConfiguration});
+  const BaseCognitoServiceConfiguration(
+      {required this.cognitoUserPoolConfiguration});
 
   /// The name of the service providing the resource.
   final BaseCognitoServiceConfigurationServiceName serviceName =
       BaseCognitoServiceConfigurationServiceName.$cognito;
 
   /// Cognito configuration exposed by Amplify.
-  final CognitoUserPoolConfiguration? cognitoUserPoolConfiguration;
+  final CognitoUserPoolConfiguration cognitoUserPoolConfiguration;
 
   Map<String, dynamic> toJson() => {
         'serviceName': serviceName,
-        if (cognitoUserPoolConfiguration != null)
-          'cognitoUserPoolConfiguration': cognitoUserPoolConfiguration,
+        'cognitoUserPoolConfiguration': cognitoUserPoolConfiguration,
       };
 }
 
@@ -653,7 +655,7 @@ class CognitoUserPoolConfiguration {
       this.refreshTokenPeriod,
       this.readAttributes,
       this.writeAttributes,
-      this.cognitoUserPoolSigninMethod,
+      required this.cognitoUserPoolSigninMethod,
       this.cognitoAdminQueries,
       this.cognitoPasswordPolicy,
       this.cognitoOAuthConfiguration});
@@ -686,7 +688,7 @@ class CognitoUserPoolConfiguration {
   /// Defines which user attributes can be written by the app. Default is none.
   final List<CognitoUserPoolConfigurationWriteAttributes>? writeAttributes;
 
-  final CognitoUserPoolConfigurationCognitoUserPoolSigninMethod?
+  final CognitoUserPoolConfigurationCognitoUserPoolSigninMethod
       cognitoUserPoolSigninMethod;
 
   /// Configuration for the AdminQueries API
@@ -708,8 +710,7 @@ class CognitoUserPoolConfiguration {
           'refreshTokenPeriod': refreshTokenPeriod,
         if (readAttributes != null) 'readAttributes': readAttributes,
         if (writeAttributes != null) 'writeAttributes': writeAttributes,
-        if (cognitoUserPoolSigninMethod != null)
-          'cognitoUserPoolSigninMethod': cognitoUserPoolSigninMethod,
+        'cognitoUserPoolSigninMethod': cognitoUserPoolSigninMethod,
         if (cognitoAdminQueries != null)
           'cognitoAdminQueries': cognitoAdminQueries,
         if (cognitoPasswordPolicy != null)
@@ -1811,6 +1812,6 @@ class AddAuthRequest {
       };
   List<ValidationError> validate() {
     final schema = JsonSchema.createSchema(_schema);
-    return schema.validateWithErrors(toJson());
+    return schema.validateWithErrors(jsonEncode(toJson()), parseJson: true);
   }
 }

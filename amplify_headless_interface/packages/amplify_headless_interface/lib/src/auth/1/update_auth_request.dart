@@ -1,3 +1,5 @@
+import 'dart:convert' show jsonEncode;
+
 import 'package:json_schema2/json_schema2.dart'
     show ValidationError, JsonSchema;
 
@@ -1275,20 +1277,18 @@ class UpdateAuthRequestCognitoIdentityPoolConfiguration {
 
 class ModifyCognitoIdentityPool {
   const ModifyCognitoIdentityPool(
-      {this.pickCognitoIdentityPoolConfigurationUnauthenticatedLoginIdentitySocialFederation});
+      {required this.pickCognitoIdentityPoolConfigurationUnauthenticatedLoginIdentitySocialFederation});
 
   final ModifyCognitoIdentityPoolIncludeIdentityPool includeIdentityPool =
       ModifyCognitoIdentityPoolIncludeIdentityPool.$true;
 
-  final UpdateAuthRequestCognitoIdentityPoolConfiguration?
+  final UpdateAuthRequestCognitoIdentityPoolConfiguration
       pickCognitoIdentityPoolConfigurationUnauthenticatedLoginIdentitySocialFederation;
 
   Map<String, dynamic> toJson() => {
         'includeIdentityPool': includeIdentityPool,
-        if (pickCognitoIdentityPoolConfigurationUnauthenticatedLoginIdentitySocialFederation !=
-            null)
-          'pickCognitoIdentityPoolConfigurationUnauthenticatedLoginIdentitySocialFederation':
-              pickCognitoIdentityPoolConfigurationUnauthenticatedLoginIdentitySocialFederation,
+        'pickCognitoIdentityPoolConfigurationUnauthenticatedLoginIdentitySocialFederation':
+            pickCognitoIdentityPoolConfigurationUnauthenticatedLoginIdentitySocialFederation,
       };
 }
 
@@ -1877,6 +1877,6 @@ class UpdateAuthRequest {
       };
   List<ValidationError> validate() {
     final schema = JsonSchema.createSchema(_schema);
-    return schema.validateWithErrors(toJson());
+    return schema.validateWithErrors(jsonEncode(toJson()), parseJson: true);
   }
 }

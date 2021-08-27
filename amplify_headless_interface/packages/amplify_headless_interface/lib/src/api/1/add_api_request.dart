@@ -1,3 +1,5 @@
+import 'dart:convert' show jsonEncode;
+
 import 'package:json_schema2/json_schema2.dart'
     show ValidationError, JsonSchema;
 
@@ -704,13 +706,13 @@ class AddApiRequestVersion {
 
 /// Defines the json object expected by `amplify add api --headless`
 class AddApiRequest {
-  const AddApiRequest({this.appSyncServiceConfiguration});
+  const AddApiRequest({required this.appSyncServiceConfiguration});
 
   /// The schema version.
   final AddApiRequestVersion version = AddApiRequestVersion.$1;
 
   /// Configuration exposed by AppSync. Currently this is the only API type supported by Amplify headless mode.
-  final AppSyncServiceConfiguration? appSyncServiceConfiguration;
+  final AppSyncServiceConfiguration appSyncServiceConfiguration;
 
   static const Map<String, dynamic> _schema = {
     "description":
@@ -956,11 +958,10 @@ class AddApiRequest {
 
   Map<String, dynamic> toJson() => {
         'version': version,
-        if (appSyncServiceConfiguration != null)
-          'appSyncServiceConfiguration': appSyncServiceConfiguration,
+        'appSyncServiceConfiguration': appSyncServiceConfiguration,
       };
   List<ValidationError> validate() {
     final schema = JsonSchema.createSchema(_schema);
-    return schema.validateWithErrors(toJson());
+    return schema.validateWithErrors(jsonEncode(toJson()), parseJson: true);
   }
 }

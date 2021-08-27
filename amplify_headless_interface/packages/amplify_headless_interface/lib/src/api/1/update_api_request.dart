@@ -1,3 +1,5 @@
+import 'dart:convert' show jsonEncode;
+
 import 'package:json_schema2/json_schema2.dart'
     show ValidationError, JsonSchema;
 
@@ -1024,6 +1026,6 @@ class UpdateApiRequest {
       };
   List<ValidationError> validate() {
     final schema = JsonSchema.createSchema(_schema);
-    return schema.validateWithErrors(toJson());
+    return schema.validateWithErrors(jsonEncode(toJson()), parseJson: true);
   }
 }

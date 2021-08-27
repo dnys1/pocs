@@ -119,6 +119,9 @@ class JsonSchemaModelBuilder {
       'ValidationError',
       'JsonSchema',
     };
+    packageImports[Uri.parse('dart:convert')] = {
+      'jsonEncode',
+    };
   }
 
   String _escapeDartString(String string) {
@@ -154,7 +157,9 @@ class JsonSchemaModelBuilder {
             )
             ..body = Block.of([
               Code(r'final schema = JsonSchema.createSchema(_schema);'),
-              Code(r'return schema.validateWithErrors(toJson());'),
+              Code(
+                r'return schema.validateWithErrors(jsonEncode(toJson()), parseJson: true);',
+              ),
             ]),
         )),
     );
@@ -219,8 +224,13 @@ class JsonSchemaModelBuilder {
 
         // Add fields
         var properties = <String, _Property>{};
-        for (var field in classSchema.properties.values) {
-          final gField = _buildField(field, parentNameOverride: b.name);
+        for (var fieldEntry in classSchema.properties.entries) {
+          final field = fieldEntry.value;
+          final gField = _buildField(
+            field,
+            isOptionalOverride: !classSchema.propertyRequired(fieldEntry.key),
+            parentNameOverride: b.name,
+          );
           properties[field.propertyName!] = _Property(
             name: gField.name,
             property: field,
@@ -291,6 +301,7 @@ class JsonSchemaModelBuilder {
     String? parentNameOverride,
   }) =>
       Field((b) {
+        //
         b.modifier = FieldModifier.final$;
         b.type = _dartType(
           fieldSchema,
