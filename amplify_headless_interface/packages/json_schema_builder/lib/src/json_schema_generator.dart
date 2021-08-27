@@ -229,6 +229,7 @@ class JsonSchemaModelBuilder {
           final gField = _buildField(
             field,
             isOptionalOverride: !classSchema.propertyRequired(fieldEntry.key),
+            propertyNameOverride: fieldEntry.key,
             parentNameOverride: b.name,
           );
           properties[field.propertyName!] = _Property(
@@ -855,8 +856,7 @@ class JsonSchemaModelBuilder {
         );
       }
 
-      void addProperty(JsonSchema property) {
-        final propertyName = property.propertyName!;
+      void addProperty(String propertyName, JsonSchema property) {
         var thisProperty = _Property(
           name: propertyName,
           isOptional: isAnyOf || !property.requiredOnParent,
@@ -878,16 +878,22 @@ class JsonSchemaModelBuilder {
       if (element.allOf.isNotEmpty) {
         collectAndUpdate(element.allOf);
       } else if (element.properties.isNotEmpty) {
-        for (var property in element.properties.values) {
+        for (var propertyEntry in element.properties.entries) {
+          final property = propertyEntry.value;
           if (property.propertyName?.startsWith(RegExp('Partial|Pick')) ??
               false) {
             collectAndUpdate([property]);
           } else {
-            addProperty(property);
+            addProperty(propertyEntry.key, property);
           }
         }
       } else {
-        addProperty(element);
+        addProperty(
+          element.parent!.properties.entries
+              .firstWhere((el) => el.value.propertyName == element.propertyName)
+              .key,
+          element,
+        );
       }
       return allProperties;
     });

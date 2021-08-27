@@ -22,19 +22,18 @@ class BaseCognitoServiceConfigurationServiceName {
 
 /// Configuration that applies to all Cognito configuration.
 class BaseCognitoServiceConfiguration {
-  const BaseCognitoServiceConfiguration(
-      {required this.cognitoUserPoolConfiguration});
+  const BaseCognitoServiceConfiguration({required this.userPoolConfiguration});
 
   /// The name of the service providing the resource.
   final BaseCognitoServiceConfigurationServiceName serviceName =
       BaseCognitoServiceConfigurationServiceName.$cognito;
 
   /// Cognito configuration exposed by Amplify.
-  final CognitoUserPoolConfiguration cognitoUserPoolConfiguration;
+  final CognitoUserPoolConfiguration userPoolConfiguration;
 
   Map<String, dynamic> toJson() => {
         'serviceName': serviceName,
-        'cognitoUserPoolConfiguration': cognitoUserPoolConfiguration,
+        'userPoolConfiguration': userPoolConfiguration,
       };
 }
 
@@ -615,30 +614,32 @@ class CognitoUserPoolConfigurationWriteAttributes {
 }
 
 /// Defines acceptable payloads to amplify add auth --headless.
-class CognitoUserPoolConfigurationCognitoUserPoolSigninMethod {
-  const CognitoUserPoolConfigurationCognitoUserPoolSigninMethod._(this._value);
+class CognitoUserPoolConfigurationSigninMethod {
+  const CognitoUserPoolConfigurationSigninMethod._(this._value);
 
   final String _value;
 
   /// `EMAIL`
-  static const $email =
-      CognitoUserPoolConfigurationCognitoUserPoolSigninMethod._('EMAIL');
+  static const $email = CognitoUserPoolConfigurationSigninMethod._('EMAIL');
 
   /// `EMAIL_AND_PHONE_NUMBER`
   static const $emailAndPhoneNumber =
-      CognitoUserPoolConfigurationCognitoUserPoolSigninMethod._(
-          'EMAIL_AND_PHONE_NUMBER');
+      CognitoUserPoolConfigurationSigninMethod._('EMAIL_AND_PHONE_NUMBER');
 
   /// `PHONE_NUMBER`
   static const $phoneNumber =
-      CognitoUserPoolConfigurationCognitoUserPoolSigninMethod._('PHONE_NUMBER');
+      CognitoUserPoolConfigurationSigninMethod._('PHONE_NUMBER');
 
   /// `USERNAME`
   static const $username =
-      CognitoUserPoolConfigurationCognitoUserPoolSigninMethod._('USERNAME');
+      CognitoUserPoolConfigurationSigninMethod._('USERNAME');
 
-  static const List<CognitoUserPoolConfigurationCognitoUserPoolSigninMethod>
-      values = [$email, $emailAndPhoneNumber, $phoneNumber, $username];
+  static const List<CognitoUserPoolConfigurationSigninMethod> values = [
+    $email,
+    $emailAndPhoneNumber,
+    $phoneNumber,
+    $username
+  ];
 
   String toJson() => _value;
 }
@@ -655,10 +656,10 @@ class CognitoUserPoolConfiguration {
       this.refreshTokenPeriod,
       this.readAttributes,
       this.writeAttributes,
-      required this.cognitoUserPoolSigninMethod,
-      this.cognitoAdminQueries,
-      this.cognitoPasswordPolicy,
-      this.cognitoOAuthConfiguration});
+      required this.signinMethod,
+      this.adminQueries,
+      this.passwordPolicy,
+      this.oAuth});
 
   /// Account attributes that must be specified to sign up.
   final List<CognitoUserPoolConfigurationRequiredSignupAttributes>
@@ -688,16 +689,15 @@ class CognitoUserPoolConfiguration {
   /// Defines which user attributes can be written by the app. Default is none.
   final List<CognitoUserPoolConfigurationWriteAttributes>? writeAttributes;
 
-  final CognitoUserPoolConfigurationCognitoUserPoolSigninMethod
-      cognitoUserPoolSigninMethod;
+  final CognitoUserPoolConfigurationSigninMethod signinMethod;
 
   /// Configuration for the AdminQueries API
-  final CognitoAdminQueries? cognitoAdminQueries;
+  final CognitoAdminQueries? adminQueries;
 
-  final CognitoPasswordPolicy? cognitoPasswordPolicy;
+  final CognitoPasswordPolicy? passwordPolicy;
 
   /// Cognito OAuth configuration exposed by Amplify
-  final CognitoOAuthConfiguration? cognitoOAuthConfiguration;
+  final CognitoOAuthConfiguration? oAuth;
 
   Map<String, dynamic> toJson() => {
         'requiredSignupAttributes': requiredSignupAttributes,
@@ -710,13 +710,10 @@ class CognitoUserPoolConfiguration {
           'refreshTokenPeriod': refreshTokenPeriod,
         if (readAttributes != null) 'readAttributes': readAttributes,
         if (writeAttributes != null) 'writeAttributes': writeAttributes,
-        'cognitoUserPoolSigninMethod': cognitoUserPoolSigninMethod,
-        if (cognitoAdminQueries != null)
-          'cognitoAdminQueries': cognitoAdminQueries,
-        if (cognitoPasswordPolicy != null)
-          'cognitoPasswordPolicy': cognitoPasswordPolicy,
-        if (cognitoOAuthConfiguration != null)
-          'cognitoOAuthConfiguration': cognitoOAuthConfiguration,
+        'signinMethod': signinMethod,
+        if (adminQueries != null) 'adminQueries': adminQueries,
+        if (passwordPolicy != null) 'passwordPolicy': passwordPolicy,
+        if (oAuth != null) 'oAuth': oAuth,
       };
 }
 
@@ -1150,18 +1147,18 @@ class CognitoIdentityPoolIncludeIdentityPool {
 
 /// Specifies that the Cognito configuration includes an identity pool configuration.
 class CognitoIdentityPool {
-  const CognitoIdentityPool({this.cognitoIdentityPoolConfiguration});
+  const CognitoIdentityPool({this.identityPoolConfiguration});
 
   /// Indicates an identity pool should be configured.
   final CognitoIdentityPoolIncludeIdentityPool includeIdentityPool =
       CognitoIdentityPoolIncludeIdentityPool.$true;
 
-  final CognitoIdentityPoolConfiguration? cognitoIdentityPoolConfiguration;
+  final CognitoIdentityPoolConfiguration? identityPoolConfiguration;
 
   Map<String, dynamic> toJson() => {
         'includeIdentityPool': includeIdentityPool,
-        if (cognitoIdentityPoolConfiguration != null)
-          'cognitoIdentityPoolConfiguration': cognitoIdentityPoolConfiguration,
+        if (identityPoolConfiguration != null)
+          'identityPoolConfiguration': identityPoolConfiguration,
       };
 }
 
@@ -1265,29 +1262,29 @@ class ServiceConfigurationServiceName {
 /// The configuration that defines the auth resource.
 class ServiceConfiguration {
   ServiceConfiguration(
-      {this.cognitoUserPoolConfiguration,
+      {this.userPoolConfiguration,
       required this.includeIdentityPool,
-      this.cognitoIdentityPoolConfiguration});
+      this.identityPoolConfiguration});
 
   /// The name of the service providing the resource.
   final ServiceConfigurationServiceName serviceName =
       ServiceConfigurationServiceName.$cognito;
 
   /// Cognito configuration exposed by Amplify.
-  final CognitoUserPoolConfiguration? cognitoUserPoolConfiguration;
+  final CognitoUserPoolConfiguration? userPoolConfiguration;
 
   /// Indicates an indentity pool should not be configured.
   final bool includeIdentityPool;
 
-  final CognitoIdentityPoolConfiguration? cognitoIdentityPoolConfiguration;
+  final CognitoIdentityPoolConfiguration? identityPoolConfiguration;
 
   Map<String, dynamic> toJson() => {
         'serviceName': serviceName,
-        if (cognitoUserPoolConfiguration != null)
-          'cognitoUserPoolConfiguration': cognitoUserPoolConfiguration,
+        if (userPoolConfiguration != null)
+          'userPoolConfiguration': userPoolConfiguration,
         'includeIdentityPool': includeIdentityPool,
-        if (cognitoIdentityPoolConfiguration != null)
-          'cognitoIdentityPoolConfiguration': cognitoIdentityPoolConfiguration,
+        if (identityPoolConfiguration != null)
+          'identityPoolConfiguration': identityPoolConfiguration,
       };
 }
 

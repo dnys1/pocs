@@ -21,8 +21,8 @@ class S3ServiceConfigurationServiceName {
 class S3ServiceConfiguration {
   const S3ServiceConfiguration(
       {required this.bucketName,
-      required this.s3Permissions,
-      this.lambdaTriggerConfig});
+      required this.permissions,
+      this.lambdaTrigger});
 
   /// Descriminant used to determine the service config type
   final S3ServiceConfigurationServiceName serviceName =
@@ -32,17 +32,16 @@ class S3ServiceConfiguration {
   final String bucketName;
 
   /// Permissions that should be applied to the bucket
-  final S3Permissions s3Permissions;
+  final S3Permissions permissions;
 
   /// Lambda function that runs on bucket change
-  final LambdaTriggerConfig? lambdaTriggerConfig;
+  final LambdaTriggerConfig? lambdaTrigger;
 
   Map<String, dynamic> toJson() => {
         'serviceName': serviceName,
         'bucketName': bucketName,
-        's3Permissions': s3Permissions,
-        if (lambdaTriggerConfig != null)
-          'lambdaTriggerConfig': lambdaTriggerConfig,
+        'permissions': permissions,
+        if (lambdaTrigger != null) 'lambdaTrigger': lambdaTrigger,
       };
 }
 
@@ -104,7 +103,7 @@ class S3PermissionsGuest {
 
 /// Permissions that should be applied to the bucket
 class S3Permissions {
-  const S3Permissions({required this.auth, this.guest, this.permissionGroups});
+  const S3Permissions({required this.auth, this.guest, this.groups});
 
   /// Permissions for authenticated users
   final List<S3PermissionsAuth> auth;
@@ -113,12 +112,12 @@ class S3Permissions {
   final List<S3PermissionsGuest>? guest;
 
   /// Permissions for Cognito user groups
-  final PermissionGroups? permissionGroups;
+  final PermissionGroups? groups;
 
   Map<String, dynamic> toJson() => {
         'auth': auth,
         if (guest != null) 'guest': guest,
-        if (permissionGroups != null) 'permissionGroups': permissionGroups,
+        if (groups != null) 'groups': groups,
       };
 }
 
@@ -210,12 +209,12 @@ class AddStorageRequestVersion {
 /// Headless mode for add storage is not yet implemented.
 /// This interface is subject to change and should not be used.
 class AddStorageRequest {
-  const AddStorageRequest({required this.s3ServiceConfiguration});
+  const AddStorageRequest({required this.serviceConfiguration});
 
   final AddStorageRequestVersion version = AddStorageRequestVersion.$1;
 
   /// Service configuration for AWS S3 through Amplify
-  final S3ServiceConfiguration s3ServiceConfiguration;
+  final S3ServiceConfiguration serviceConfiguration;
 
   static const Map<String, dynamic> _schema = {
     "description":
@@ -313,7 +312,7 @@ class AddStorageRequest {
 
   Map<String, dynamic> toJson() => {
         'version': version,
-        's3ServiceConfiguration': s3ServiceConfiguration,
+        'serviceConfiguration': serviceConfiguration,
       };
   List<ValidationError> validate() {
     final schema = JsonSchema.createSchema(_schema);

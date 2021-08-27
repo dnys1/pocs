@@ -723,8 +723,8 @@ class UserPoolModification {
       this.refreshTokenPeriod,
       this.readAttributes,
       this.writeAttributes,
-      this.cognitoAdminQueries,
-      this.cognitoPasswordPolicy});
+      this.adminQueries,
+      this.passwordPolicy});
 
   /// Your hosted UI domain name.
   final String? domainPrefix;
@@ -763,9 +763,9 @@ class UserPoolModification {
   final List<UserPoolModificationWriteAttributes>? writeAttributes;
 
   /// Configuration for the AdminQueries API
-  final CognitoAdminQueries? cognitoAdminQueries;
+  final CognitoAdminQueries? adminQueries;
 
-  final CognitoPasswordPolicy? cognitoPasswordPolicy;
+  final CognitoPasswordPolicy? passwordPolicy;
 
   Map<String, dynamic> toJson() => {
         if (domainPrefix != null) 'domainPrefix': domainPrefix,
@@ -784,10 +784,8 @@ class UserPoolModification {
           'refreshTokenPeriod': refreshTokenPeriod,
         if (readAttributes != null) 'readAttributes': readAttributes,
         if (writeAttributes != null) 'writeAttributes': writeAttributes,
-        if (cognitoAdminQueries != null)
-          'cognitoAdminQueries': cognitoAdminQueries,
-        if (cognitoPasswordPolicy != null)
-          'cognitoPasswordPolicy': cognitoPasswordPolicy,
+        if (adminQueries != null) 'adminQueries': adminQueries,
+        if (passwordPolicy != null) 'passwordPolicy': passwordPolicy,
       };
 }
 
@@ -1029,8 +1027,8 @@ class UpdateAuthRequestCognitoUserPoolConfiguration
       this.refreshTokenPeriod,
       this.readAttributes,
       this.writeAttributes,
-      this.cognitoAdminQueries,
-      this.cognitoPasswordPolicy});
+      this.adminQueries,
+      this.passwordPolicy});
 
   /// User pool groups to create within the user pool. If not specified, no groups are created.
   final List<CognitoUserPoolGroup>? userPoolGroups;
@@ -1053,9 +1051,9 @@ class UpdateAuthRequestCognitoUserPoolConfiguration
       writeAttributes;
 
   /// Configuration for the AdminQueries API
-  final CognitoAdminQueries? cognitoAdminQueries;
+  final CognitoAdminQueries? adminQueries;
 
-  final CognitoPasswordPolicy? cognitoPasswordPolicy;
+  final CognitoPasswordPolicy? passwordPolicy;
 
   @override
   String? get domainPrefix => null;
@@ -1077,10 +1075,8 @@ class UpdateAuthRequestCognitoUserPoolConfiguration
           'refreshTokenPeriod': refreshTokenPeriod,
         if (readAttributes != null) 'readAttributes': readAttributes,
         if (writeAttributes != null) 'writeAttributes': writeAttributes,
-        if (cognitoAdminQueries != null)
-          'cognitoAdminQueries': cognitoAdminQueries,
-        if (cognitoPasswordPolicy != null)
-          'cognitoPasswordPolicy': cognitoPasswordPolicy,
+        if (adminQueries != null) 'adminQueries': adminQueries,
+        if (passwordPolicy != null) 'passwordPolicy': passwordPolicy,
       };
 }
 
@@ -1276,19 +1272,17 @@ class UpdateAuthRequestCognitoIdentityPoolConfiguration {
 }
 
 class ModifyCognitoIdentityPool {
-  const ModifyCognitoIdentityPool(
-      {required this.pickCognitoIdentityPoolConfigurationUnauthenticatedLoginIdentitySocialFederation});
+  const ModifyCognitoIdentityPool({required this.identityPoolModification});
 
   final ModifyCognitoIdentityPoolIncludeIdentityPool includeIdentityPool =
       ModifyCognitoIdentityPoolIncludeIdentityPool.$true;
 
   final UpdateAuthRequestCognitoIdentityPoolConfiguration
-      pickCognitoIdentityPoolConfigurationUnauthenticatedLoginIdentitySocialFederation;
+      identityPoolModification;
 
   Map<String, dynamic> toJson() => {
         'includeIdentityPool': includeIdentityPool,
-        'pickCognitoIdentityPoolConfigurationUnauthenticatedLoginIdentitySocialFederation':
-            pickCognitoIdentityPoolConfigurationUnauthenticatedLoginIdentitySocialFederation,
+        'identityPoolModification': identityPoolModification,
       };
 }
 

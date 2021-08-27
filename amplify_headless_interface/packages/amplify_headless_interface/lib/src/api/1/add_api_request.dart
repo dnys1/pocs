@@ -706,13 +706,13 @@ class AddApiRequestVersion {
 
 /// Defines the json object expected by `amplify add api --headless`
 class AddApiRequest {
-  const AddApiRequest({required this.appSyncServiceConfiguration});
+  const AddApiRequest({required this.serviceConfiguration});
 
   /// The schema version.
   final AddApiRequestVersion version = AddApiRequestVersion.$1;
 
   /// Configuration exposed by AppSync. Currently this is the only API type supported by Amplify headless mode.
-  final AppSyncServiceConfiguration appSyncServiceConfiguration;
+  final AppSyncServiceConfiguration serviceConfiguration;
 
   static const Map<String, dynamic> _schema = {
     "description":
@@ -958,7 +958,7 @@ class AddApiRequest {
 
   Map<String, dynamic> toJson() => {
         'version': version,
-        'appSyncServiceConfiguration': appSyncServiceConfiguration,
+        'serviceConfiguration': serviceConfiguration,
       };
   List<ValidationError> validate() {
     final schema = JsonSchema.createSchema(_schema);
