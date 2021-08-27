@@ -1,13 +1,13 @@
 import 'package:amplify_common/src/config/api/api_config.dart';
 import 'package:amplify_common/src/config/auth/auth_config.dart';
-import 'package:amplify_common/src/util/equatable.dart';
 import 'package:amplify_common/src/util/serializable.dart';
+import 'package:aws_common/aws_common.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'amplify_config.g.dart';
 
 @amplifySerializable
-class AmplifyConfig with AmplifyEquatable, AmplifySerializable {
+class AmplifyConfig with AWSEquatable, AWSSerializable {
   @JsonKey(name: 'UserAgent')
   final String userAgent;
 

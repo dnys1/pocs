@@ -1,8 +1,8 @@
 import 'package:amplify_common/amplify_common.dart';
 import 'package:amplify_common/src/config/amplify_plugin_config.dart';
 import 'package:amplify_common/src/config/amplify_plugin_registry.dart';
-import 'package:amplify_common/src/util/equatable.dart';
 import 'package:amplify_common/src/util/serializable.dart';
+import 'package:aws_common/aws_common.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'cognito_config.g.dart';
@@ -35,7 +35,7 @@ extension CognitoAuthConfigsX on CognitoAuthConfigs {
 
 @awsSerializable
 class CognitoPluginConfig
-    with AmplifyEquatable, AmplifySerializable
+    with AWSEquatable, AWSSerializable
     implements AmplifyPluginConfig {
   static const pluginKey = 'awsCognitoAuthPlugin';
 
@@ -74,8 +74,7 @@ class CognitoPluginConfig
 }
 
 @awsSerializable
-class CognitoIdentityCredentialsProvider
-    with AmplifyEquatable, AmplifySerializable {
+class CognitoIdentityCredentialsProvider with AWSEquatable, AWSSerializable {
   final String poolId;
   final String region;
 
@@ -122,7 +121,7 @@ extension CognitoCredentialsProvidersX on CognitoCredentialsProviders {
 }
 
 @awsSerializable
-class CognitoUserPoolConfig with AmplifyEquatable, AmplifySerializable {
+class CognitoUserPoolConfig with AWSEquatable, AWSSerializable {
   final String poolId;
   final String appClientId;
   final String region;
@@ -144,7 +143,7 @@ class CognitoUserPoolConfig with AmplifyEquatable, AmplifySerializable {
 }
 
 @amplifySerializable
-class CognitoAuthConfig with AmplifyEquatable, AmplifySerializable {
+class CognitoAuthConfig with AWSEquatable, AWSSerializable {
   @JsonKey(name: 'OAuth')
   final CognitoOAuthConfig? oauth;
 
@@ -163,7 +162,7 @@ class CognitoAuthConfig with AmplifyEquatable, AmplifySerializable {
 }
 
 @awsSerializable
-class CognitoOAuthConfig with AmplifyEquatable, AmplifySerializable {
+class CognitoOAuthConfig with AWSEquatable, AWSSerializable {
   final String webDomain;
   final String appClientId;
 

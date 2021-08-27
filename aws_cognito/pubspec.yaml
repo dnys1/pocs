@@ -7,8 +7,8 @@ environment:
   sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
-  amplify_common:
-    path: ../amplify_common
+  aws_common:
+    path: ../aws_common
   aws_signature_v4:
     path: ../aws_signature_v4
   json_annotation: ^4.0.0

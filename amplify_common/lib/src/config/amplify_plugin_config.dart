@@ -1,6 +1,5 @@
 import 'package:amplify_common/src/config/amplify_plugin_registry.dart';
-import 'package:amplify_common/src/util/equatable.dart';
-import 'package:amplify_common/src/util/serializable.dart';
+import 'package:aws_common/aws_common.dart';
 import 'package:collection/collection.dart';
 
 /// Plugins must implement this class before they can be registered with [PluginRegistry].
@@ -14,7 +13,8 @@ abstract class AmplifyPluginConfig {
 /// Category plugins by name.
 typedef AmplifyPlugins = Map<String, AmplifyPluginConfig>;
 
-class UnknownPluginConfigFactory extends AmplifyPluginConfigFactory<UnknownPluginConfig> {
+class UnknownPluginConfigFactory
+    extends AmplifyPluginConfigFactory<UnknownPluginConfig> {
   const UnknownPluginConfigFactory(this.name);
 
   @override
@@ -27,9 +27,10 @@ class UnknownPluginConfigFactory extends AmplifyPluginConfigFactory<UnknownPlugi
 }
 
 class UnknownPluginConfig extends DelegatingMap<String, dynamic>
-    with AmplifySerializable, AmplifyEquatable
+    with AWSSerializable, AWSEquatable
     implements AmplifyPluginConfig {
-  const UnknownPluginConfig(this.name, Map<String, dynamic> plugin) : super(plugin);
+  const UnknownPluginConfig(this.name, Map<String, dynamic> plugin)
+      : super(plugin);
 
   @override
   final String name;

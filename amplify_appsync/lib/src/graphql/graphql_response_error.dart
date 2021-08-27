@@ -1,4 +1,4 @@
-import 'package:amplify_common/amplify_common.dart';
+import 'package:aws_common/aws_common.dart';
 
 /// {@template graphql_response_error}
 /// Contains an error produced via a GraphQL invocation. Corresponds to one
@@ -6,7 +6,7 @@ import 'package:amplify_common/amplify_common.dart';
 ///
 /// [locations] and [path] may be null.
 /// {@endtemplate}
-class GraphQLResponseError with AmplifySerializable, AmplifyEquatable {
+class GraphQLResponseError with AWSSerializable, AWSEquatable {
   /// The description of the error.
   final String message;
 
@@ -52,7 +52,7 @@ class GraphQLResponseError with AmplifySerializable, AmplifyEquatable {
 /// [line] and [column] correspond to the beginning of the syntax element associated
 /// with the error.
 /// {@endtemplate}
-class GraphQLResponseErrorLocation with AmplifySerializable, AmplifyEquatable {
+class GraphQLResponseErrorLocation with AWSSerializable, AWSEquatable {
   /// The line in the GraphQL request document where the error-causing syntax
   /// element starts.
   final int line;

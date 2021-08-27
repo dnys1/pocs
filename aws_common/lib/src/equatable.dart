@@ -1,12 +1,12 @@
 import 'package:collection/collection.dart';
 
-mixin AmplifyEquatable on Object {
+mixin AWSEquatable on Object {
   List<Object?> get props;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is AmplifyEquatable &&
+      other is AWSEquatable &&
           const DeepCollectionEquality.unordered().equals(props, other.props);
 
   @override

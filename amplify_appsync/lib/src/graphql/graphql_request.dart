@@ -1,8 +1,8 @@
-import 'package:amplify_common/amplify_common.dart';
+import 'package:aws_common/aws_common.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-class GraphQLRequest with AmplifySerializable, AmplifyEquatable {
+class GraphQLRequest with AWSSerializable, AWSEquatable {
   final String query;
   final Map<String, dynamic> variables;
   final String? operationName;

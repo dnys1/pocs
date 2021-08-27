@@ -1,4 +1,4 @@
-import 'package:amplify_common/amplify_common.dart';
+import 'package:aws_common/aws_common.dart';
 
 part 'credentials.g.dart';
 

@@ -9,6 +9,8 @@ environment:
 dependencies:
   collection: ^1.15.0
   json_annotation: ^4.0.0
+  aws_common:
+    path: ../aws_common
   aws_signature_v4:
     path: ../aws_signature_v4
 

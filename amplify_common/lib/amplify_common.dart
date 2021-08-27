@@ -14,6 +14,4 @@ export 'src/config/auth/auth_config.dart';
 export 'src/config/auth/cognito_config.dart';
 
 // Utilities
-export 'src/util/equatable.dart';
-export 'src/util/json.dart';
 export 'src/util/serializable.dart';

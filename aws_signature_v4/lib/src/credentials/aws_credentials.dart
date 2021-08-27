@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:aws_common/aws_common.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'aws_credentials.g.dart';
@@ -7,7 +7,7 @@ part 'aws_credentials.g.dart';
 ///
 /// Temporary credentials must include an STS [sessionToken].
 @JsonSerializable(fieldRename: FieldRename.snake)
-class AWSCredentials with EquatableMixin {
+class AWSCredentials with AWSEquatable, AWSSerializable {
   final String accessKeyId;
   final String secretAccessKey;
   final String? sessionToken;
@@ -21,10 +21,16 @@ class AWSCredentials with EquatableMixin {
   ]);
 
   @override
-  List<Object?> get props => [accessKeyId, secretAccessKey, sessionToken];
+  List<Object?> get props => [
+        accessKeyId,
+        secretAccessKey,
+        sessionToken,
+        expiration,
+      ];
 
   factory AWSCredentials.fromJson(Map<String, dynamic> json) =>
       _$AWSCredentialsFromJson(json);
 
+  @override
   Map<String, dynamic> toJson() => _$AWSCredentialsToJson(this);
 }

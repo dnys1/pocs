@@ -16,7 +16,7 @@ class AppSyncPluginFactory
 
 /// A map of AppSync plugins keyed by the API name.
 class AppSyncPluginConfig extends DelegatingMap<String, AppSyncApiConfig>
-    with AmplifySerializable, AmplifyEquatable
+    with AWSSerializable, AWSEquatable
     implements AmplifyPluginConfig {
   const AppSyncPluginConfig(Map<String, AppSyncApiConfig> configs)
       : super(configs);
@@ -56,7 +56,7 @@ class AppSyncPluginConfig extends DelegatingMap<String, AppSyncApiConfig>
 }
 
 @amplifySerializable
-class AppSyncApiConfig with AmplifyEquatable, AmplifySerializable {
+class AppSyncApiConfig with AWSEquatable, AWSSerializable {
   final ApiEndpointType endpointType;
   final String endpoint;
   final String region;

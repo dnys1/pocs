@@ -2,8 +2,7 @@ import 'dart:convert';
 
 import 'package:amplify_appsync/amplify_appsync.dart';
 import 'package:amplify_appsync/src/graphql/graphql_request.dart';
-import 'package:amplify_appsync/src/ws/websocket_connection_header.dart';
-import 'package:amplify_common/amplify_common.dart';
+import 'package:aws_common/aws_common.dart';
 import 'package:uuid/uuid.dart';
 
 class MessageType {

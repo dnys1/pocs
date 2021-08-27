@@ -7,10 +7,8 @@ import 'package:aws_signature_v4/src/credentials/aws_credential_scope.dart';
 import 'package:aws_signature_v4/src/credentials/aws_credentials.dart';
 import 'package:aws_signature_v4/src/request/aws_sig_v4_signed_request.dart';
 import 'package:aws_signature_v4/src/signer/aws_signer.dart';
-import 'package:equatable/equatable.dart';
 
 void main(List<String> args) async {
-  EquatableConfig.stringify = true;
   final argParser = ArgParser();
 
   const accessKeyIdArg = 'access-key-id';

@@ -1,9 +1,9 @@
-import 'package:amplify_common/amplify_common.dart';
+import 'package:aws_common/aws_common.dart';
 
 part 'device_config.g.dart';
 
 @awsSerializable
-class DeviceConfiguration with AmplifyEquatable {
+class DeviceConfiguration with AWSEquatable {
   /// Indicates whether a challenge is required on a new device. Only applicable to a new device.
   final bool? challengeRequiredOnNewDevice;
 

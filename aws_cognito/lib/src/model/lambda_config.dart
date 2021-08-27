@@ -1,4 +1,4 @@
-import 'package:amplify_common/amplify_common.dart';
+import 'package:aws_common/aws_common.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'lambda_config.g.dart';
