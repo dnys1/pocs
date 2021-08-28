@@ -33,7 +33,7 @@ class AWSSigV4Signer {
   }) {
     final sb = StringBuffer();
     sb.writeln(algorithm);
-    sb.writeln(credentialScope.dateTime.formatFull());
+    sb.writeln(credentialScope.dateTime);
     sb.writeln(credentialScope);
     sb.write(canonicalRequestHash);
 

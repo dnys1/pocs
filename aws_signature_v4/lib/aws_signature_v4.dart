@@ -1,4 +1,4 @@
-/// HTTP/1.1 and HTTP/2 request signer for AWS (Version 4).
+/// HTTP request signer for AWS (Version 4).
 library aws_signature_v4;
 
 export 'src/credentials/aws_credential_scope.dart';
