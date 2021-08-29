@@ -10,6 +10,8 @@ part 'aws_credentials.g.dart';
 class AWSCredentials with AWSEquatable, AWSSerializable {
   final String accessKeyId;
   final String secretAccessKey;
+
+  @JsonKey(name: 'token')
   final String? sessionToken;
   final DateTime? expiration;
 
