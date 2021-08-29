@@ -287,7 +287,7 @@ class JsonSchemaModelBuilder {
         _buildToJson(b);
       });
 
-  bool _isEnum(JsonSchema property) {
+  static bool _isEnum(JsonSchema property) {
     return property.enumValues?.isNotEmpty ?? false;
   }
 
@@ -302,7 +302,6 @@ class JsonSchemaModelBuilder {
     String? parentNameOverride,
   }) =>
       Field((b) {
-        //
         b.modifier = FieldModifier.final$;
         b.type = _dartType(
           fieldSchema,
@@ -352,7 +351,7 @@ class JsonSchemaModelBuilder {
     }
 
     final type = value.type;
-    final isEnum = value.enumValues?.isNotEmpty ?? false;
+    final isEnum = _isEnum(value);
 
     switch (type) {
       case SchemaType.array:
@@ -781,47 +780,6 @@ class JsonSchemaModelBuilder {
     if (existingTypeWithName && existingTypeWithFields) {
       return typeMap[className]!;
     } else if (existingTypeWithName) {
-      // final existingClass = customTypes
-      //     .firstWhere(
-      //       (el) => el.ref.name == className,
-      //     )
-      //     .ref;
-      // final mergedClassFields = <Field>{
-      //   ...$class.fields.where(
-      //     (f) => existingClass.fields.any((e) => e.name == f.name),
-      //   ),
-      //   ...$class.fields.where(
-      //     (f) => existingClass.fields.every((e) => e.name != f.name),
-      //   ),
-      //   ...existingClass.fields.where(
-      //     (f) => $class.fields.every((e) => e.name != f.name),
-      //   ),
-      // };
-
-      // // Add back values with all new values
-      // if (isEnum) {
-      //   mergedClassFields.removeWhere((f) => f.name == 'values');
-      //   mergedClassFields.add(Field(
-      //     (f) => f
-      //       ..static = true
-      //       ..modifier = FieldModifier.constant
-      //       ..name = 'values'
-      //       ..type = TypeReference(
-      //         (t) => t
-      //           ..isNullable = false
-      //           ..symbol = 'List'
-      //           ..types.add(refer(className)),
-      //       )
-      //       ..assignment = Code('''[
-      //     ${mergedClassFields.where((f) => f.name != '_value').map((f) => f.name).join(',')}
-      //     ]'''),
-      //   ));
-      // }
-
-      // final mergedClass = $class.rebuild(
-      //   (b) => b.fields.replace(mergedClassFields),
-      // );
-
       final rename = _cleanPropertyName('${parentName}_$className').pascalCase;
       $class = $class.rebuild((b) => b.name = rename);
       customTypes.add(_Class($class));
@@ -1049,8 +1007,7 @@ class _Property {
     }
     final schemaMap = {...property.schemaMap}.cast<String, dynamic>();
 
-    final isEnum = property.enumValues?.isNotEmpty ?? false;
-    final isArray = property.itemsList?.isNotEmpty ?? false;
+    final isEnum = JsonSchemaModelBuilder._isEnum(property);
 
     if (isEnum) {
       final allValues = {
@@ -1060,18 +1017,14 @@ class _Property {
       schemaMap['enum'] = allValues.toList();
       switch (property.type) {
         case SchemaType.boolean:
-          if ([true, false].every((el) => allValues.contains(el))) {
+          if (const UnorderedIterableEquality().equals(
+            [true, false],
+            allValues,
+          )) {
             schemaMap.remove('enum');
           }
       }
     }
-    //  else if (isArray) {
-    //   final allItems = [
-    //     ...?property.itemsList,
-    //     ...?other.property.itemsList,
-    //   ];
-    //   schemaMap['items']
-    // }
 
     final newSchema = JsonSchema.createSchema(
       schemaMap,
