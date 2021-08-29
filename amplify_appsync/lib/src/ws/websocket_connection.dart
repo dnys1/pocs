@@ -3,8 +3,8 @@ import 'dart:convert';
 
 import 'package:amplify_appsync/src/config/appsync_config.dart';
 import 'package:amplify_appsync/src/graphql/graphql_request.dart';
-import 'package:amplify_appsync/src/ws/websocket_message.dart';
 import 'package:amplify_appsync/src/ws/websocket_connection_header.dart';
+import 'package:amplify_appsync/src/ws/websocket_message.dart';
 import 'package:async/async.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 

@@ -1,8 +1,6 @@
 import 'dart:convert';
 
 import 'package:amplify_appsync/src/config/appsync_config.dart';
-import 'package:amplify_common/amplify_common.dart';
-import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:equatable/equatable.dart';
 
 class WebSocketConnectionHeader with EquatableMixin {

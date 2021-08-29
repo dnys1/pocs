@@ -35,11 +35,11 @@ class AmplifyPluginRegistry {
   /// The global, shared plugin registry.
   static late final shared = AmplifyPluginRegistry._();
 
-  final Map<String, PluginConfigFactory> _plugins = {};
+  final Map<String, AmplifyPluginConfigFactory> _plugins = {};
 
   void _registerDefaultPlugins() {
     _plugins.addAll({
-      for (var plugin in _defaultPlugins) plugin.name: plugin.build,
+      for (var plugin in _defaultPlugins) plugin.name: plugin,
     });
   }
 
@@ -52,18 +52,15 @@ class AmplifyPluginRegistry {
         'Plugin already registered for ${pluginFactory.name}',
       );
     }
-    _plugins[pluginFactory.name] = pluginFactory.build;
+    _plugins[pluginFactory.name] = pluginFactory;
   }
 
   /// Builds a plugin from the given [name] and [json]. If [name] is registered,
   /// this will build a plugin using the registered factory. Otherwise, an
   /// [UnknownPluginConfig] instance is returned.
   AmplifyPluginConfig build(String name, Map<String, dynamic> json) {
-    final factory = _plugins[name];
-    if (factory == null) {
-      return UnknownPluginConfigFactory(name).build(json);
-    }
-    return factory(json);
+    final factory = _plugins[name] ?? UnknownPluginConfigFactory(name);
+    return factory.build(json);
   }
 
   /// Deserializes plugins from a json [Map].
@@ -79,7 +76,7 @@ class AmplifyPluginRegistry {
       if (value is! Map) {
         throw ArgumentError.value(value, key, 'Invalid plugin');
       }
-      final plugin = AmplifyPluginRegistry.shared.build(key, value.cast());
+      final plugin = shared.build(key, value.cast());
       return MapEntry(key, plugin);
     });
   }

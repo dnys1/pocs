@@ -51,11 +51,9 @@ class GraphQLClient {
       errors: errors == null
           ? const []
           : errors
-              .map(
-                (error) => GraphQLResponseError.fromJson(
-                  error.cast<String, dynamic>(),
-                ),
-              )
+              .map((error) => GraphQLResponseError.fromJson(
+                    error.cast<String, dynamic>(),
+                  ))
               .toList(),
     );
   }
