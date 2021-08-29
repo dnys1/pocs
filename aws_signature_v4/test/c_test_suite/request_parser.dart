@@ -1,6 +1,8 @@
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:aws_signature_v4/aws_signature_v4.dart';
+import 'package:http/http.dart';
 
 import 'context.dart';
 
@@ -43,6 +45,50 @@ class SignerRequestParser {
     }));
   }
 
+  Map<String, String> _parseHeaders(List<String> headerLines) {
+    final numLines = headerLines.length;
+
+    // Create a case-insensitive hash map for valid comparison, i.e. 'Host' and
+    // 'host' as keys should point to the same value.
+    final Map<String, String> headers = LinkedHashMap(
+      equals: (key1, key2) => key1.toLowerCase() == key2.toLowerCase(),
+      hashCode: (key) => key.toLowerCase().hashCode,
+    );
+
+    // Process all lines by starting with the ones with the key, i.e. containing
+    // a ':' character, and get all values for that key by processing subsequent
+    // lines which do not have a ':' character. This allows us to correctly process
+    // multiline header values which are incorrectly interpreted by the Dart server.
+    var lineNo = 0;
+    while (lineNo >= 0 && lineNo < numLines) {
+      var line = headerLines[lineNo];
+      var lineParts = line.split(':');
+      var key = lineParts.first;
+      var value = lineParts[1];
+      var nextLineNo = lineNo + 1;
+      while (nextLineNo < numLines) {
+        line = headerLines[nextLineNo];
+        if (line.contains(':')) {
+          break;
+        }
+        value += '\n' + line;
+        nextLineNo++;
+      }
+
+      // Concatenate values for the same key with a ','
+      headers.update(
+        key,
+        (currValue) => currValue + ',' + value,
+        ifAbsent: () => value,
+      );
+
+      // Skip to the next key line
+      lineNo = headerLines.indexWhere((el) => el.contains(':'), lineNo + 1);
+    }
+
+    return headers;
+  }
+
   /// Writes the raw request to the HTTP server and listens for the server to
   /// emit the parsed [HttpRequest].
   Future<AWSHttpRequest> parse(
@@ -66,38 +112,29 @@ class SignerRequestParser {
     _sendSocket.writeln();
     await _sendSocket.flush();
     await _sendSocket.close();
-    final httpRequest = await nextRequest;
+    final HttpRequest httpRequest = await nextRequest;
 
     // Capture the body bytes of the request.
-    List<int>? body;
-    if (context.signBody) {
-      body = await httpRequest.reduce(
-        (previous, element) => previous..addAll(element),
-      );
-    }
+    final List<int> body = await ByteStream(httpRequest).toBytes();
 
-    // Map headers from HttpHeaders to Map.
-    final headers = httpRequest.headers;
-    final mapHeaders = <String, String>{};
-    headers.forEach((name, values) {
-      mapHeaders[name] = values.join(',');
-    });
-
-    // Close request when done with it.
+    // Close server connection.
     await httpRequest.response.close();
 
-    final requestLine = request.split('\n').first;
+    final requestLines = request.split('\n');
 
     // Parse these parameters manually since they are modified, normalized, etc.
     // by the Dart server.
-    final path = _parseRequestPath(requestLine);
-    final queryParameters = _parseQueryString(requestLine);
+    final path = _parseRequestPath(requestLines.first);
+    final queryParameters = _parseQueryString(requestLines.first);
+    final headers =
+        _parseHeaders(requestLines.sublist(1, requestLines.indexOf('')));
+    final host = headers[AWSHeaders.host]!;
 
     return AWSHttpRequest(
       method: HttpMethodX.fromString(httpRequest.method),
-      host: headers.host!,
+      host: host,
       path: path,
-      headers: mapHeaders,
+      headers: headers,
       queryParameters: queryParameters,
       body: body,
     );

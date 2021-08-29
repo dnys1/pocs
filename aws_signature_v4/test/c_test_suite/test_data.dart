@@ -185,6 +185,6 @@ class SignerTest {
     group(name, () {
       _runMethod(SignerTestMethod.header);
       _runMethod(SignerTestMethod.query);
-    }, skip: name == 'get-header-value-multiline');
+    });
   }
 }
