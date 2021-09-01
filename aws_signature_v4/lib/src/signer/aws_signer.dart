@@ -1,5 +1,7 @@
 import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:aws_signature_v4/src/credentials/aws_credentials.dart';
+import 'package:aws_signature_v4/src/request/canonical_request/authorization_header.dart';
+import 'package:aws_signature_v4/src/services/configuration.dart';
 import 'package:aws_signature_v4/src/signer/aws_algorithm.dart';
 import 'package:meta/meta.dart';
 
@@ -47,6 +49,7 @@ class AWSSigV4Signer {
     bool? presignedUrl,
     bool? normalizePath,
     bool? omitSessionTokenFromSigning,
+    ServiceConfiguration? serviceConfiguration,
     int? expiresIn,
   }) {
     final canonicalRequest = CanonicalRequest(
@@ -62,6 +65,8 @@ class AWSSigV4Signer {
 
       algorithm: algorithm,
       expiresIn: expiresIn,
+      serviceConfiguration:
+          serviceConfiguration ?? const BaseServiceConfiguration(),
     );
     final sts = stringToSign(
       algorithm: algorithm,
@@ -106,12 +111,13 @@ class AWSSigV4Signer {
         if (includeSessionToken) AWSHeaders.securityToken: sessionToken!,
       });
     } else {
-      headers[AWSHeaders.authorization] = [
-        algorithm.id,
-        'Credential=${credentials.accessKeyId}/$credentialScope,',
-        'SignedHeaders=${canonicalRequest.signedHeaders.join(';')},',
-        'Signature=$signature',
-      ].join(' ');
+      headers[AWSHeaders.authorization] = createAuthorizationHeader(
+        algorithm: algorithm,
+        credentials: credentials,
+        credentialScope: credentialScope,
+        signedHeaders: canonicalRequest.signedHeaders,
+        signature: signature,
+      );
       if (includeSessionToken) {
         headers[AWSHeaders.securityToken] = sessionToken!;
       }

@@ -31,4 +31,16 @@ class AWSSigV4SignedRequest extends AWSHttpRequest {
           headers: headers,
           body: body,
         );
+
+  @override
+  List<Object> get props => [
+        method,
+        host,
+        path,
+        queryParameters,
+        headers,
+        body,
+        canonicalRequest,
+        signature,
+      ];
 }

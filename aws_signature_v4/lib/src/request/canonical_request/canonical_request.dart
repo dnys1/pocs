@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:aws_signature_v4/src/credentials/aws_credential_scope.dart';
 import 'package:aws_signature_v4/src/credentials/aws_credentials.dart';
 import 'package:aws_signature_v4/src/request/aws_headers.dart';
+import 'package:aws_signature_v4/src/services/configuration.dart';
 import 'package:aws_signature_v4/src/signer/aws_algorithm.dart';
 import 'package:collection/collection.dart';
 import 'package:convert/convert.dart';
@@ -41,17 +42,16 @@ class CanonicalRequest {
   late final Map<String, String> queryParameters;
 
   /// The canonicalized [queryParameters].
-  late final CanonicalQueryParameters canonicalQueryParameters =
-      CanonicalQueryParameters(queryParameters);
+  late final CanonicalQueryParameters canonicalQueryParameters;
 
   /// The request headers, with AWS values added, if necessary.
   late final Map<String, String> headers;
 
   /// The canonicalized [headers].
-  late final CanonicalHeaders canonicalHeaders = CanonicalHeaders(headers);
+  late final CanonicalHeaders canonicalHeaders;
 
   /// The list of signed headers.
-  late final SignedHeaders signedHeaders = SignedHeaders(canonicalHeaders);
+  late final SignedHeaders signedHeaders;
 
   /// Whether or not to normalize the URI path.
   ///
@@ -89,7 +89,7 @@ class CanonicalRequest {
   final int? expiresIn;
 
   /// The hashed body of the request.
-  late final String _hashedPayload =
+  late final String hashedPayload =
       request.body.isEmpty ? _emptyPayloadHash : hashRequest(request.body);
 
   /// The computed hash of the canonical request.
@@ -100,6 +100,8 @@ class CanonicalRequest {
     required this.request,
     required AWSCredentials credentials,
     required this.credentialScope,
+    ServiceConfiguration serviceConfiguration =
+        const BaseServiceConfiguration(),
     bool? normalizePath,
     bool? presignedUrl,
     bool? omitSessionTokenFromSigning,
@@ -112,19 +114,27 @@ class CanonicalRequest {
       ArgumentError.checkNotNull(algorithm, 'algorithm');
       ArgumentError.checkNotNull(expiresIn, 'expiresIn');
     }
-    headers = this.presignedUrl
-        ? request.headers
-        : _withAmazonValues(
-            request.headers,
-            credentials: credentials,
-            includeBodyHash: true,
-          );
-    queryParameters = this.presignedUrl
-        ? _withAmazonValues(
-            request.queryParameters,
-            credentials: credentials,
-          )
-        : request.queryParameters;
+    headers = Map.of(request.headers);
+    queryParameters = Map.of(request.queryParameters);
+
+    // Apply service configuration to appropriate values for request type.
+    if (this.presignedUrl) {
+      serviceConfiguration.apply(
+        queryParameters,
+        this,
+        credentials: credentials,
+      );
+    } else {
+      serviceConfiguration.apply(
+        headers,
+        this,
+        credentials: credentials,
+      );
+    }
+
+    canonicalHeaders = CanonicalHeaders(headers);
+    canonicalQueryParameters = CanonicalQueryParameters(queryParameters);
+    signedHeaders = SignedHeaders(canonicalHeaders);
   }
 
   /// Removes excess slashes from paths.
@@ -156,38 +166,6 @@ class CanonicalRequest {
     return canonicalizedPath;
   }
 
-  /// Returns a copy of [params] with the necessary AWS values added.
-  Map<String, String> _withAmazonValues(
-    Map<String, String> params, {
-    required AWSCredentials credentials,
-    bool includeBodyHash = false,
-  }) {
-    return {
-      ...params,
-      if (!request.headers.containsKey('host')) AWSHeaders.host: request.host,
-      // TODO: This is service specific
-      // if (request.httpMethod.hasBody &&
-      //     !params.containsKey(AWSHeaders.contentType))
-      //   AWSHeaders.contentType: AWSHeaderValues.defaultContentType,
-      // if (request.httpMethod.hasBody &&
-      //     !params.containsKey(AWSHeaders.contentLength))
-      // AWSHeaders.contentLength: request.body.length.toString(),
-      AWSHeaders.date: credentialScope.dateTime.formatFull(),
-      if (presignedUrl && algorithm != null)
-        AWSHeaders.algorithm: algorithm!.id,
-      if (presignedUrl)
-        AWSHeaders.credential:
-            Uri.encodeComponent('${credentials.accessKeyId}/$credentialScope'),
-      if (presignedUrl && expiresIn != null)
-        AWSHeaders.expires: expiresIn.toString(),
-      if (includeBodyHash && request.body.isNotEmpty)
-        AWSHeaders.contentSHA256: hashRequest(request.body),
-      if (credentials.sessionToken != null && !omitSessionTokenFromSigning)
-        AWSHeaders.securityToken: credentials.sessionToken!,
-      if (presignedUrl) AWSHeaders.signedHeaders: signedHeaders.toString(),
-    };
-  }
-
   /// Hashes [requestBytes] using SHA-256 and returns the hex-encoded string.
   static String hashRequest(List<int> requestBytes) {
     final hash = sha256.convert(requestBytes);
@@ -204,7 +182,7 @@ class CanonicalRequest {
     sb.writeln(canonicalQueryParameters);
     sb.writeln(canonicalHeaders);
     sb.writeln(signedHeaders);
-    sb.write(_hashedPayload);
+    sb.write(hashedPayload);
     return sb.toString();
   }
 }

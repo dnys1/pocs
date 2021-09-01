@@ -1,3 +1,4 @@
+import 'package:aws_common/aws_common.dart';
 import 'package:aws_signature_v4/src/request/http_method.dart';
 import 'package:http/http.dart' as http;
 
@@ -9,7 +10,7 @@ export 'package:aws_signature_v4/src/request/http_method.dart';
 /// The request is typically passed to a signer for signing, although it can be
 /// used unsigned as well for sending unauthenticated requests.
 /// {@endtemplate}
-class AWSHttpRequest {
+class AWSHttpRequest with AWSEquatable {
   final HttpMethod method;
   final String host;
   final String path;
@@ -50,6 +51,16 @@ class AWSHttpRequest {
       body: body,
     );
   }
+
+  @override
+  List<Object> get props => [
+        method,
+        host,
+        path,
+        queryParameters,
+        headers,
+        body,
+      ];
 
   /// Creates a `package:http` request from this request.
   http.BaseRequest toHttpRequest() {
