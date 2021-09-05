@@ -44,13 +44,13 @@ class WebSocketConnection {
   }
 
   /// Connects to the real time WebSocket.
-  void _connect() {
+  Future<void> _connect() async {
     final payload = WebSocketConnectionPayload.fromConfig(_config);
 
     final authorizationHeader = WebSocketConnectionHeader(_config);
     final connectionUri = _config.realTimeGraphQLUri.replace(
       queryParameters: <String, String>{
-        'header': authorizationHeader.encode(),
+        'header': await authorizationHeader.encode(),
         'payload': payload.encode(),
       },
     );

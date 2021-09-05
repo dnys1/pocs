@@ -7,6 +7,7 @@ import 'package:aws_signature_v4/src/credentials/aws_credential_scope.dart';
 import 'package:aws_signature_v4/src/credentials/aws_credentials.dart';
 import 'package:aws_signature_v4/src/request/aws_sig_v4_signed_request.dart';
 import 'package:aws_signature_v4/src/signer/aws_signer.dart';
+import 'package:aws_signature_v4/src/signer/aws_signer_request.dart';
 
 void main(List<String> args) async {
   final argParser = ArgParser();
@@ -74,8 +75,12 @@ void main(List<String> args) async {
     body: body,
   );
 
-  final AWSSigV4SignedRequest signedRequest =
-      signer.sign(sigRequest, credentialScope: scope);
+  final AWSSigV4SignedRequest signedRequest = await signer.sign(
+    AWSSignerRequest(
+      sigRequest,
+      credentialScope: scope,
+    ),
+  );
   final resp = await signedRequest.send();
   print(resp.body);
 }

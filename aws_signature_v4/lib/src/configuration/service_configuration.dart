@@ -1,6 +1,11 @@
+import 'dart:async';
+
 import 'package:aws_common/aws_common.dart';
 import 'package:aws_signature_v4/aws_signature_v4.dart';
-import 'package:aws_signature_v4/src/services/validator.dart';
+import 'package:aws_signature_v4/src/configuration/validator.dart';
+import 'package:convert/convert.dart';
+import 'package:crypto/crypto.dart';
+import 'package:http/http.dart';
 import 'package:meta/meta.dart';
 
 /// A description of an [AWSSigv4Signer] configuration.
@@ -34,6 +39,18 @@ abstract class ServiceConfiguration {
     Map<String, String> base,
     CanonicalRequest canonicalRequest, {
     required AWSCredentials credentials,
+  });
+
+  /// Hashes the request payload for the canonical request.
+  Future<String> hashPayload(AWSHttpRequest request);
+
+  /// Transforms the request body using [signer].
+  Stream<List<int>> signBody({
+    required AWSAlgorithm algorithm,
+    required List<int> signingKey,
+    required String seedSignature,
+    required AWSCredentialScope credentialScope,
+    required CanonicalRequest canonicalRequest,
   });
 }
 
@@ -76,11 +93,58 @@ class BaseServiceConfiguration extends ServiceConfiguration {
             Uri.encodeComponent('${credentials.accessKeyId}/$credentialScope'),
       if (presignedUrl && expiresIn != null)
         AWSHeaders.expires: expiresIn.toString(),
-      if (includeBodyHash && request.body.isNotEmpty)
-        AWSHeaders.contentSHA256: canonicalRequest.hashedPayload,
+      if (includeBodyHash && canonicalRequest.request.contentLength > 0)
+        AWSHeaders.contentSHA256: canonicalRequest.payloadHash,
       if (credentials.sessionToken != null && !omitSessionTokenFromSigning)
         AWSHeaders.securityToken: credentials.sessionToken!,
     });
+  }
+
+  @override
+  Future<String> hashPayload(AWSHttpRequest request) async {
+    final digestSink = _DigestSink();
+    final shaSink = sha256.startChunkedConversion(digestSink);
+    request.body.listen(
+      shaSink.add,
+      onDone: shaSink.close,
+      onError: digestSink._digest.completeError,
+      cancelOnError: true,
+    );
+    final digest = await digestSink.digest;
+    return hex.encode(digest.bytes);
+  }
+
+  @override
+  Stream<List<int>> signBody({
+    required AWSAlgorithm algorithm,
+    required List<int> signingKey,
+    required String seedSignature,
+    required AWSCredentialScope credentialScope,
+    required CanonicalRequest canonicalRequest,
+  }) {
+    // By default, the body is not signed.
+    return canonicalRequest.request.body;
+  }
+}
+
+class _DigestSink extends Sink<Digest> {
+  final Completer<Digest> _digest = Completer();
+
+  Future<Digest> get digest => _digest.future;
+
+  @override
+  void add(Digest data) {
+    if (_digest.isCompleted) {
+      throw StateError('Cannot call add more than once');
+    }
+    _digest.complete(data);
+  }
+
+  @override
+  void close() {
+    if (!_digest.isCompleted) {
+      throw StateError('No digest received');
+    }
   }
 }
 

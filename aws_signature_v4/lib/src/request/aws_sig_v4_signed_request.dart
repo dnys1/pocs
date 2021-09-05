@@ -10,7 +10,7 @@ class AWSSigV4SignedRequest extends AWSHttpRequest {
   /// The canonical request for this request.
   final CanonicalRequest canonicalRequest;
 
-  /// The signature for this request.
+  /// The signature for [canonicalRequest].
   final String signature;
 
   /// @{macro aws_sig_v4_signed_request}
@@ -22,24 +22,21 @@ class AWSSigV4SignedRequest extends AWSHttpRequest {
     required String path,
     Map<String, String>? queryParameters,
     Map<String, String>? headers,
-    List<int>? body,
-  }) : super(
+    required Stream<List<int>> body,
+    required int contentLength,
+  }) : super.streamed(
           method: method,
           host: host,
           path: path,
           queryParameters: queryParameters,
           headers: headers,
           body: body,
+          contentLength: contentLength,
         );
 
   @override
-  List<Object> get props => [
-        method,
-        host,
-        path,
-        queryParameters,
-        headers,
-        body,
+  List<Object?> get props => [
+        ...super.props,
         canonicalRequest,
         signature,
       ];

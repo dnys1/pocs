@@ -1,12 +1,15 @@
+import 'dart:async';
+
 import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:aws_signature_v4/src/credentials/aws_credentials.dart';
 import 'package:aws_signature_v4/src/request/canonical_request/authorization_header.dart';
-import 'package:aws_signature_v4/src/services/configuration.dart';
 import 'package:aws_signature_v4/src/signer/aws_algorithm.dart';
 import 'package:meta/meta.dart';
 
 import '../credentials/aws_credential_scope.dart';
 import '../request/aws_sig_v4_signed_request.dart';
+
+import 'aws_signer_request.dart';
 
 /// {@template aws_sig_v4_signer}
 /// The main class for signing requests made to AWS services.
@@ -26,72 +29,71 @@ class AWSSigV4Signer {
     this.algorithm = AWSAlgorithm.hmacSha256,
   });
 
-  /// Creates the string-to-sign (STS).
+  /// Creates the string-to-sign (STS) for the canonical request.
   @visibleForTesting
   String stringToSign({
     required AWSAlgorithm algorithm,
     required AWSCredentialScope credentialScope,
-    required String canonicalRequestHash,
+    required CanonicalRequest canonicalRequest,
   }) {
     final sb = StringBuffer();
     sb.writeln(algorithm);
     sb.writeln(credentialScope.dateTime);
     sb.writeln(credentialScope);
-    sb.write(canonicalRequestHash);
+    sb.write(canonicalRequest.hash);
 
     return sb.toString();
   }
 
-  /// Signs [request] for the given [credentialScope].
-  AWSSigV4SignedRequest sign(
-    AWSHttpRequest request, {
-    required AWSCredentialScope credentialScope,
-    bool? presignedUrl,
-    bool? normalizePath,
-    bool? omitSessionTokenFromSigning,
-    ServiceConfiguration? serviceConfiguration,
-    int? expiresIn,
-  }) {
+  /// Signs the given [signerRequest].
+  Future<AWSSigV4SignedRequest> sign(AWSSignerRequest signerRequest) async {
+    final payloadHash = await signerRequest.serviceConfiguration
+        .hashPayload(signerRequest.request);
     final canonicalRequest = CanonicalRequest(
-      request: request,
+      request: signerRequest.request,
       credentials: credentials,
-      credentialScope: credentialScope,
-
-      // TODO: Service-specific stuff
-      // i.e. if service == s3, normalize = false
-      normalizePath: normalizePath,
-      presignedUrl: presignedUrl,
-      omitSessionTokenFromSigning: omitSessionTokenFromSigning,
-
+      credentialScope: signerRequest.credentialScope,
+      normalizePath: signerRequest.normalizePath,
+      presignedUrl: signerRequest.presignedUrl,
+      omitSessionTokenFromSigning: signerRequest.omitSessionTokenFromSigning,
       algorithm: algorithm,
-      expiresIn: expiresIn,
-      serviceConfiguration:
-          serviceConfiguration ?? const BaseServiceConfiguration(),
-    );
-    final sts = stringToSign(
-      algorithm: algorithm,
-      credentialScope: credentialScope,
-      canonicalRequestHash: canonicalRequest.hash,
+      expiresIn: signerRequest.expiresIn,
+      configuration: signerRequest.serviceConfiguration,
+      payloadHash: payloadHash,
     );
     final signingKey = algorithm.deriveSigningKey(
       credentials,
-      credentialScope,
+      signerRequest.credentialScope,
     );
-    final signature = algorithm.sign(sts, signingKey);
+    final sts = stringToSign(
+      algorithm: algorithm,
+      credentialScope: signerRequest.credentialScope,
+      canonicalRequest: canonicalRequest,
+    );
+    final seedSignature = algorithm.sign(sts, signingKey);
+    final signedBody = signerRequest.serviceConfiguration.signBody(
+      algorithm: algorithm,
+      signingKey: signingKey,
+      seedSignature: seedSignature,
+      credentialScope: signerRequest.credentialScope,
+      canonicalRequest: canonicalRequest,
+    );
 
     return _buildSignedRequest(
-      credentialScope: credentialScope,
-      signature: signature,
+      credentialScope: signerRequest.credentialScope,
+      signature: seedSignature,
+      body: signedBody,
       canonicalRequest: canonicalRequest,
     );
   }
 
-  /// Builds a signed request from [canonicalRequest] and [signature].
-  AWSSigV4SignedRequest _buildSignedRequest({
+  /// Builds a signed request from [canonicalRequest] and [signatureStream].
+  Future<AWSSigV4SignedRequest> _buildSignedRequest({
     required CanonicalRequest canonicalRequest,
     required String signature,
+    required Stream<List<int>> body,
     required AWSCredentialScope credentialScope,
-  }) {
+  }) async {
     // The signing process requires component keys be encoded. However, the
     // actual HTTP request should have the pre-encoded keys.
     final queryParameters = canonicalRequest.queryParameters;
@@ -130,7 +132,8 @@ class AWSSigV4Signer {
       method: originalRequest.method,
       host: originalRequest.host,
       path: originalRequest.path,
-      body: originalRequest.body,
+      body: body,
+      contentLength: originalRequest.contentLength,
       headers: headers,
 
       // Encode query components, if necessary (avoid double encoding here)

@@ -1,10 +1,11 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
 import 'package:aws_signature_v4/src/credentials/aws_credential_scope.dart';
 import 'package:aws_signature_v4/src/credentials/aws_credentials.dart';
 import 'package:aws_signature_v4/src/request/aws_headers.dart';
-import 'package:aws_signature_v4/src/services/configuration.dart';
+import 'package:aws_signature_v4/src/configuration/service_configuration.dart';
 import 'package:aws_signature_v4/src/signer/aws_algorithm.dart';
 import 'package:collection/collection.dart';
 import 'package:convert/convert.dart';
@@ -23,8 +24,6 @@ part 'canonical_request_util.dart';
 class CanonicalRequest {
   static const encodedEquals = '%3D';
   static const doubleEncodedEquals = '%253D';
-  static const _emptyPayloadHash =
-      'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
   /// The original HTTP request.
   final AWSHttpRequest request;
@@ -88,20 +87,21 @@ class CanonicalRequest {
   /// is `true`.
   final int? expiresIn;
 
-  /// The hashed body of the request.
-  late final String hashedPayload =
-      request.body.isEmpty ? _emptyPayloadHash : hashRequest(request.body);
+  final ServiceConfiguration configuration;
 
   /// The computed hash of the canonical request.
-  late final String hash = hashRequest(utf8.encode(toString()));
+  late final String hash = payloadEncoder.convert(utf8.encode(toString()));
+
+  /// The payload hash.
+  final String payloadHash;
 
   /// {@macro canonical_request}
   CanonicalRequest({
     required this.request,
     required AWSCredentials credentials,
     required this.credentialScope,
-    ServiceConfiguration serviceConfiguration =
-        const BaseServiceConfiguration(),
+    required this.payloadHash,
+    this.configuration = const BaseServiceConfiguration(),
     bool? normalizePath,
     bool? presignedUrl,
     bool? omitSessionTokenFromSigning,
@@ -118,19 +118,11 @@ class CanonicalRequest {
     queryParameters = Map.of(request.queryParameters);
 
     // Apply service configuration to appropriate values for request type.
-    if (this.presignedUrl) {
-      serviceConfiguration.apply(
-        queryParameters,
-        this,
-        credentials: credentials,
-      );
-    } else {
-      serviceConfiguration.apply(
-        headers,
-        this,
-        credentials: credentials,
-      );
-    }
+    configuration.apply(
+      this.presignedUrl ? queryParameters : headers,
+      this,
+      credentials: credentials,
+    );
 
     canonicalHeaders = CanonicalHeaders(headers);
     canonicalQueryParameters = CanonicalQueryParameters(queryParameters);
@@ -166,13 +158,6 @@ class CanonicalRequest {
     return canonicalizedPath;
   }
 
-  /// Hashes [requestBytes] using SHA-256 and returns the hex-encoded string.
-  static String hashRequest(List<int> requestBytes) {
-    final hash = sha256.convert(requestBytes);
-    final hexed = hex.encode(hash.bytes);
-    return hexed.toLowerCase();
-  }
-
   /// Creates the canonical request string.
   @override
   String toString() {
@@ -182,7 +167,7 @@ class CanonicalRequest {
     sb.writeln(canonicalQueryParameters);
     sb.writeln(canonicalHeaders);
     sb.writeln(signedHeaders);
-    sb.write(hashedPayload);
+    sb.write(payloadHash);
     return sb.toString();
   }
 }

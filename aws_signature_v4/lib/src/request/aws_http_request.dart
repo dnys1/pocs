@@ -1,8 +1,11 @@
+import 'package:async/async.dart';
 import 'package:aws_common/aws_common.dart';
+import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:aws_signature_v4/src/request/http_method.dart';
 import 'package:http/http.dart' as http;
+import 'package:meta/meta.dart';
 
-export 'package:aws_signature_v4/src/request/http_method.dart';
+export 'http_method.dart';
 
 /// {@template aws_http_request}
 /// A parameterized HTTP request.
@@ -10,13 +13,17 @@ export 'package:aws_signature_v4/src/request/http_method.dart';
 /// The request is typically passed to a signer for signing, although it can be
 /// used unsigned as well for sending unauthenticated requests.
 /// {@endtemplate}
+@immutable
 class AWSHttpRequest with AWSEquatable {
   final HttpMethod method;
   final String host;
   final String path;
   final Map<String, String> queryParameters;
   final Map<String, String> headers;
-  final List<int> body;
+
+  final StreamSplitter<List<int>> _body;
+  Stream<List<int>> get body => _body.split();
+  final int contentLength;
 
   late final Uri uri = Uri(
     scheme: 'https',
@@ -35,25 +42,27 @@ class AWSHttpRequest with AWSEquatable {
     List<int>? body,
   })  : queryParameters = queryParameters ?? const {},
         headers = headers ?? const {},
-        body = body ?? const [];
+        _body = StreamSplitter(
+          body == null || body.isEmpty
+              ? const http.ByteStream(Stream.empty())
+              : http.ByteStream.fromBytes(body),
+        ),
+        contentLength = body?.length ?? 0;
 
-  /// Creates a request from a `package:http` request object.
-  factory AWSHttpRequest.fromHttpRequest(
-    http.BaseRequest request, {
-    List<int>? body,
-  }) {
-    return AWSHttpRequest(
-      method: HttpMethodX.fromString(request.method),
-      host: request.url.authority,
-      path: request.url.path,
-      queryParameters: request.url.queryParameters,
-      headers: request.headers,
-      body: body,
-    );
-  }
+  AWSHttpRequest.streamed({
+    required this.method,
+    required this.host,
+    required this.path,
+    Map<String, String>? queryParameters,
+    Map<String, String>? headers,
+    required Stream<List<int>> body,
+    required this.contentLength,
+  })  : queryParameters = queryParameters ?? const {},
+        headers = headers ?? const {},
+        _body = StreamSplitter(body);
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         method,
         host,
         path,
@@ -63,10 +72,16 @@ class AWSHttpRequest with AWSEquatable {
       ];
 
   /// Creates a `package:http` request from this request.
-  http.BaseRequest toHttpRequest() {
-    final request = http.Request(method.value, uri);
+  http.BaseRequest get httpRequest {
+    final request = http.StreamedRequest(method.value, uri);
     request.headers.addAll(headers);
-    request.bodyBytes = body;
+    request.contentLength = contentLength;
+
+    body.listen(request.sink.add,
+        onError: request.sink.addError,
+        onDone: request.sink.close,
+        cancelOnError: true);
+
     return request;
   }
 
@@ -76,20 +91,8 @@ class AWSHttpRequest with AWSEquatable {
   Future<http.Response> send([http.Client? client]) async {
     final _client = client ?? http.Client();
     try {
-      switch (method) {
-        case HttpMethod.get:
-          return await _client.get(uri, headers: headers);
-        case HttpMethod.head:
-          return await _client.head(uri, headers: headers);
-        case HttpMethod.post:
-          return await _client.post(uri, headers: headers, body: body);
-        case HttpMethod.put:
-          return await _client.put(uri, headers: headers, body: body);
-        case HttpMethod.patch:
-          return await _client.patch(uri, headers: headers, body: body);
-        case HttpMethod.delete:
-          return await _client.delete(uri, headers: headers);
-      }
+      final resp = await _client.send(httpRequest);
+      return http.Response.fromStream(resp);
     } finally {
       // Only close a client we created.
       if (client == null) {

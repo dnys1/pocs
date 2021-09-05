@@ -4,9 +4,12 @@ import 'dart:io';
 import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:aws_signature_v4/src/credentials/aws_credential_scope.dart';
 import 'package:aws_signature_v4/src/request/canonical_request/canonical_request.dart';
+import 'package:aws_signature_v4/src/configuration/service_configuration.dart';
 import 'package:aws_signature_v4/src/signer/aws_signer.dart';
 import 'package:aws_signature_v4/src/signer/aws_algorithm.dart';
+import 'package:aws_signature_v4/src/signer/aws_signer_request.dart';
 import 'package:collection/collection.dart';
+import 'package:http/http.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -91,8 +94,9 @@ class SignerTest {
   final String name;
   final Context context;
   final AWSHttpRequest request;
-  final SignerTestMethodData headerTestData;
-  final SignerTestMethodData queryTestData;
+  final SignerTestMethodData? headerTestData;
+  final SignerTestMethodData? queryTestData;
+  final ServiceConfiguration serviceConfiguration;
 
   final AWSSigV4Signer signer;
   final AWSCredentialScope credentialScope;
@@ -101,8 +105,9 @@ class SignerTest {
     required this.name,
     required this.context,
     required this.request,
-    required this.headerTestData,
-    required this.queryTestData,
+    this.headerTestData,
+    this.queryTestData,
+    this.serviceConfiguration = const BaseServiceConfiguration(),
   })  : signer = AWSSigV4Signer(context.credentials, algorithm: algorithm),
         credentialScope = AWSCredentialScope(
           dateTime: context.awsDateTime,
@@ -113,32 +118,47 @@ class SignerTest {
   void _runMethod(SignerTestMethod method) {
     final testMethodData =
         method == SignerTestMethod.header ? headerTestData : queryTestData;
+    if (testMethodData == null) {
+      return;
+    }
     final presignedUrl = method == SignerTestMethod.query;
 
     group(method.string, () {
-      final canonicalRequest = CanonicalRequest(
-        request: request,
-        credentials: context.credentials,
-        credentialScope: credentialScope,
-        algorithm: algorithm,
-        presignedUrl: presignedUrl,
-        normalizePath: context.normalize,
-        omitSessionTokenFromSigning: context.omitSessionToken ?? false,
-        expiresIn: context.expirationInSeconds,
-      );
-      final stringToSign = signer.stringToSign(
-        algorithm: algorithm,
-        credentialScope: credentialScope,
-        canonicalRequestHash: canonicalRequest.hash,
-      );
-      final signedRequest = signer.sign(
-        request,
-        credentialScope: credentialScope,
-        presignedUrl: presignedUrl,
-        normalizePath: context.normalize,
-        omitSessionTokenFromSigning: context.omitSessionToken,
-        expiresIn: context.expirationInSeconds,
-      );
+      late final CanonicalRequest canonicalRequest;
+      late final String stringToSign;
+      late final AWSSigV4SignedRequest signedRequest;
+
+      setUpAll(() async {
+        final payloadHash = await serviceConfiguration.hashPayload(request);
+        canonicalRequest = CanonicalRequest(
+          request: request,
+          credentials: context.credentials,
+          credentialScope: credentialScope,
+          algorithm: algorithm,
+          presignedUrl: presignedUrl,
+          normalizePath: context.normalize,
+          omitSessionTokenFromSigning: context.omitSessionToken ?? false,
+          expiresIn: context.expirationInSeconds,
+          configuration: serviceConfiguration,
+          payloadHash: payloadHash,
+        );
+        stringToSign = signer.stringToSign(
+          algorithm: algorithm,
+          credentialScope: credentialScope,
+          canonicalRequest: canonicalRequest,
+        );
+        final signerRequest = AWSSignerRequest(
+          request,
+          credentialScope: credentialScope,
+          presignedUrl: presignedUrl,
+          normalizePath: context.normalize,
+          omitSessionTokenFromSigning: context.omitSessionToken,
+          expiresIn: context.expirationInSeconds,
+          serviceConfiguration: serviceConfiguration,
+        );
+        signedRequest = await signer.sign(signerRequest);
+      });
+
       test('canonical request', () {
         expect(
           canonicalRequest.toString(),
@@ -176,6 +196,17 @@ class SignerTest {
             ),
             isTrue,
           );
+        });
+        test('body', () async {
+          final body = await signedRequest.body.toList();
+          final expected = await testMethodData.signedRequest.body.toList();
+          expect(body.length, equals(expected.length));
+          for (var i = 0; i < body.length; i++) {
+            expect(
+              body[i],
+              orderedEquals(expected[i]),
+            );
+          }
         });
       });
     });

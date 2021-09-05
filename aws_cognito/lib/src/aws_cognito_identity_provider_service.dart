@@ -43,8 +43,12 @@ class AWSCognitoIdentityProviderService {
       },
       body: body,
     );
-    final AWSSigV4SignedRequest signedRequest =
-        _signer.sign(sigRequest, credentialScope: scope);
+    final AWSSigV4SignedRequest signedRequest = await _signer.sign(
+      AWSSignerRequest(
+        sigRequest,
+        credentialScope: scope,
+      ),
+    );
 
     final resp = await signedRequest.send();
     if (resp.statusCode != 200) {
@@ -77,8 +81,12 @@ class AWSCognitoIdentityProviderService {
       },
       body: body,
     );
-    final AWSSigV4SignedRequest signedRequest =
-        _signer.sign(sigRequest, credentialScope: scope);
+    final AWSSigV4SignedRequest signedRequest = await _signer.sign(
+      AWSSignerRequest(
+        sigRequest,
+        credentialScope: scope,
+      ),
+    );
 
     final resp = await signedRequest.send();
     if (resp.statusCode != 200) {
