@@ -1,0 +1,1 @@
+class AWSS3Service {}

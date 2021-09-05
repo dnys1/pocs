@@ -5,23 +5,14 @@ import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:aws_signature_v4/src/configuration/validator.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
-import 'package:http/http.dart';
 import 'package:meta/meta.dart';
 
-/// A description of an [AWSSigv4Signer] configuration.
+/// A description of an [AWSSigV4Signer] configuration.
 ///
 /// All requests made to AWS services must be processed in the precise way
 /// that service expects. Since each service is different, this class provides
 /// a way to override steps of the signing process which need precendence over
 /// the [BaseServiceConfiguration].
-///
-/// Polices are applied iteratively based on the value of [precedence]. Lower
-/// precendence policies are applied first, while higher precendence values are
-/// applied last and can override values of the previous policies.
-///
-/// Policies of the same precedence with conflicting values are not allowed and
-/// throw a runtime [ServiceConfigurationError]. Implementers should take care
-/// to ensure this does not happen.
 @sealed
 abstract class ServiceConfiguration {
   final bool? normalizePath;
@@ -34,7 +25,6 @@ abstract class ServiceConfiguration {
 
   /// Applies service-specific keys to [base] with values from [canonicalRequest]
   /// and [credentials].
-  @mustCallSuper
   void apply(
     Map<String, String> base,
     CanonicalRequest canonicalRequest, {
@@ -44,7 +34,7 @@ abstract class ServiceConfiguration {
   /// Hashes the request payload for the canonical request.
   Future<String> hashPayload(AWSHttpRequest request);
 
-  /// Transforms the request body using [signer].
+  /// Transforms the request body using [algorithm] and [signingKey].
   Stream<List<int>> signBody({
     required AWSAlgorithm algorithm,
     required List<int> signingKey,
@@ -64,6 +54,7 @@ class BaseServiceConfiguration extends ServiceConfiguration {
         );
 
   @override
+  @mustCallSuper
   void apply(
     Map<String, String> base,
     CanonicalRequest canonicalRequest, {
@@ -169,16 +160,4 @@ abstract class ServiceHeader with AWSEquatable {
 
   @override
   String toString() => key;
-}
-
-class ServiceConfigurationError extends Error {
-  final String? message;
-
-  ServiceConfigurationError.conflicting(
-    ServiceConfiguration a,
-    ServiceConfiguration b,
-  ) : message = 'Conflicting configurations:\n1) $a\n\n2) $b';
-
-  @override
-  String toString() => message ?? 'Invalid service configuration';
 }
