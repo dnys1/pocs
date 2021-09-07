@@ -6,24 +6,23 @@ part of 'cognito_config.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-CognitoPluginConfig _$CognitoPluginConfigFromJson(Map<String, dynamic> json) {
-  return CognitoPluginConfig(
-    userAgent: json['UserAgent'] as String,
-    version: json['Version'] as String,
-    credentialsProvider:
-        (json['CredentialsProvider'] as Map<String, dynamic>?)?.map(
-      (k, e) => MapEntry(k, e as Map<String, dynamic>),
-    ),
-    userPool: (json['CognitoUserPool'] as Map<String, dynamic>?)?.map(
-      (k, e) => MapEntry(
-          k, CognitoUserPoolConfig.fromJson(e as Map<String, dynamic>)),
-    ),
-    auth: (json['Auth'] as Map<String, dynamic>?)?.map(
-      (k, e) =>
-          MapEntry(k, CognitoAuthConfig.fromJson(e as Map<String, dynamic>)),
-    ),
-  );
-}
+CognitoPluginConfig _$CognitoPluginConfigFromJson(Map<String, dynamic> json) =>
+    CognitoPluginConfig(
+      userAgent: json['UserAgent'] as String,
+      version: json['Version'] as String,
+      credentialsProvider:
+          (json['CredentialsProvider'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, e as Map<String, dynamic>),
+      ),
+      userPool: (json['CognitoUserPool'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(
+            k, CognitoUserPoolConfig.fromJson(e as Map<String, dynamic>)),
+      ),
+      auth: (json['Auth'] as Map<String, dynamic>?)?.map(
+        (k, e) =>
+            MapEntry(k, CognitoAuthConfig.fromJson(e as Map<String, dynamic>)),
+      ),
+    );
 
 Map<String, dynamic> _$CognitoPluginConfigToJson(CognitoPluginConfig instance) {
   final val = <String, dynamic>{
@@ -44,12 +43,11 @@ Map<String, dynamic> _$CognitoPluginConfigToJson(CognitoPluginConfig instance) {
 }
 
 CognitoIdentityCredentialsProvider _$CognitoIdentityCredentialsProviderFromJson(
-    Map<String, dynamic> json) {
-  return CognitoIdentityCredentialsProvider(
-    poolId: json['PoolId'] as String,
-    region: json['Region'] as String,
-  );
-}
+        Map<String, dynamic> json) =>
+    CognitoIdentityCredentialsProvider(
+      poolId: json['PoolId'] as String,
+      region: json['Region'] as String,
+    );
 
 Map<String, dynamic> _$CognitoIdentityCredentialsProviderToJson(
         CognitoIdentityCredentialsProvider instance) =>
@@ -59,13 +57,12 @@ Map<String, dynamic> _$CognitoIdentityCredentialsProviderToJson(
     };
 
 CognitoUserPoolConfig _$CognitoUserPoolConfigFromJson(
-    Map<String, dynamic> json) {
-  return CognitoUserPoolConfig(
-    poolId: json['PoolId'] as String,
-    appClientId: json['AppClientId'] as String,
-    region: json['Region'] as String,
-  );
-}
+        Map<String, dynamic> json) =>
+    CognitoUserPoolConfig(
+      poolId: json['PoolId'] as String,
+      appClientId: json['AppClientId'] as String,
+      region: json['Region'] as String,
+    );
 
 Map<String, dynamic> _$CognitoUserPoolConfigToJson(
         CognitoUserPoolConfig instance) =>
@@ -75,13 +72,12 @@ Map<String, dynamic> _$CognitoUserPoolConfigToJson(
       'Region': instance.region,
     };
 
-CognitoAuthConfig _$CognitoAuthConfigFromJson(Map<String, dynamic> json) {
-  return CognitoAuthConfig(
-    oauth: json['OAuth'] == null
-        ? null
-        : CognitoOAuthConfig.fromJson(json['OAuth'] as Map<String, dynamic>),
-  );
-}
+CognitoAuthConfig _$CognitoAuthConfigFromJson(Map<String, dynamic> json) =>
+    CognitoAuthConfig(
+      oauth: json['OAuth'] == null
+          ? null
+          : CognitoOAuthConfig.fromJson(json['OAuth'] as Map<String, dynamic>),
+    );
 
 Map<String, dynamic> _$CognitoAuthConfigToJson(CognitoAuthConfig instance) {
   final val = <String, dynamic>{};
@@ -96,15 +92,15 @@ Map<String, dynamic> _$CognitoAuthConfigToJson(CognitoAuthConfig instance) {
   return val;
 }
 
-CognitoOAuthConfig _$CognitoOAuthConfigFromJson(Map<String, dynamic> json) {
-  return CognitoOAuthConfig(
-    webDomain: json['WebDomain'] as String,
-    appClientId: json['AppClientId'] as String,
-    signInRedirectUri: Uri.parse(json['SignInRedirectURI'] as String),
-    signOutRedirectUri: Uri.parse(json['SignOutRedirectURI'] as String),
-    scopes: (json['Scopes'] as List<dynamic>).map((e) => e as String).toList(),
-  );
-}
+CognitoOAuthConfig _$CognitoOAuthConfigFromJson(Map<String, dynamic> json) =>
+    CognitoOAuthConfig(
+      webDomain: json['WebDomain'] as String,
+      appClientId: json['AppClientId'] as String,
+      signInRedirectUri: Uri.parse(json['SignInRedirectURI'] as String),
+      signOutRedirectUri: Uri.parse(json['SignOutRedirectURI'] as String),
+      scopes:
+          (json['Scopes'] as List<dynamic>).map((e) => e as String).toList(),
+    );
 
 Map<String, dynamic> _$CognitoOAuthConfigToJson(CognitoOAuthConfig instance) =>
     <String, dynamic>{

@@ -4,6 +4,8 @@ import 'package:amplify_common/src/util/serializable.dart';
 import 'package:aws_common/aws_common.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import 'geo/geo_config.dart';
+
 part 'amplify_config.g.dart';
 
 @amplifySerializable
@@ -16,12 +18,14 @@ class AmplifyConfig with AWSEquatable, AWSSerializable {
 
   final ApiConfig? api;
   final AuthConfig? auth;
+  final GeoConfig? geo;
 
   const AmplifyConfig({
     required this.userAgent,
     required this.version,
     this.api,
     this.auth,
+    this.geo,
   });
 
   @override

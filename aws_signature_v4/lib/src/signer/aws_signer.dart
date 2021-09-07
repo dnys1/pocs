@@ -46,9 +46,29 @@ class AWSSigV4Signer {
   }
 
   /// Signs the given [signerRequest].
-  Future<AWSSigV4SignedRequest> sign(AWSSignerRequest signerRequest) async {
+  ///
+  /// For streaming requests, use [signStreamed].
+  AWSSigV4SignedRequest sign(AWSSignerRequest signerRequest) {
+    return _sign(
+      signerRequest,
+      signerRequest.serviceConfiguration.hashPayloadSync(signerRequest.request),
+    );
+  }
+
+  /// Signs a streaming request.
+  Future<AWSSigV4SignedRequest> signStreamed(
+    AWSSignerRequest signerRequest,
+  ) async {
     final payloadHash = await signerRequest.serviceConfiguration
         .hashPayload(signerRequest.request);
+    return _sign(signerRequest, payloadHash);
+  }
+
+  /// Synchronously signs the given [signerRequest] and [payloadHash].
+  AWSSigV4SignedRequest _sign(
+    AWSSignerRequest signerRequest,
+    String payloadHash,
+  ) {
     final canonicalRequest = CanonicalRequest(
       request: signerRequest.request,
       credentials: credentials,
@@ -88,12 +108,12 @@ class AWSSigV4Signer {
   }
 
   /// Builds a signed request from [canonicalRequest] and [signatureStream].
-  Future<AWSSigV4SignedRequest> _buildSignedRequest({
+  AWSSigV4SignedRequest _buildSignedRequest({
     required CanonicalRequest canonicalRequest,
     required String signature,
     required Stream<List<int>> body,
     required AWSCredentialScope credentialScope,
-  }) async {
+  }) {
     // The signing process requires component keys be encoded. However, the
     // actual HTTP request should have the pre-encoded keys.
     final queryParameters = canonicalRequest.queryParameters;
@@ -135,11 +155,7 @@ class AWSSigV4Signer {
       body: body,
       contentLength: originalRequest.contentLength,
       headers: headers,
-
-      // Encode query components, if necessary (avoid double encoding here)
-      queryParameters: queryParameters.map(
-        (k, v) => MapEntry(k, v.contains('%') ? v : Uri.encodeComponent(v)),
-      ),
+      queryParameters: queryParameters,
     );
   }
 }

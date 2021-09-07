@@ -6,18 +6,20 @@ part of 'amplify_config.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-AmplifyConfig _$AmplifyConfigFromJson(Map<String, dynamic> json) {
-  return AmplifyConfig(
-    userAgent: json['UserAgent'] as String,
-    version: json['Version'] as String,
-    api: json['api'] == null
-        ? null
-        : ApiConfig.fromJson(json['api'] as Map<String, dynamic>),
-    auth: json['auth'] == null
-        ? null
-        : AuthConfig.fromJson(json['auth'] as Map<String, dynamic>),
-  );
-}
+AmplifyConfig _$AmplifyConfigFromJson(Map<String, dynamic> json) =>
+    AmplifyConfig(
+      userAgent: json['UserAgent'] as String,
+      version: json['Version'] as String,
+      api: json['api'] == null
+          ? null
+          : ApiConfig.fromJson(json['api'] as Map<String, dynamic>),
+      auth: json['auth'] == null
+          ? null
+          : AuthConfig.fromJson(json['auth'] as Map<String, dynamic>),
+      geo: json['geo'] == null
+          ? null
+          : GeoConfig.fromJson(json['geo'] as Map<String, dynamic>),
+    );
 
 Map<String, dynamic> _$AmplifyConfigToJson(AmplifyConfig instance) {
   final val = <String, dynamic>{
@@ -33,5 +35,6 @@ Map<String, dynamic> _$AmplifyConfigToJson(AmplifyConfig instance) {
 
   writeNotNull('api', instance.api);
   writeNotNull('auth', instance.auth);
+  writeNotNull('geo', instance.geo);
   return val;
 }

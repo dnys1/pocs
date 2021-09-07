@@ -10,6 +10,7 @@ import 'package:aws_signature_v4/src/signer/aws_algorithm.dart';
 import 'package:collection/collection.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
+import 'package:path/path.dart';
 
 import '../aws_http_request.dart';
 
@@ -85,7 +86,7 @@ class CanonicalRequest {
   ///
   /// Only valid for presigned URLs, and must be provided if [presignedUrl]
   /// is `true`.
-  final int? expiresIn;
+  late final int? expiresIn;
 
   final ServiceConfiguration configuration;
 
@@ -101,32 +102,39 @@ class CanonicalRequest {
     required AWSCredentials credentials,
     required this.credentialScope,
     required this.payloadHash,
+    required this.algorithm,
     this.configuration = const BaseServiceConfiguration(),
     bool? normalizePath,
     bool? presignedUrl,
     bool? omitSessionTokenFromSigning,
-    this.algorithm,
-    this.expiresIn,
+    int? expiresIn,
   })  : normalizePath = normalizePath ?? true,
         presignedUrl = presignedUrl ?? false,
         omitSessionTokenFromSigning = omitSessionTokenFromSigning ?? false {
-    if (this.presignedUrl) {
-      ArgumentError.checkNotNull(algorithm, 'algorithm');
-      ArgumentError.checkNotNull(expiresIn, 'expiresIn');
-    }
     headers = Map.of(request.headers);
     queryParameters = Map.of(request.queryParameters);
 
     // Apply service configuration to appropriate values for request type.
-    configuration.apply(
-      this.presignedUrl ? queryParameters : headers,
-      this,
-      credentials: credentials,
-    );
-
-    canonicalHeaders = CanonicalHeaders(headers);
+    if (this.presignedUrl) {
+      this.expiresIn = expiresIn ?? 600;
+      canonicalHeaders = CanonicalHeaders(headers);
+      signedHeaders = SignedHeaders(canonicalHeaders);
+      configuration.apply(
+        queryParameters,
+        this,
+        credentials: credentials,
+      );
+    } else {
+      this.expiresIn = expiresIn;
+      configuration.apply(
+        headers,
+        this,
+        credentials: credentials,
+      );
+      canonicalHeaders = CanonicalHeaders(headers);
+      signedHeaders = SignedHeaders(canonicalHeaders);
+    }
     canonicalQueryParameters = CanonicalQueryParameters(queryParameters);
-    signedHeaders = SignedHeaders(canonicalHeaders);
   }
 
   /// Removes excess slashes from paths.
@@ -143,14 +151,19 @@ class CanonicalRequest {
     AWSHttpRequest request, {
     required bool normalizePath,
   }) {
-    final path = normalizePath
-        ? Uri(
-            host: request.host,
-            path: _removeDoubleSlashes(request.path),
-          ).path
+    var path = normalizePath
+        ? url.normalize(_removeDoubleSlashes(request.path))
         : request.path;
+    if (normalizePath) {
+      if (request.path.endsWith('/') && !path.endsWith('/')) {
+        path += '/';
+      }
+      if (!request.path.startsWith('/') && !path.startsWith('/')) {
+        path = '/$path';
+      }
+    }
     final pathComponents = path.split('/').map(
-          (comp) => Uri.encodeComponent(_decodeIfNeeded(comp)),
+          (comp) => Uri.encodeComponent(comp),
         );
     final isEmptyPath = pathComponents.isEmpty ||
         pathComponents.length == 1 && pathComponents.first.isEmpty;

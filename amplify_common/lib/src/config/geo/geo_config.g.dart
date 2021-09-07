@@ -1,16 +1,15 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'auth_config.dart';
+part of 'geo_config.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-AuthConfig _$AuthConfigFromJson(Map<String, dynamic> json) => AuthConfig(
+GeoConfig _$GeoConfigFromJson(Map<String, dynamic> json) => GeoConfig(
       plugins: AmplifyPluginRegistry.pluginConfigsFromJson(json['plugins']),
     );
 
-Map<String, dynamic> _$AuthConfigToJson(AuthConfig instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$GeoConfigToJson(GeoConfig instance) => <String, dynamic>{
       'plugins': instance.plugins,
     };

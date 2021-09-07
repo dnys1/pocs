@@ -6,26 +6,24 @@ part of 'api_config.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ApiConfig _$ApiConfigFromJson(Map<String, dynamic> json) {
-  return ApiConfig(
-    plugins: AmplifyPluginRegistry.pluginConfigsFromJson(json['plugins']),
-  );
-}
+ApiConfig _$ApiConfigFromJson(Map<String, dynamic> json) => ApiConfig(
+      plugins: AmplifyPluginRegistry.pluginConfigsFromJson(json['plugins']),
+    );
 
 Map<String, dynamic> _$ApiConfigToJson(ApiConfig instance) => <String, dynamic>{
       'plugins': instance.plugins,
     };
 
-AppSyncApiConfig _$AppSyncApiConfigFromJson(Map<String, dynamic> json) {
-  return AppSyncApiConfig(
-    endpointType: _$enumDecode(_$ApiEndpointTypeEnumMap, json['endpointType']),
-    endpoint: json['endpoint'] as String,
-    region: json['region'] as String,
-    authorizationType:
-        _$enumDecode(_$ApiAuthorizationTypeEnumMap, json['authorizationType']),
-    apiKey: json['apiKey'] as String?,
-  );
-}
+AppSyncApiConfig _$AppSyncApiConfigFromJson(Map<String, dynamic> json) =>
+    AppSyncApiConfig(
+      endpointType:
+          _$enumDecode(_$ApiEndpointTypeEnumMap, json['endpointType']),
+      endpoint: json['endpoint'] as String,
+      region: json['region'] as String,
+      authorizationType: _$enumDecode(
+          _$ApiAuthorizationTypeEnumMap, json['authorizationType']),
+      apiKey: json['apiKey'] as String?,
+    );
 
 Map<String, dynamic> _$AppSyncApiConfigToJson(AppSyncApiConfig instance) {
   final val = <String, dynamic>{

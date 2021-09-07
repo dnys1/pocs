@@ -41,7 +41,10 @@ abstract class ServiceConfiguration {
     required AWSCredentials credentials,
   });
 
-  /// Hashes the request payload for the canonical request.
+  /// Hashes the request payload for the canonical request synchronously.
+  String hashPayloadSync(AWSHttpRequest request);
+
+  /// Hashes the request payload for the canonical request asynchronously.
   Future<String> hashPayload(AWSHttpRequest request);
 
   /// Transforms the request body using [signer].
@@ -78,19 +81,15 @@ class BaseServiceConfiguration extends ServiceConfiguration {
         canonicalRequest.omitSessionTokenFromSigning;
     final includeBodyHash = !presignedUrl;
 
-    if (presignedUrl) {
-      base[AWSHeaders.signedHeaders] =
-          SignedHeaders(CanonicalHeaders(request.headers)).toString();
-    }
-
     base.addAll({
       if (!request.headers.containsKey(AWSHeaders.host))
         AWSHeaders.host: request.host,
       AWSHeaders.date: credentialScope.dateTime.formatFull(),
+      if (presignedUrl)
+        AWSHeaders.signedHeaders: canonicalRequest.signedHeaders.toString(),
       if (presignedUrl && algorithm != null) AWSHeaders.algorithm: algorithm.id,
       if (presignedUrl)
-        AWSHeaders.credential:
-            Uri.encodeComponent('${credentials.accessKeyId}/$credentialScope'),
+        AWSHeaders.credential: '${credentials.accessKeyId}/$credentialScope',
       if (presignedUrl && expiresIn != null)
         AWSHeaders.expires: expiresIn.toString(),
       if (includeBodyHash && canonicalRequest.request.contentLength > 0)
@@ -112,6 +111,15 @@ class BaseServiceConfiguration extends ServiceConfiguration {
     );
     final digest = await digestSink.digest;
     return hex.encode(digest.bytes);
+  }
+
+  @override
+  String hashPayloadSync(AWSHttpRequest request) {
+    var bodyBytes = request.bodyBytes;
+    if (bodyBytes == null) {
+      throw ArgumentError('Cannot call for streaming requests');
+    }
+    return payloadEncoder.convert(bodyBytes);
   }
 
   @override
@@ -169,16 +177,4 @@ abstract class ServiceHeader with AWSEquatable {
 
   @override
   String toString() => key;
-}
-
-class ServiceConfigurationError extends Error {
-  final String? message;
-
-  ServiceConfigurationError.conflicting(
-    ServiceConfiguration a,
-    ServiceConfiguration b,
-  ) : message = 'Conflicting configurations:\n1) $a\n\n2) $b';
-
-  @override
-  String toString() => message ?? 'Invalid service configuration';
 }

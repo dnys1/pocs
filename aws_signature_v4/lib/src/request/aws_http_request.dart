@@ -21,8 +21,12 @@ class AWSHttpRequest with AWSEquatable {
   final Map<String, String> queryParameters;
   final Map<String, String> headers;
 
+  final List<int>? _bodyBytes;
+  List<int>? get bodyBytes => _bodyBytes;
+
   final StreamSplitter<List<int>> _body;
   Stream<List<int>> get body => _body.split();
+
   final int contentLength;
 
   late final Uri uri = Uri(
@@ -42,6 +46,7 @@ class AWSHttpRequest with AWSEquatable {
     List<int>? body,
   })  : queryParameters = queryParameters ?? const {},
         headers = headers ?? const {},
+        _bodyBytes = body ?? const [],
         _body = StreamSplitter(
           body == null || body.isEmpty
               ? const http.ByteStream(Stream.empty())
@@ -59,6 +64,7 @@ class AWSHttpRequest with AWSEquatable {
     required this.contentLength,
   })  : queryParameters = queryParameters ?? const {},
         headers = headers ?? const {},
+        _bodyBytes = null,
         _body = StreamSplitter(body);
 
   @override

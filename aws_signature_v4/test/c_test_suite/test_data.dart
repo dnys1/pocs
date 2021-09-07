@@ -156,7 +156,7 @@ class SignerTest {
           expiresIn: context.expirationInSeconds,
           serviceConfiguration: serviceConfiguration,
         );
-        signedRequest = await signer.sign(signerRequest);
+        signedRequest = await signer.signStreamed(signerRequest);
       });
 
       test('canonical request', () {

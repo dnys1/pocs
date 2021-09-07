@@ -26,13 +26,17 @@ class SignerRequestParser {
   String _parseRequestUri(String requestLine) {
     final s1 = requestLine.indexOf(' ');
     final s2 = requestLine.lastIndexOf(' ');
-    final requestUri = requestLine.substring(s1 + 1, s2).replaceAll(' ', '%20');
+    final requestUri = requestLine.substring(s1 + 1, s2);
     return requestUri;
   }
 
   /// Parses the request path from the first line of the HTTP request.
   String _parseRequestPath(String requestLine) {
-    return _parseRequestUri(requestLine).split('?').first;
+    final path = _parseRequestUri(requestLine).split('?').first;
+    if (path.contains('%')) {
+      return Uri.decodeComponent(path);
+    }
+    return path;
   }
 
   /// Parses the query string into a map of query parameters.
@@ -41,7 +45,10 @@ class SignerRequestParser {
     if (requestUriParts.length < 2) return null;
     return Map.fromEntries(requestUriParts[1].split('&').map((q) {
       final parts = q.split('=');
-      return MapEntry(parts[0], parts[1]);
+      return MapEntry(
+        parts[0],
+        Uri.decodeQueryComponent(parts[1]),
+      );
     }));
   }
 
