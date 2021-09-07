@@ -11,11 +11,11 @@ dependencies:
   flutter:
     sdk: flutter
   amplify_common:
-    path: ../../amplify-pocs/amplify_common
+    path: ../amplify_common
   aws_cognito:
-    path: ../../amplify-pocs/aws_cognito
+    path: ../aws_cognito
   aws_signature_v4:
-    path: ../../amplify-pocs/aws_signature_v4
+    path: ../aws_signature_v4
   maplibre_gl:
     path: ../../maplibre_gl/maplibre_gl
 

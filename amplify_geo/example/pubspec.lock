@@ -16,7 +16,7 @@ packages:
     source: path
     version: "0.0.1"
   async:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: async
       url: "https://pub.dartlang.org"
