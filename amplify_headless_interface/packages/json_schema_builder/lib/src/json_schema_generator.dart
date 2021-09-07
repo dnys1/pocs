@@ -106,6 +106,7 @@ class _Class {
 
 class JsonSchemaModelBuilder {
   static const jsonSchemaPackage = 'package:json_schema2/json_schema2.dart';
+  static const dartIoPackage = 'dart:io';
   static final _formatter = DartFormatter();
 
   final String libraryName;
@@ -122,14 +123,19 @@ class JsonSchemaModelBuilder {
     packageImports[Uri.parse('dart:convert')] = {
       'jsonEncode',
     };
+    packageImports[Uri.parse(dartIoPackage)] = {
+      'Process',
+    };
   }
 
   String _escapeDartString(String string) {
     return string.replaceAll(r'$', r'\$');
   }
 
-  Class _addValidator(Class $class) {
+  Class _addTopLevelMethods(Class $class) {
     final schemaMap = schema.schemaMap;
+    final action = libraryName.split('_').first;
+    final category = libraryName.split('_')[1];
     return $class.rebuild(
       (b) => b
         ..fields.add(Field(
@@ -161,6 +167,59 @@ class JsonSchemaModelBuilder {
                 r'return schema.validateWithErrors(jsonEncode(toJson()), parseJson: true);',
               ),
             ]),
+        ))
+        ..methods.add(Method(
+          (m) => m
+            ..name = 'start'
+            ..returns = TypeReference(
+              (t) => t
+                ..symbol = 'Future'
+                ..types.add(refer(
+                  'Process',
+                  dartIoPackage,
+                )),
+            )
+            ..optionalParameters.addAll([
+              Parameter((p) => p
+                ..name = 'workingDirectory'
+                ..named = true
+                ..type = TypeReference(
+                  (t) => t
+                    ..symbol = 'String'
+                    ..isNullable = true,
+                )),
+              Parameter((p) => p
+                ..name = 'environment'
+                ..named = true
+                ..type = TypeReference(
+                  (t) => t
+                    ..symbol = 'Map'
+                    ..types.addAll([refer('String'), refer('String')])
+                    ..isNullable = true,
+                )),
+              Parameter((p) => p
+                ..name = 'runInShell'
+                ..named = true
+                ..type = refer('bool')
+                ..defaultTo = Code('false')),
+            ])
+            ..modifier = MethodModifier.async
+            ..body = Code('''
+            final proc = await Process.start(
+              'amplify',
+              [
+                '$action',
+                '$category',
+                '--headless',
+              ],
+              workingDirectory: workingDirectory,
+              environment: environment,
+              runInShell: runInShell,
+            );
+            proc.stdin.writeln(jsonEncode(this));
+
+            return proc;
+            '''),
         )),
     );
   }
@@ -203,7 +262,7 @@ class JsonSchemaModelBuilder {
       }
     }
 
-    final libraryClass = _addValidator(_buildClass(schema, className));
+    final libraryClass = _addTopLevelMethods(_buildClass(schema, className));
     customTypes.add(_Class(libraryClass));
     typeMap[className] = refer(className).type as TypeReference;
   }

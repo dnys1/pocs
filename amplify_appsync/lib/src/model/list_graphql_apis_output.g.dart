@@ -10,7 +10,7 @@ ListGraphqlApisOutput _$ListGraphqlApisOutputFromJson(
         Map<String, dynamic> json) =>
     ListGraphqlApisOutput(
       graphqlApis: (json['graphqlApis'] as List<dynamic>?)
-              ?.map((e) => GraphqlApis.fromJson(e as Map<String, dynamic>))
+              ?.map((e) => GraphqlApi.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
       nextToken: json['nextToken'] as String?,
