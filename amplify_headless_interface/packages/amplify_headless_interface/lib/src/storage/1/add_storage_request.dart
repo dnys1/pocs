@@ -1,4 +1,5 @@
 import 'dart:convert' show jsonEncode;
+import 'dart:io' show Process;
 
 import 'package:json_schema2/json_schema2.dart'
     show ValidationError, JsonSchema;
@@ -317,5 +318,25 @@ class AddStorageRequest {
   List<ValidationError> validate() {
     final schema = JsonSchema.createSchema(_schema);
     return schema.validateWithErrors(jsonEncode(toJson()), parseJson: true);
+  }
+
+  Future<Process> start(
+      {String? workingDirectory,
+      Map<String, String>? environment,
+      bool runInShell = false}) async {
+    final proc = await Process.start(
+      'amplify',
+      [
+        'add',
+        'storage',
+        '--headless',
+      ],
+      workingDirectory: workingDirectory,
+      environment: environment,
+      runInShell: runInShell,
+    );
+    proc.stdin.writeln(jsonEncode(this));
+
+    return proc;
   }
 }

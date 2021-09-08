@@ -6,11 +6,20 @@ part of 'graphql_apis.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-GraphqlApis _$GraphqlApisFromJson(Map<String, dynamic> json) => GraphqlApis(
+GraphqlApi _$GraphqlApiFromJson(Map<String, dynamic> json) => GraphqlApi(
+      additionalAuthenticationProviders:
+          (json['additionalAuthenticationProviders'] as List<dynamic>?)
+              ?.map((e) => AdditionalAuthenticationProvider.fromJson(
+                  e as Map<String, dynamic>))
+              .toList(),
       apiId: json['apiId'] as String?,
       arn: json['arn'] as String?,
       authenticationType: _$enumDecodeNullable(
           _$AuthenticationTypeEnumMap, json['authenticationType']),
+      lambdaAuthorizerConfig: json['lambdaAuthorizerConfig'] == null
+          ? null
+          : LambdaAuthorizerConfig.fromJson(
+              json['lambdaAuthorizerConfig'] as Map<String, dynamic>),
       name: json['name'] as String?,
       openIDConnectConfig: json['openIDConnectConfig'] == null
           ? null
@@ -26,7 +35,7 @@ GraphqlApis _$GraphqlApisFromJson(Map<String, dynamic> json) => GraphqlApis(
       xrayEnabled: json['xrayEnabled'] as bool?,
     );
 
-Map<String, dynamic> _$GraphqlApisToJson(GraphqlApis instance) {
+Map<String, dynamic> _$GraphqlApiToJson(GraphqlApi instance) {
   final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {
@@ -35,10 +44,13 @@ Map<String, dynamic> _$GraphqlApisToJson(GraphqlApis instance) {
     }
   }
 
+  writeNotNull('additionalAuthenticationProviders',
+      instance.additionalAuthenticationProviders);
   writeNotNull('apiId', instance.apiId);
   writeNotNull('arn', instance.arn);
   writeNotNull('authenticationType',
       _$AuthenticationTypeEnumMap[instance.authenticationType]);
+  writeNotNull('lambdaAuthorizerConfig', instance.lambdaAuthorizerConfig);
   writeNotNull('name', instance.name);
   writeNotNull('openIDConnectConfig', instance.openIDConnectConfig);
   writeNotNull('tags', instance.tags);
@@ -92,3 +104,63 @@ const _$AuthenticationTypeEnumMap = {
   AuthenticationType.openIDConnect: 'OPENID_CONNECT',
   AuthenticationType.awsLambda: 'AWS_LAMBDA',
 };
+
+AdditionalAuthenticationProvider _$AdditionalAuthenticationProviderFromJson(
+        Map<String, dynamic> json) =>
+    AdditionalAuthenticationProvider(
+      authenticationType:
+          _$enumDecode(_$AuthenticationTypeEnumMap, json['authenticationType']),
+      lambdaAuthorizerConfig: json['lambdaAuthorizerConfig'] == null
+          ? null
+          : LambdaAuthorizerConfig.fromJson(
+              json['lambdaAuthorizerConfig'] as Map<String, dynamic>),
+      openIDConnectConfig: json['openIDConnectConfig'] == null
+          ? null
+          : OpenIDConnectConfig.fromJson(
+              json['openIDConnectConfig'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$AdditionalAuthenticationProviderToJson(
+    AdditionalAuthenticationProvider instance) {
+  final val = <String, dynamic>{
+    'authenticationType':
+        _$AuthenticationTypeEnumMap[instance.authenticationType],
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('lambdaAuthorizerConfig', instance.lambdaAuthorizerConfig);
+  writeNotNull('openIDConnectConfig', instance.openIDConnectConfig);
+  return val;
+}
+
+LambdaAuthorizerConfig _$LambdaAuthorizerConfigFromJson(
+        Map<String, dynamic> json) =>
+    LambdaAuthorizerConfig(
+      authorizerResultTtlInSeconds: json['authorizerResultTtlInSeconds'] as int,
+      authorizerUri: json['authorizerUri'] as String,
+      identityValidationExpression:
+          json['identityValidationExpression'] as String?,
+    );
+
+Map<String, dynamic> _$LambdaAuthorizerConfigToJson(
+    LambdaAuthorizerConfig instance) {
+  final val = <String, dynamic>{
+    'authorizerResultTtlInSeconds': instance.authorizerResultTtlInSeconds,
+    'authorizerUri': instance.authorizerUri,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull(
+      'identityValidationExpression', instance.identityValidationExpression);
+  return val;
+}

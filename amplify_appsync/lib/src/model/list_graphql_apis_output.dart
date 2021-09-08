@@ -7,7 +7,7 @@ part 'list_graphql_apis_output.g.dart';
 @JsonSerializable(includeIfNull: false)
 class ListGraphqlApisOutput {
 // The GraphqlApi objects.
-  final List<GraphqlApis> graphqlApis;
+  final List<GraphqlApi> graphqlApis;
 
   // An identifier to be passed in the next request to this operation to return
   // the next set of items in the list.
