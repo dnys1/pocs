@@ -1,11 +1,9 @@
 import 'dart:async';
 
 import 'package:aws_signature_v4/aws_signature_v4.dart';
-import 'package:convert/convert.dart';
-import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 
-/// A description of an [AWSSigv4Signer] configuration.
+/// A description of an [AWSSigV4Signer] configuration.
 ///
 /// All requests made to AWS services must be processed in the precise way
 /// that service expects. Since each service is different, this class provides
@@ -106,26 +104,5 @@ class BaseServiceConfiguration extends ServiceConfiguration {
   }) {
     // By default, the body is not signed.
     return canonicalRequest.request.body;
-  }
-}
-
-class _DigestSink extends Sink<Digest> {
-  final Completer<Digest> _digest = Completer();
-
-  Future<Digest> get digest => _digest.future;
-
-  @override
-  void add(Digest data) {
-    if (_digest.isCompleted) {
-      throw StateError('Cannot call add more than once');
-    }
-    _digest.complete(data);
-  }
-
-  @override
-  void close() {
-    if (!_digest.isCompleted) {
-      throw StateError('No digest received');
-    }
   }
 }

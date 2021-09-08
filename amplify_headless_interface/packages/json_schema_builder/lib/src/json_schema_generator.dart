@@ -652,7 +652,7 @@ class JsonSchemaModelBuilder {
         el.typeList != null &&
         el.type == SchemaType.object)) {
       // Implement parent type
-      propertyValues.forEach((prop) {
+      for (var prop in propertyValues) {
         final propertyTypeName = _className(
           prop.propertyName!,
           partialClass.name,
@@ -673,7 +673,7 @@ class JsonSchemaModelBuilder {
             _class.methods.any(
               (m) => missingFields.any((f) => f.name == m.name),
             )) {
-          return;
+          break;
         }
 
         for (var field in _class.fields) {
@@ -741,7 +741,7 @@ class JsonSchemaModelBuilder {
           _buildToJson(b);
         });
         customTypes.add(_Class(updatedClass));
-      });
+      }
     }
 
     return classType;
@@ -1023,6 +1023,9 @@ class _Property {
           )) {
             schemaMap.remove('enum');
           }
+          break;
+        default:
+          break;
       }
     }
 

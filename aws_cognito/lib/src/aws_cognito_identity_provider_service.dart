@@ -43,7 +43,7 @@ class AWSCognitoIdentityProviderService {
       },
       body: body,
     );
-    final AWSSigV4SignedRequest signedRequest = await _signer.sign(
+    final AWSSigV4SignedRequest signedRequest = _signer.sign(
       AWSSignerRequest(
         sigRequest,
         credentialScope: scope,
@@ -81,7 +81,7 @@ class AWSCognitoIdentityProviderService {
       },
       body: body,
     );
-    final AWSSigV4SignedRequest signedRequest = await _signer.sign(
+    final AWSSigV4SignedRequest signedRequest = _signer.sign(
       AWSSignerRequest(
         sigRequest,
         credentialScope: scope,
