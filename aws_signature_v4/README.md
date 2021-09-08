@@ -9,7 +9,7 @@ See the [example](example/) for a full example.
 1. Make sure you have pulled down this repository's submodules
 
 ```bash
-git submodule init --update
+git submodule update --init
 ```
 
 2. Run `dart test`
