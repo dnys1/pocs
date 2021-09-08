@@ -57,7 +57,7 @@ class AppSyncConfig {
     final authType = appSyncConfig.authorizationType;
     if (authType == ApiAuthorizationType.apiKey) {
       ArgumentError.checkNotNull(appSyncConfig.apiKey);
-      authorization ??= ApiKeyAuthorization(appSyncConfig.apiKey!);
+      authorization ??= AppSyncApiKeyAuthorization(appSyncConfig.apiKey!);
     } else {
       ArgumentError.checkNotNull(
         authorization,

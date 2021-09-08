@@ -13,21 +13,20 @@ export 'http_method.dart';
 /// The request is typically passed to a signer for signing, although it can be
 /// used unsigned as well for sending unauthenticated requests.
 /// {@endtemplate}
+///
+/// See also:
+/// - [AWSHttpRequest]
+/// - [AWSStreamedHttpRequest]
 @immutable
-class AWSHttpRequest with AWSEquatable {
+abstract class AWSBaseHttpRequest with AWSEquatable {
   final HttpMethod method;
   final String host;
   final String path;
   final Map<String, String> queryParameters;
   final Map<String, String> headers;
-
-  final List<int>? _bodyBytes;
-  List<int>? get bodyBytes => _bodyBytes;
-
-  final StreamSplitter<List<int>> _body;
-  Stream<List<int>> get body => _body.split();
-
   final int contentLength;
+
+  Stream<List<int>> get body;
 
   late final Uri uri = Uri(
     scheme: 'https',
@@ -37,35 +36,15 @@ class AWSHttpRequest with AWSEquatable {
   );
 
   /// {@macro aws_http_request}
-  AWSHttpRequest({
+  AWSBaseHttpRequest._({
     required this.method,
     required this.host,
     required this.path,
     Map<String, String>? queryParameters,
     Map<String, String>? headers,
-    List<int>? body,
-  })  : queryParameters = queryParameters ?? const {},
-        headers = headers ?? const {},
-        _bodyBytes = body ?? const [],
-        _body = StreamSplitter(
-          body == null || body.isEmpty
-              ? const http.ByteStream(Stream.empty())
-              : http.ByteStream.fromBytes(body),
-        ),
-        contentLength = body?.length ?? 0;
-
-  AWSHttpRequest.streamed({
-    required this.method,
-    required this.host,
-    required this.path,
-    Map<String, String>? queryParameters,
-    Map<String, String>? headers,
-    required Stream<List<int>> body,
     required this.contentLength,
   })  : queryParameters = queryParameters ?? const {},
-        headers = headers ?? const {},
-        _bodyBytes = null,
-        _body = StreamSplitter(body);
+        headers = headers ?? const {};
 
   @override
   List<Object?> get props => [
@@ -74,7 +53,6 @@ class AWSHttpRequest with AWSEquatable {
         path,
         queryParameters,
         headers,
-        body,
       ];
 
   /// Creates a `package:http` request from this request.
@@ -109,4 +87,64 @@ class AWSHttpRequest with AWSEquatable {
 
   @override
   String toString() => uri.toString();
+}
+
+/// {@macro aws_http_request}
+class AWSHttpRequest extends AWSBaseHttpRequest {
+  /// {@macro aws_http_request}
+  AWSHttpRequest({
+    required HttpMethod method,
+    required String host,
+    required String path,
+    Map<String, String>? queryParameters,
+    Map<String, String>? headers,
+    List<int>? body,
+  })  : bodyBytes = body ?? const [],
+        super._(
+          method: method,
+          host: host,
+          path: path,
+          queryParameters: queryParameters,
+          headers: headers,
+          contentLength: body?.length ?? 0,
+        );
+
+  @override
+  Stream<List<int>> get body => bodyBytes.isEmpty
+      ? const http.ByteStream(Stream.empty())
+      : http.ByteStream.fromBytes(bodyBytes);
+
+  /// The body bytes.
+  final List<int> bodyBytes;
+}
+
+/// {@template aws_http_streamed_request}
+/// A streaming HTTP request.
+/// {@endtemplate}
+class AWSStreamedHttpRequest extends AWSBaseHttpRequest {
+  /// @{macro aws_http_streamed_request}
+  ///
+  /// For signed requests, [body] is read once, in chunks, as it is sent to AWS.
+  /// It is required that [contentLength] be provided so that [body] does not
+  /// have to be read twice, since the content length must be known when
+  /// calculating the signature.
+  AWSStreamedHttpRequest({
+    required HttpMethod method,
+    required String host,
+    required String path,
+    Map<String, String>? queryParameters,
+    Map<String, String>? headers,
+    required this.body,
+    required int contentLength,
+  }) : super._(
+          method: method,
+          host: host,
+          path: path,
+          queryParameters: queryParameters,
+          headers: headers,
+          contentLength: contentLength,
+        );
+
+  @override
+  final Stream<List<int>> body;
 }

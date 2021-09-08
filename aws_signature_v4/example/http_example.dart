@@ -75,7 +75,7 @@ void main(List<String> args) async {
     body: body,
   );
 
-  final AWSSigV4SignedRequest signedRequest = await signer.sign(
+  final AWSSigV4SignedRequest signedRequest = signer.sign(
     AWSSignerRequest(
       sigRequest,
       credentialScope: scope,

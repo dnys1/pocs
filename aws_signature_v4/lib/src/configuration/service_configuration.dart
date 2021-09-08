@@ -1,11 +1,8 @@
 import 'dart:async';
 
-import 'package:aws_common/aws_common.dart';
 import 'package:aws_signature_v4/aws_signature_v4.dart';
-import 'package:aws_signature_v4/src/configuration/validator.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
-import 'package:http/http.dart';
 import 'package:meta/meta.dart';
 
 /// A description of an [AWSSigv4Signer] configuration.
@@ -14,14 +11,6 @@ import 'package:meta/meta.dart';
 /// that service expects. Since each service is different, this class provides
 /// a way to override steps of the signing process which need precendence over
 /// the [BaseServiceConfiguration].
-///
-/// Polices are applied iteratively based on the value of [precedence]. Lower
-/// precendence policies are applied first, while higher precendence values are
-/// applied last and can override values of the previous policies.
-///
-/// Policies of the same precedence with conflicting values are not allowed and
-/// throw a runtime [ServiceConfigurationError]. Implementers should take care
-/// to ensure this does not happen.
 @sealed
 abstract class ServiceConfiguration {
   final bool? normalizePath;
@@ -41,11 +30,8 @@ abstract class ServiceConfiguration {
     required AWSCredentials credentials,
   });
 
-  /// Hashes the request payload for the canonical request synchronously.
-  String hashPayloadSync(AWSHttpRequest request);
-
-  /// Hashes the request payload for the canonical request asynchronously.
-  Future<String> hashPayload(AWSHttpRequest request);
+  /// Hashes the request payload for the canonical request.
+  String hashPayload(AWSBaseHttpRequest request);
 
   /// Transforms the request body using [signer].
   Stream<List<int>> signBody({
@@ -100,26 +86,14 @@ class BaseServiceConfiguration extends ServiceConfiguration {
   }
 
   @override
-  Future<String> hashPayload(AWSHttpRequest request) async {
-    final digestSink = _DigestSink();
-    final shaSink = sha256.startChunkedConversion(digestSink);
-    request.body.listen(
-      shaSink.add,
-      onDone: shaSink.close,
-      onError: digestSink._digest.completeError,
-      cancelOnError: true,
-    );
-    final digest = await digestSink.digest;
-    return hex.encode(digest.bytes);
-  }
-
-  @override
-  String hashPayloadSync(AWSHttpRequest request) {
-    var bodyBytes = request.bodyBytes;
-    if (bodyBytes == null) {
-      throw ArgumentError('Cannot call for streaming requests');
+  String hashPayload(AWSBaseHttpRequest request) {
+    if (request is! AWSHttpRequest) {
+      throw ArgumentError(
+        'Streaming requests cannot be hashed synchronously. Services needing '
+        'to support streaming requests should subclass BaseServiceConfiguration',
+      );
     }
-    return payloadEncoder.convert(bodyBytes);
+    return payloadEncoder.convert(request.bodyBytes);
   }
 
   @override
@@ -154,27 +128,4 @@ class _DigestSink extends Sink<Digest> {
       throw StateError('No digest received');
     }
   }
-}
-
-abstract class ServiceHeader with AWSEquatable {
-  /// The header map key.
-  final String key;
-
-  /// The validator for values of the header.
-  final Validator<String> validator;
-
-  const ServiceHeader(this.key, this.validator);
-
-  @override
-  List<Object?> get props => [
-        key,
-        validator,
-
-        // To distinguish between keys of the same value but from
-        // different service configurations.
-        runtimeType,
-      ];
-
-  @override
-  String toString() => key;
 }

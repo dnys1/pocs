@@ -43,7 +43,6 @@ void main() {
         request: request,
         credentials: credentials,
         credentialScope: scope,
-        payloadHash: emptyPayloadHash,
         algorithm: AWSAlgorithm.hmacSha256,
         presignedUrl: true,
       );

@@ -28,7 +28,7 @@ class AWSAppSyncService {
       region: _region,
       service: serviceName,
     );
-    final AWSHttpRequest request = AWSHttpRequest(
+    final AWSBaseHttpRequest request = AWSHttpRequest(
       method: HttpMethod.get,
       host: '$serviceName.$_region.amazonaws.com',
       path: '/v1/apis',

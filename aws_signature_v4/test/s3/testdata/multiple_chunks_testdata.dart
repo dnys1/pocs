@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:aws_signature_v4/src/configuration/services/s3.dart';
 
@@ -35,7 +33,7 @@ AWS4-HMAC-SHA256
 20130524/us-east-1/s3/aws4_request
 cee3fed04b70f867d036f722359b0b1f2f0e5dc0efadbc082b76c4c60e316455''',
   signature: '4f232c4386841ef735655705268965c44a0e4690baa4adea153f7db9fa80a0a9',
-  signedRequest: AWSHttpRequest.streamed(
+  signedRequest: AWSStreamedHttpRequest(
     method: HttpMethod.put,
     host: 's3.amazonaws.com',
     path: '/examplebucket/chunkObject.txt',
@@ -69,7 +67,7 @@ cee3fed04b70f867d036f722359b0b1f2f0e5dc0efadbc082b76c4c60e316455''',
 final putObjectTest = SignerTest(
   name: 'PUT Object',
   context: buildContext(),
-  request: AWSHttpRequest.streamed(
+  request: AWSStreamedHttpRequest(
     method: HttpMethod.put,
     host: 's3.amazonaws.com',
     path: '/examplebucket/chunkObject.txt',

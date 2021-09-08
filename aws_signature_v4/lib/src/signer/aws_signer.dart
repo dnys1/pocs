@@ -46,29 +46,7 @@ class AWSSigV4Signer {
   }
 
   /// Signs the given [signerRequest].
-  ///
-  /// For streaming requests, use [signStreamed].
   AWSSigV4SignedRequest sign(AWSSignerRequest signerRequest) {
-    return _sign(
-      signerRequest,
-      signerRequest.serviceConfiguration.hashPayloadSync(signerRequest.request),
-    );
-  }
-
-  /// Signs a streaming request.
-  Future<AWSSigV4SignedRequest> signStreamed(
-    AWSSignerRequest signerRequest,
-  ) async {
-    final payloadHash = await signerRequest.serviceConfiguration
-        .hashPayload(signerRequest.request);
-    return _sign(signerRequest, payloadHash);
-  }
-
-  /// Synchronously signs the given [signerRequest] and [payloadHash].
-  AWSSigV4SignedRequest _sign(
-    AWSSignerRequest signerRequest,
-    String payloadHash,
-  ) {
     final canonicalRequest = CanonicalRequest(
       request: signerRequest.request,
       credentials: credentials,
@@ -79,7 +57,6 @@ class AWSSigV4Signer {
       algorithm: algorithm,
       expiresIn: signerRequest.expiresIn,
       configuration: signerRequest.serviceConfiguration,
-      payloadHash: payloadHash,
     );
     final signingKey = algorithm.deriveSigningKey(
       credentials,

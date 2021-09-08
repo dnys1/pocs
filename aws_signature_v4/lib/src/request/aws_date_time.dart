@@ -1,7 +1,7 @@
 import 'dart:math';
 
 /// {@template aws_date_time}
-/// A utility class which wraps a [DateTime] object.
+/// A utility class which wraps [DateTime] objects.
 ///
 /// Used for formatting dates and times throughout the signing process.
 /// {@endtemplate}

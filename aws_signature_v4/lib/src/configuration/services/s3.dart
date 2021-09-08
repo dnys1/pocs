@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:async/async.dart';
 import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:aws_signature_v4/src/configuration/service_configuration.dart';
+import 'package:aws_signature_v4/src/configuration/service_header.dart';
 import 'package:aws_signature_v4/src/configuration/validator.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
@@ -37,6 +38,7 @@ class S3ServiceConfiguration extends BaseServiceConfiguration {
   static const int _defaultChunkSize = 64 * 1024;
 
   static const _chunkedPayloadSeedHash = 'STREAMING-AWS4-HMAC-SHA256-PAYLOAD';
+  static const _unsignedChunkedPayloadSeedHash = 'UNSIGNED-PAYLOAD';
   static final _sigSep = ';chunk-signature='.codeUnits;
   static final _sep = '\r\n'.codeUnits;
 
@@ -56,7 +58,7 @@ class S3ServiceConfiguration extends BaseServiceConfiguration {
           omitSessionToken: false,
         );
 
-  int _calculateContentLength(AWSHttpRequest request) {
+  int _calculateContentLength(AWSBaseHttpRequest request) {
     var decodedLength = request.contentLength;
     var chunkedLength = 0;
     var metadataLength = 0;
@@ -104,11 +106,14 @@ class S3ServiceConfiguration extends BaseServiceConfiguration {
   }
 
   @override
-  Future<String> hashPayload(AWSHttpRequest request) async {
+  String hashPayload(AWSBaseHttpRequest request) {
     if (!chunked) {
       return super.hashPayload(request);
     }
-    return _chunkedPayloadSeedHash;
+    if (signPayload) {
+      return _chunkedPayloadSeedHash;
+    }
+    return _unsignedChunkedPayloadSeedHash;
   }
 
   @override

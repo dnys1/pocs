@@ -4,9 +4,9 @@ import 'package:aws_signature_v4/src/request/canonical_request/canonical_request
 export 'package:aws_signature_v4/src/request/http_method.dart';
 
 /// {@template aws_sig_v4_signed_request}
-/// A signed [AWSHttpRequest].
+/// A signed [AWSBaseHttpRequest].
 /// {@endtemplate}
-class AWSSigV4SignedRequest extends AWSHttpRequest {
+class AWSSigV4SignedRequest extends AWSStreamedHttpRequest {
   /// The canonical request for this request.
   final CanonicalRequest canonicalRequest;
 
@@ -24,7 +24,7 @@ class AWSSigV4SignedRequest extends AWSHttpRequest {
     Map<String, String>? headers,
     required Stream<List<int>> body,
     required int contentLength,
-  }) : super.streamed(
+  }) : super(
           method: method,
           host: host,
           path: path,

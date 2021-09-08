@@ -98,7 +98,7 @@ class SignerRequestParser {
 
   /// Writes the raw request to the HTTP server and listens for the server to
   /// emit the parsed [HttpRequest].
-  Future<AWSHttpRequest> parse(
+  Future<AWSBaseHttpRequest> parse(
     String request, {
     required Context context,
   }) async {

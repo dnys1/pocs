@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:test/test.dart';
 
 import 'testdata/single_chunk_testdata.dart';

@@ -1,10 +1,8 @@
-import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
 import 'package:aws_signature_v4/src/credentials/aws_credential_scope.dart';
 import 'package:aws_signature_v4/src/credentials/aws_credentials.dart';
-import 'package:aws_signature_v4/src/request/aws_headers.dart';
 import 'package:aws_signature_v4/src/configuration/service_configuration.dart';
 import 'package:aws_signature_v4/src/signer/aws_algorithm.dart';
 import 'package:collection/collection.dart';
@@ -27,7 +25,7 @@ class CanonicalRequest {
   static const doubleEncodedEquals = '%253D';
 
   /// The original HTTP request.
-  final AWSHttpRequest request;
+  final AWSBaseHttpRequest request;
 
   /// The scope for the request.
   final AWSCredentialScope credentialScope;
@@ -94,14 +92,13 @@ class CanonicalRequest {
   late final String hash = payloadEncoder.convert(utf8.encode(toString()));
 
   /// The payload hash.
-  final String payloadHash;
+  late final String payloadHash = configuration.hashPayload(request);
 
   /// {@macro canonical_request}
   CanonicalRequest({
     required this.request,
     required AWSCredentials credentials,
     required this.credentialScope,
-    required this.payloadHash,
     required this.algorithm,
     this.configuration = const BaseServiceConfiguration(),
     bool? normalizePath,
@@ -137,38 +134,31 @@ class CanonicalRequest {
     canonicalQueryParameters = CanonicalQueryParameters(queryParameters);
   }
 
-  /// Removes excess slashes from paths.
-  ///
-  /// Not handled by [Uri]'s normalization.
-  static String _removeDoubleSlashes(String path) {
-    return path.replaceAll('//', '/');
-  }
-
   /// Returns the normalized path with double-encoded path segments.
   ///
   /// Uses [Uri] to normalize the path.
   static String _canonicalPath(
-    AWSHttpRequest request, {
+    AWSBaseHttpRequest request, {
     required bool normalizePath,
   }) {
-    var path = normalizePath
-        ? url.normalize(_removeDoubleSlashes(request.path))
-        : request.path;
+    var path = normalizePath ? url.normalize(request.path) : request.path;
+
+    // `normalize` removes leading and trailing slashes which should be preserved.
     if (normalizePath) {
-      if (request.path.endsWith('/') && !path.endsWith('/')) {
-        path += '/';
+      if (request.path.endsWith('/')) {
+        path = path.ensureEndsWith('/');
       }
-      if (!request.path.startsWith('/') && !path.startsWith('/')) {
-        path = '/$path';
+      if (!request.path.startsWith('/')) {
+        path = path.ensureStartsWith('/');
       }
     }
-    final pathComponents = path.split('/').map(
+
+    return path
+        .split('/')
+        .map(
           (comp) => Uri.encodeComponent(comp),
-        );
-    final isEmptyPath = pathComponents.isEmpty ||
-        pathComponents.length == 1 && pathComponents.first.isEmpty;
-    final canonicalizedPath = isEmptyPath ? '/' : pathComponents.join('/');
-    return canonicalizedPath;
+        )
+        .join('/');
   }
 
   /// Creates the canonical request string.
@@ -182,5 +172,21 @@ class CanonicalRequest {
     sb.writeln(signedHeaders);
     sb.write(payloadHash);
     return sb.toString();
+  }
+}
+
+extension on String {
+  String ensureStartsWith(String s) {
+    if (!startsWith(s)) {
+      return '$s$this';
+    }
+    return this;
+  }
+
+  String ensureEndsWith(String s) {
+    if (!endsWith(s)) {
+      return '${this}$s';
+    }
+    return this;
   }
 }
