@@ -1,0 +1,31 @@
+name: 'AWSCommon'
+description: 'Bindings for the [aws-c-common](https://github.com/awslabs/aws-c-common) library.'
+output: 'lib/src/bindings.dart'
+headers:
+  entry-points:
+    - 'aws-c-common/include/aws/common/error.h'
+    - 'aws-c-common/include/aws/common/clock.h'
+    - 'aws-c-common/include/aws/common/common.h'
+  include-directives:
+    - '**.h'
+compiler-opts:
+  - '-I./aws-c-common/include'
+  - '-I./build/generated/include'
+  - '-Wno-nullability-completeness'
+functions:
+  include:
+    - 'aws_.*'
+structs:
+  include:
+    - 'aws_.*'
+enums:
+  include:
+    - 'aws_.*'
+globals:
+  exclude:
+    - '_.*'
+macros:
+  exclude:
+    - '_.*'
+    - 'true'
+    - 'false'
