@@ -14,11 +14,29 @@ class AmplifyGeoMap extends StatefulWidget {
     required this.config,
     this.center,
     this.zoom,
+    this.customAttribution,
+    this.dragPan,
+    this.dragRotate,
+    this.doubleClickZoom,
+    this.hash,
+    this.fadeDuration,
+    this.failIfMajorPerformanceCaveat,
+    this.interactive,
+    this.keyboard,
   }) : super(key: key);
 
   final AmplifyConfig config;
   final Coordinates? center;
   final int? zoom;
+  final List<String>? customAttribution;
+  final bool? dragPan;
+  final bool? dragRotate;
+  final bool? doubleClickZoom;
+  final bool? hash;
+  final int? fadeDuration;
+  final bool? failIfMajorPerformanceCaveat;
+  final bool? interactive;
+  final bool? keyboard;
 
   @override
   State<AmplifyGeoMap> createState() => _AmplifyGeoMapState();
@@ -76,6 +94,15 @@ class _AmplifyGeoMapState extends State<AmplifyGeoMap> {
           style: _config.maps!.$default,
           transformRequestFunction:
               AmplifyGeo.instance.getTransformRequestFunction(credentials),
+          customAttribution: widget.customAttribution,
+          dragPan: widget.dragPan,
+          dragRotate: widget.dragRotate,
+          doubleClickZoom: widget.doubleClickZoom,
+          hash: widget.hash,
+          fadeDuration: widget.fadeDuration,
+          failIfMajorPerformanceCaveat: widget.failIfMajorPerformanceCaveat,
+          interactive: widget.interactive,
+          keyboard: widget.keyboard,
         );
       },
     );
