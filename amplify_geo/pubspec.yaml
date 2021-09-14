@@ -16,8 +16,8 @@ dependencies:
     path: ../aws_cognito
   aws_signature_v4:
     path: ../aws_signature_v4
-  maplibre_gl:
-    path: ../../maplibre_gl/maplibre_gl
+  flutter_map: ^0.13.0
+  vector_map_tiles: ^1.0.0
 
 dev_dependencies:
   flutter_test:
