@@ -1,5 +1,4 @@
 import 'package:aws_signature_v4/aws_signature_v4.dart';
-import 'package:aws_signature_v4/src/request/canonical_request/canonical_request.dart';
 
 export 'package:aws_signature_v4/src/request/http_method.dart';
 
