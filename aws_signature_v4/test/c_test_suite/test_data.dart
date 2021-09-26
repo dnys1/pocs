@@ -1,10 +1,5 @@
 import 'package:aws_signature_v4/aws_signature_v4.dart';
-import 'package:aws_signature_v4/src/credentials/aws_credential_scope.dart';
-import 'package:aws_signature_v4/src/request/canonical_request/canonical_request.dart';
 import 'package:aws_signature_v4/src/configuration/service_configuration.dart';
-import 'package:aws_signature_v4/src/signer/aws_signer.dart';
-import 'package:aws_signature_v4/src/signer/aws_algorithm.dart';
-import 'package:aws_signature_v4/src/signer/aws_signer_request.dart';
 import 'package:collection/collection.dart';
 import 'package:test/test.dart';
 

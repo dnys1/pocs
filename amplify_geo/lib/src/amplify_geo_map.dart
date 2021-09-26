@@ -5,7 +5,6 @@ import 'package:amplify_geo/src/amplify_geo.dart';
 import 'package:aws_cognito/aws_cognito.dart';
 import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
 class AmplifyGeoMap extends StatefulWidget {

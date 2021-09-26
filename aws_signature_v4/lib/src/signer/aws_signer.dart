@@ -1,15 +1,8 @@
 import 'dart:async';
 
 import 'package:aws_signature_v4/aws_signature_v4.dart';
-import 'package:aws_signature_v4/src/credentials/aws_credentials.dart';
 import 'package:aws_signature_v4/src/request/canonical_request/authorization_header.dart';
-import 'package:aws_signature_v4/src/signer/aws_algorithm.dart';
 import 'package:meta/meta.dart';
-
-import '../credentials/aws_credential_scope.dart';
-import '../request/aws_sig_v4_signed_request.dart';
-
-import 'aws_signer_request.dart';
 
 /// {@template aws_sig_v4_signer}
 /// The main class for signing requests made to AWS services.

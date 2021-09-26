@@ -4,9 +4,6 @@ import 'package:amplify_appsync/amplify_appsync.dart';
 import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:http/http.dart' as http;
 
-import 'graphql_request.dart';
-import 'graphql_response.dart';
-
 class GraphQLClient {
   final AppSyncConfig _config;
   final http.Client _client;
@@ -40,7 +37,7 @@ class GraphQLClient {
       if (operationName != null) {
         operationData = data[operationName] as Map?;
       } else if (data.length == 1) {
-        operationData = data.entries.single as Map?;
+        operationData = data[data.keys.single] as Map?;
       } else {
         operationData = data;
       }
@@ -48,13 +45,15 @@ class GraphQLClient {
     final errors = (respJson['errors'] as List?)?.cast<Map>();
     return GraphQLResponse(
       data: data,
-      errors: errors == null
-          ? const []
-          : errors
-              .map((error) => GraphQLResponseError.fromJson(
-                    error.cast<String, dynamic>(),
-                  ))
-              .toList(),
+      errors: GraphQLResponseErrors(
+        errors == null
+            ? const []
+            : errors
+                .map((error) => GraphQLResponseError.fromJson(
+                      error.cast<String, dynamic>(),
+                    ))
+                .toList(),
+      ),
     );
   }
 }

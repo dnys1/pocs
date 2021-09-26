@@ -39,9 +39,7 @@ class WebSocketConnection {
   Stream<WebSocketMessage> get _messageStream => _rebroadcastController.stream;
 
   /// {@macro websocket_connection}
-  WebSocketConnection(this._config) {
-    _connect();
-  }
+  WebSocketConnection(this._config);
 
   /// Connects to the real time WebSocket.
   Future<void> _connect() async {
@@ -75,6 +73,7 @@ class WebSocketConnection {
   }
 
   Future<void> _init() async {
+    await _connect();
     if (_connectionReady.isCompleted) return;
     send(MessageType.connectionInit);
     return ready;
@@ -119,7 +118,7 @@ class WebSocketConnection {
   /// Sends a structured message over the WebSocket.
   void _send(WebSocketMessage message) {
     final msgJson = json.encode(message.toJson());
-    print('Sent: $msgJson');
+    // print('Sent: $msgJson');
     _channel.sink.add(msgJson);
   }
 
@@ -135,7 +134,7 @@ class WebSocketConnection {
 
   /// Handles incoming data on the WebSocket.
   void _onData(WebSocketMessage message) {
-    print('Received: $message');
+    // print('Received: $message');
     switch (message.messageType) {
       case MessageType.connectionAck:
         final messageAck = message.payload as ConnectionAckMessagePayload;
@@ -147,7 +146,7 @@ class WebSocketConnection {
           () => _timeout(timeoutDuration),
         );
         _connectionReady.complete();
-        print('Registered timer');
+        // print('Registered timer');
         return;
       case MessageType.connectionError:
         final wsError = message.payload as WebSocketError?;
@@ -160,7 +159,7 @@ class WebSocketConnection {
         return;
       case MessageType.keepAlive:
         _timeoutTimer.reset();
-        print('Reset timer');
+        // print('Reset timer');
         return;
       case MessageType.error:
         // Only handle general messages, not subscription-specific ones

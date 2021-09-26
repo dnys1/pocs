@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:amplify_appsync/amplify_appsync.dart';
-import 'package:amplify_appsync/src/graphql/graphql_request.dart';
 import 'package:aws_common/aws_common.dart';
 import 'package:uuid/uuid.dart';
 
@@ -93,7 +92,7 @@ class SubscriptionRegistrationPayload extends WebSocketMessagePayload {
   Map<String, dynamic> toJson() => <String, dynamic>{
         'data': jsonEncode(request.toJson()),
         'extensions': {
-          'authorization': config.authorization.requestHeaders(
+          'authorization': config.authorization.connectionHeaders(
             config.subscriptionRequest(request),
           ),
         },

@@ -14,8 +14,7 @@ abstract class ApiAuthorization {
 }
 
 class AppSyncApiKeyAuthorization extends ApiAuthorization {
-  const AppSyncApiKeyAuthorization(this.apiKey)
-      : super._(ApiAuthorizationType.apiKey);
+  const AppSyncApiKeyAuthorization(this.apiKey) : super._(ApiAuthorizationType.apiKey);
 
   final String apiKey;
 
@@ -31,8 +30,7 @@ class AppSyncApiKeyAuthorization extends ApiAuthorization {
       };
 
   @override
-  bool operator ==(Object other) =>
-      other is AppSyncApiKeyAuthorization && apiKey == other.apiKey;
+  bool operator ==(Object other) => other is AppSyncApiKeyAuthorization && apiKey == other.apiKey;
 
   @override
   int get hashCode => apiKey.hashCode;
@@ -47,12 +45,10 @@ class AppSyncIamAuthorization extends ApiAuthorization {
   final AWSSigV4Signer _signer;
 
   @override
-  Map<String, String> connectionHeaders(AWSHttpRequest request) =>
-      _headers(request);
+  Map<String, String> connectionHeaders(AWSHttpRequest request) => _headers(request);
 
   @override
-  Map<String, String> requestHeaders(AWSHttpRequest request) =>
-      _headers(request);
+  Map<String, String> requestHeaders(AWSHttpRequest request) => _headers(request);
 
   Map<String, String> _headers(AWSHttpRequest request) {
     final host = request.host;

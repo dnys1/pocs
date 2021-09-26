@@ -1,4 +1,9 @@
 import 'package:aws_common/aws_common.dart';
+import 'package:collection/collection.dart';
+
+class GraphQLResponseErrors extends DelegatingList<GraphQLResponseError> implements Exception {
+  const GraphQLResponseErrors(List<GraphQLResponseError> errors) : super(errors);
+}
 
 /// {@template graphql_response_error}
 /// Contains an error produced via a GraphQL invocation. Corresponds to one
