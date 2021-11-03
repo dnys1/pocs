@@ -58,12 +58,6 @@ Map<String, dynamic> _$SmokeTestResponseToJson(SmokeTestResponse instance) =>
       'payload4': TimestampSerializer.dateTime.toJson(instance.payload4),
     };
 
-Map<String, dynamic> _$ExplicitStringRequestToJson(
-        ExplicitStringRequest instance) =>
-    <String, dynamic>{
-      'payload1': instance.payload1,
-    };
-
 ExplicitStringResponse _$ExplicitStringResponseFromJson(
         Map<String, dynamic> json) =>
     $checkedCreate(
@@ -71,7 +65,7 @@ ExplicitStringResponse _$ExplicitStringResponseFromJson(
       json,
       ($checkedConvert) {
         final val = ExplicitStringResponse(
-          payload1: $checkedConvert('payload1', (v) => v as String?),
+          $checkedConvert('payload1', (v) => v as String?),
         );
         return val;
       },
@@ -81,30 +75,4 @@ Map<String, dynamic> _$ExplicitStringResponseToJson(
         ExplicitStringResponse instance) =>
     <String, dynamic>{
       'payload1': instance.payload1,
-    };
-
-Map<String, dynamic> _$ExplicitBlobRequestToJson(
-        ExplicitBlobRequest instance) =>
-    <String, dynamic>{
-      'payload1': blobSerializer.toJson(instance.payload1),
-    };
-
-ExplicitBlobResponse _$ExplicitBlobResponseFromJson(
-        Map<String, dynamic> json) =>
-    $checkedCreate(
-      'ExplicitBlobResponse',
-      json,
-      ($checkedConvert) {
-        final val = ExplicitBlobResponse(
-          payload1: $checkedConvert(
-              'payload1', (v) => blobSerializer.fromJson(v as String?)),
-        );
-        return val;
-      },
-    );
-
-Map<String, dynamic> _$ExplicitBlobResponseToJson(
-        ExplicitBlobResponse instance) =>
-    <String, dynamic>{
-      'payload1': blobSerializer.toJson(instance.payload1),
     };

@@ -11,6 +11,10 @@ export 'src/annotations/time.dart';
 export 'src/client.dart';
 export 'src/operation.dart';
 
+// Protocol
+export 'src/protocol.dart';
+export 'src/serializer.dart';
+
 // Types
 export 'src/types/enum.dart';
 export 'src/types/union.dart';

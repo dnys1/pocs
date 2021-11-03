@@ -34,6 +34,16 @@ mixin JsonSerializer<T> implements Serializer<T, String> {
   }
 }
 
+mixin JsonDeserializer<T extends Object?> implements Deserializer<String, T> {
+  JsonConstructor<T> get responseConstructor;
+
+  @override
+  T deserialize(String data) {
+    final json = (jsonDecode(data) as Map).cast<String, Object?>();
+    return responseConstructor(json);
+  }
+}
+
 const int64Serializer = Int64Serializer();
 
 class Int64Serializer extends JsonConverter<Int64?, String?>

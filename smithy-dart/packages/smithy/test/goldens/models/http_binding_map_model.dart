@@ -4,6 +4,8 @@ library com.test.http_binding_map_model;
 
 import 'dart:convert';
 
+import 'package:http/src/base_response.dart';
+import 'package:http/src/base_request.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:smithy/smithy.dart';
 
@@ -26,14 +28,9 @@ class MapInputRequest {
   Map<String, dynamic> toJson() => _$MapInputRequestToJson(this);
 }
 
-class MapInputOperation extends HttpStaticOperation<MapInputRequest, void> {
+class MapInputOperation extends HttpJsonOperation<MapInputRequest, void> {
   const MapInputOperation() : super(method: 'POST', path: '/input/map');
 
   @override
-  void deserialize(String body) {}
-
-  @override
-  String serialize(MapInputRequest input) {
-    return jsonEncode(input);
-  }
+  JsonConstructor<void> get responseConstructor => (_) {};
 }

@@ -1,7 +1,6 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:aws_common/aws_common.dart';
+import 'package:http/src/streamed_response.dart';
+import 'package:http/src/streamed_request.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:smithy/smithy.dart';
 import 'package:smithy/src/serializer.dart';
@@ -9,8 +8,7 @@ import 'package:smithy/src/types/timestamp.dart';
 
 part 'kitchen_sink_model.g.dart';
 
-class SmokeTest extends HttpStaticOperation<SmokeTestRequest, SmokeTestResponse>
-    with JsonSerializer<SmokeTestRequest> {
+class SmokeTest extends HttpJsonOperation<SmokeTestRequest, SmokeTestResponse> {
   const SmokeTest()
       : super(
           method: 'POST',
@@ -38,10 +36,8 @@ class SmokeTest extends HttpStaticOperation<SmokeTestRequest, SmokeTestResponse>
   }
 
   @override
-  SmokeTestResponse deserialize(String body) {
-    final json = jsonDecode(body) as Map<String, dynamic>;
-    return SmokeTestResponse.fromJson(json);
-  }
+  final JsonConstructor<SmokeTestResponse> responseConstructor =
+      SmokeTestResponse.fromJson;
 }
 
 @JsonSerializer.serializableRequest
@@ -149,9 +145,8 @@ class NestedErrorData {
   final int? field1;
 }
 
-class ExplicitStringOperation
-    extends HttpStaticOperation<ExplicitStringRequest, ExplicitStringResponse>
-    with JsonSerializer<ExplicitStringRequest> {
+class ExplicitStringOperation extends HttpRawOperation<String?,
+    ExplicitStringRequest, ExplicitStringResponse> {
   const ExplicitStringOperation()
       : super(
           method: 'POST',
@@ -159,44 +154,30 @@ class ExplicitStringOperation
         );
 
   @override
-  ExplicitStringResponse deserialize(String data) {
-    final json = (jsonDecode(data) as Map).cast<String, dynamic>();
-    return ExplicitStringResponse.fromJson(json);
-  }
+  RawResponseConstructor<String?, ExplicitStringResponse>
+      get responseConstructor => ExplicitStringResponse.new;
 }
 
-@JsonSerializer.serializableRequest
-class ExplicitStringRequest with AWSSerializable {
-  const ExplicitStringRequest({
-    required this.payload1,
-  });
+class ExplicitStringRequest implements InputPayload<String?> {
+  const ExplicitStringRequest(this.payload1);
 
   @HttpPayload()
   final String? payload1;
 
   @override
-  Map<String, dynamic> toJson() => _$ExplicitStringRequestToJson(this);
+  String? getPayload() => payload1;
 }
 
 @JsonSerializer.serializableResponse
-class ExplicitStringResponse with AWSSerializable {
-  const ExplicitStringResponse({
-    required this.payload1,
-  });
+class ExplicitStringResponse {
+  const ExplicitStringResponse(this.payload1);
 
   @HttpPayload()
   final String? payload1;
-
-  factory ExplicitStringResponse.fromJson(Map<String, dynamic> json) =>
-      _$ExplicitStringResponseFromJson(json);
-
-  @override
-  Map<String, dynamic> toJson() => _$ExplicitStringResponseToJson(this);
 }
 
-class ExplicitBlobOperation
-    extends HttpStaticOperation<ExplicitBlobRequest, ExplicitBlobResponse>
-    with JsonSerializer<ExplicitBlobRequest> {
+class ExplicitBlobOperation extends HttpRawOperation<List<int>?,
+    ExplicitBlobRequest, ExplicitBlobResponse> {
   const ExplicitBlobOperation()
       : super(
           method: 'POST',
@@ -204,61 +185,49 @@ class ExplicitBlobOperation
         );
 
   @override
-  ExplicitBlobResponse deserialize(String data) {
-    final json = (jsonDecode(data) as Map).cast<String, dynamic>();
-    return ExplicitBlobResponse.fromJson(json);
-  }
+  RawResponseConstructor<List<int>?, ExplicitBlobResponse>
+      get responseConstructor => ExplicitBlobResponse.new;
 }
 
-@JsonSerializer.serializableRequest
-class ExplicitBlobRequest with AWSSerializable {
-  const ExplicitBlobRequest({
-    required this.payload1,
-  });
+class ExplicitBlobRequest implements InputPayload<List<int>?> {
+  const ExplicitBlobRequest(this.payload1);
 
-  @blobSerializer
   @HttpPayload()
-  final Uint8List? payload1;
+  final List<int>? payload1;
 
   @override
-  Map<String, dynamic> toJson() => _$ExplicitBlobRequestToJson(this);
+  List<int>? getPayload() => payload1;
 }
 
-@JsonSerializer.serializableResponse
-class ExplicitBlobResponse with AWSSerializable {
-  const ExplicitBlobResponse({
-    required this.payload1,
-  });
+class ExplicitBlobResponse {
+  const ExplicitBlobResponse(this.payload1);
 
-  @blobSerializer
   @HttpPayload()
-  final Uint8List? payload1;
-
-  factory ExplicitBlobResponse.fromJson(Map<String, dynamic> json) =>
-      _$ExplicitBlobResponseFromJson(json);
-
-  @override
-  Map<String, dynamic> toJson() => _$ExplicitBlobResponseToJson(this);
+  final List<int>? payload1;
 }
 
 typedef BodyStream = Stream<List<int>>;
 
-class ExplicitBlobStream extends HttpStreamingOperation<
+class ExplicitBlobStream extends HttpStreamingRawOperation<List<int>,
     ExplicitBlobStreamRequest, ExplicitBlobStreamResponse> {
   ExplicitBlobStream()
       : super(
           method: 'POST',
           path: '/explicit/struct',
-          outputFactory: ExplicitBlobStreamResponse.new,
         );
+
+  @override
+  StreamingResponseContructor<List<int>, ExplicitBlobStreamResponse>
+      get responseConstructor => ExplicitBlobStreamResponse.new;
 }
 
-class ExplicitBlobStreamRequest extends StreamingInput {
-  const ExplicitBlobStreamRequest({
-    required this.payload1,
-  }) : super(payload1);
+class ExplicitBlobStreamRequest implements InputPayload<Stream<List<int>>> {
+  const ExplicitBlobStreamRequest(this.payload1);
 
   final BodyStream payload1;
+
+  @override
+  Stream<List<int>> getPayload() => payload1;
 }
 
 class ExplicitBlobStreamResponse {

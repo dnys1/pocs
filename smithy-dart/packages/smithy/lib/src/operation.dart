@@ -1,12 +1,24 @@
+import 'dart:convert';
+
+import 'package:aws_common/aws_common.dart';
 import 'package:meta/meta.dart';
+import 'package:smithy/smithy.dart';
 import 'package:smithy/src/client.dart';
 import 'package:http/http.dart' as http;
 import 'package:smithy/src/serializer.dart';
 
-abstract class StreamingInput {
+import 'protocol.dart';
+
+typedef Constructor<T extends Object?, Output> = Output Function(T);
+typedef StreamingResponseContructor<T extends Object?, Output> = Output
+    Function(Stream<T>);
+typedef RawResponseConstructor<T extends Object?, Output> = Output Function(T);
+typedef JsonConstructor<Output> = Output Function(Map<String, dynamic>);
+
+abstract class StreamingInput<T extends Object?> {
   const StreamingInput(this._body);
 
-  final Stream<List<int>> _body;
+  final Stream<T> _body;
 }
 
 abstract class Operation<Input, Output> {
@@ -15,7 +27,12 @@ abstract class Operation<Input, Output> {
   Future<Output> run(covariant Client client, Input input);
 }
 
-abstract class HttpOperation<Input, Output> extends Operation<Input, Output> {
+abstract class InputPayload<T extends Object?> {
+  T getPayload();
+}
+
+abstract class HttpOperation<T extends Object?, Input, Output>
+    extends Operation<Input, Output> implements HttpProtocol<T, Input, Output> {
   const HttpOperation._({
     required this.method,
     required String path,
@@ -43,7 +60,15 @@ abstract class HttpOperation<Input, Output> extends Operation<Input, Output> {
   }
 
   @visibleForTesting
-  http.BaseRequest createRequest(Uri baseUri, Input input);
+  http.BaseRequest createRequest(Uri baseUri, Input input) {
+    final request = http.StreamedRequest(
+      method,
+      baseUri.resolve(path(input))
+        ..queryParameters.addAll(queryParameters(input)),
+    )..headers.addAll(headers(input));
+    addBody(request, input);
+    return request;
+  }
 
   @visibleForTesting
   @nonVirtual
@@ -56,9 +81,8 @@ abstract class HttpOperation<Input, Output> extends Operation<Input, Output> {
   Future<Output> run(HttpClient client, Input input);
 }
 
-abstract class HttpStaticOperation<Input, Output>
-    extends HttpOperation<Input, Output>
-    implements Serializer<Input, String>, Deserializer<String, Output> {
+abstract class HttpStaticOperation<T extends Object?, Input, Output>
+    extends HttpOperation<T, Input, Output> {
   const HttpStaticOperation({
     required String method,
     required String path,
@@ -68,56 +92,134 @@ abstract class HttpStaticOperation<Input, Output>
         );
 
   @override
-  http.BaseRequest createRequest(Uri baseUri, Input input) {
-    return http.Request(
-      method,
-      baseUri.resolve(path(input))
-        ..queryParameters.addAll(queryParameters(input)),
-    )
-      ..body = serialize(input)
-      ..headers.addAll(headers(input));
-  }
+  Future<Output> parseResponse(http.StreamedResponse response);
 
   @override
   Future<Output> run(HttpClient client, Input input) async {
     final response = await sendRequest(client, input);
-    final responseBody = await response.stream.bytesToString();
-    return deserialize(responseBody);
+    return parseResponse(response);
   }
 }
 
-abstract class HttpStreamingOperation<Input extends StreamingInput, Output>
-    extends HttpOperation<Input, Output> {
-  const HttpStreamingOperation({
+abstract class HttpRawOperation<
+        T extends Object?,
+        Input extends InputPayload<T>,
+        Output> extends HttpStaticOperation<T, Input, Output>
+    with RawBody<T, Input, Output> {
+  const HttpRawOperation({
     required String method,
     required String path,
-    required this.outputFactory,
+  }) : super(
+          method: method,
+          path: path,
+        );
+
+  @override
+  RawResponseConstructor<T, Output> get responseConstructor;
+}
+
+mixin RawBody<T extends Object?, Input extends InputPayload<T>, Output>
+    on HttpOperation<T, Input, Output> {
+  @override
+  void addBody(http.StreamedRequest request, Input input) {
+    var payload = input.getPayload();
+    if (payload == null) {
+      return;
+    }
+    if (payload is String) {
+      request.sink.add(utf8.encode(payload));
+    } else if (payload is List<int>) {
+      request.sink.add(payload);
+    } else {
+      throw ArgumentError(
+        'Invalid raw payload type: $T. '
+            'Only String and List<int> are supported.',
+        'T',
+      );
+    }
+  }
+
+  @override
+  Future<Output> parseResponse(http.StreamedResponse response) async {
+    if (T == String) {
+      final body = await response.stream.bytesToString();
+      return responseConstructor(body as T);
+    } else if (T == List<int>) {
+      final bodyBytes = await response.stream.toBytes();
+      return responseConstructor(bodyBytes as T);
+    } else {
+      throw ArgumentError(
+        'Invalid raw payload type: $T. '
+            'Only String and List<int> are supported.',
+        'T',
+      );
+    }
+  }
+}
+
+abstract class HttpJsonOperation<Input, Output>
+    extends HttpStaticOperation<Map<String, dynamic>, Input, Output>
+    with
+        JsonSerializer<Input>,
+        JsonDeserializer<Output>,
+        JsonProtocol<Input, Output> {
+  const HttpJsonOperation({
+    required String method,
+    required String path,
+  }) : super(
+          method: method,
+          path: path,
+        );
+}
+
+abstract class HttpStreamingOperation<
+    T extends Object?,
+    Input extends InputPayload<Stream<T>>,
+    Output> extends HttpOperation<Stream<T>, Input, Output> {
+  const HttpStreamingOperation._({
+    required String method,
+    required String path,
   }) : super._(
           method: method,
           path: path,
         );
 
-  final Output Function(Stream<List<int>>) outputFactory;
-
   @override
-  http.BaseRequest createRequest(Uri baseUri, Input input) {
-    final request = http.StreamedRequest(
-      method,
-      baseUri.resolve(path(input))
-        ..queryParameters.addAll(queryParameters(input)),
-    )..headers.addAll(headers(input));
-    input._body.listen(
-      request.sink.add,
-      onError: request.sink.addError,
-    );
-    return request;
-  }
+  StreamingResponseContructor<T, Output> get responseConstructor;
 
   @override
   Future<Output> run(HttpClient client, Input input) async {
     final response = await sendRequest(client, input);
-    return outputFactory(response.stream);
+    return parseResponse(response);
   }
+}
+
+abstract class HttpStreamingRawOperation<
+        T extends Object?,
+        Input extends InputPayload<Stream<T>>,
+        Output> extends HttpStreamingOperation<T, Input, Output>
+    with RawBody<Stream<T>, Input, Output> {
+  const HttpStreamingRawOperation({
+    required String method,
+    required String path,
+  }) : super._(
+          method: method,
+          path: path,
+        );
+}
+
+abstract class HttpStreamingJsonOperation<
+        T extends AWSSerializable,
+        Input extends InputPayload<Stream<T>>,
+        Output> extends HttpStreamingOperation<T, Input, Output>
+    with JsonSerializer<Input> {
+  const HttpStreamingJsonOperation({
+    required String method,
+    required String path,
+  }) : super._(
+          method: method,
+          path: path,
+        );
 }
 
 class MissingLabelError<T> extends Error {
