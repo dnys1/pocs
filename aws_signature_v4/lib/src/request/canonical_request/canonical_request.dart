@@ -1,10 +1,8 @@
 import 'dart:collection';
 import 'dart:convert';
 
-import 'package:aws_signature_v4/src/credentials/aws_credential_scope.dart';
-import 'package:aws_signature_v4/src/credentials/aws_credentials.dart';
+import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:aws_signature_v4/src/configuration/service_configuration.dart';
-import 'package:aws_signature_v4/src/signer/aws_algorithm.dart';
 import 'package:collection/collection.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';

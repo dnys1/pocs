@@ -39,7 +39,7 @@ class AWSSigV4Signer {
   }
 
   /// Signs the given [signerRequest].
-  AWSSigV4SignedRequest sign(AWSSignerRequest signerRequest) {
+  AWSSignedRequest sign(AWSSignerRequest signerRequest) {
     final canonicalRequest = CanonicalRequest(
       request: signerRequest.request,
       credentials: credentials,
@@ -78,7 +78,7 @@ class AWSSigV4Signer {
   }
 
   /// Builds a signed request from [canonicalRequest] and [signatureStream].
-  AWSSigV4SignedRequest _buildSignedRequest({
+  AWSSignedRequest _buildSignedRequest({
     required CanonicalRequest canonicalRequest,
     required String signature,
     required Stream<List<int>> body,
@@ -94,14 +94,14 @@ class AWSSigV4Signer {
     final headers = canonicalRequest.headers;
 
     // If the session token was omitted from signing, include it now.
-    var sessionToken = credentials.sessionToken;
+    final sessionToken = credentials.sessionToken;
     final includeSessionToken =
         sessionToken != null && canonicalRequest.omitSessionTokenFromSigning;
     if (canonicalRequest.presignedUrl) {
-      queryParameters.addAll({
-        AWSHeaders.signature: signature,
-        if (includeSessionToken) AWSHeaders.securityToken: sessionToken!,
-      });
+      queryParameters[AWSHeaders.signature] = signature;
+      if (includeSessionToken) {
+        queryParameters[AWSHeaders.securityToken] = sessionToken!;
+      }
     } else {
       headers[AWSHeaders.authorization] = createAuthorizationHeader(
         algorithm: algorithm,
@@ -116,7 +116,7 @@ class AWSSigV4Signer {
     }
 
     final originalRequest = canonicalRequest.request;
-    return AWSSigV4SignedRequest(
+    return AWSSignedRequest(
       canonicalRequest: canonicalRequest,
       signature: signature,
       method: originalRequest.method,

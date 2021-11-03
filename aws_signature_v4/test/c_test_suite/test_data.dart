@@ -136,7 +136,7 @@ class SignerTest {
       expiresIn: context.expirationInSeconds,
       serviceConfiguration: serviceConfiguration,
     );
-    final AWSSigV4SignedRequest signedRequest = signer.sign(signerRequest);
+    final AWSSignedRequest signedRequest = signer.sign(signerRequest);
 
     group(method.string, () {
       test('canonical request', () {

@@ -36,7 +36,7 @@ class AWSAppSyncService {
         return MapEntry(key, value.toString());
       }),
     );
-    final AWSSigV4SignedRequest signedRequest = _signer.sign(
+    final AWSSignedRequest signedRequest = _signer.sign(
       AWSSignerRequest(
         request,
         credentialScope: scope,

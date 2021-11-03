@@ -1,5 +1,4 @@
-import 'package:aws_signature_v4/src/request/aws_date_time.dart';
-import 'package:aws_signature_v4/src/credentials/aws_credentials.dart';
+import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'context.g.dart';

@@ -5,7 +5,7 @@ export 'package:aws_signature_v4/src/request/http_method.dart';
 /// {@template aws_sig_v4_signed_request}
 /// A signed [AWSBaseHttpRequest].
 /// {@endtemplate}
-class AWSSigV4SignedRequest extends AWSStreamedHttpRequest {
+class AWSSignedRequest extends AWSStreamedHttpRequest {
   /// The canonical request for this request.
   final CanonicalRequest canonicalRequest;
 
@@ -13,7 +13,7 @@ class AWSSigV4SignedRequest extends AWSStreamedHttpRequest {
   final String signature;
 
   /// @{macro aws_sig_v4_signed_request}
-  AWSSigV4SignedRequest({
+  AWSSignedRequest({
     required this.canonicalRequest,
     required this.signature,
     required HttpMethod method,
