@@ -1,12 +1,12 @@
 abstract class SmithyEnum<T extends SmithyEnum<T>> {
-  const SmithyEnum(this.index, this.value);
-  const SmithyEnum.unknown(this.value) : index = -1;
+  const SmithyEnum(this.index, this.name);
+  const SmithyEnum.unknown(this.name) : index = -1;
 
   final int index;
-  final String value;
+  final String name;
 
   bool get isUnknown => index == -1;
 
   @override
-  String toString() => value;
+  String toString() => name;
 }

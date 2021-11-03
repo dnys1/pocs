@@ -1,8 +1,8 @@
 import 'package:smithy/smithy.dart';
 
 class MyEnum extends SmithyEnum<MyEnum> {
-  const MyEnum._(int index, String value) : super(index, value);
-  const MyEnum._unknown(String value) : super.unknown(value);
+  const MyEnum._(int index, String name) : super(index, name);
+  const MyEnum._unknown(String name) : super.unknown(name);
 
   static const a = MyEnum._(0, 'a');
 
@@ -10,10 +10,10 @@ class MyEnum extends SmithyEnum<MyEnum> {
     a,
   ];
 
-  factory MyEnum.fromValue(String value) {
+  factory MyEnum.fromString(String name) {
     return values.firstWhere(
-      (element) => element.value == value,
-      orElse: () => MyEnum._unknown(value),
+      (element) => element.name == name,
+      orElse: () => MyEnum._unknown(name),
     );
   }
 }

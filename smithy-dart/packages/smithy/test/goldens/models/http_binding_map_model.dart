@@ -26,7 +26,7 @@ class MapInputRequest {
   Map<String, dynamic> toJson() => _$MapInputRequestToJson(this);
 }
 
-class MapInputOperation extends HttpOperation<MapInputRequest, void> {
+class MapInputOperation extends HttpStaticOperation<MapInputRequest, void> {
   const MapInputOperation() : super(method: 'POST', path: '/input/map');
 
   @override

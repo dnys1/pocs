@@ -64,8 +64,8 @@ class Timestamp {
   }
 }
 
-class TimestampList extends DelegatingList<Timestamp> {
-  const TimestampList(List<Timestamp> timestamps) : super(timestamps);
+class TimestampList<T extends Timestamp?> extends DelegatingList<T> {
+  const TimestampList(List<T> timestamps) : super(timestamps);
 
   static TimestampList? dateTimeFromJson(String? json) {
     if (json == null) {
@@ -145,30 +145,6 @@ class TimestampSerializer extends JsonConverter<Timestamp?, String?>
   static const dateTime =
       TimestampSerializer._(TimestampSerializationFormat.dateTime);
 
-  static String? dateTimeToJson(Object? timestamp) {
-    if (timestamp is Timestamp) {
-      return dateTime.serialize(timestamp);
-    } else if (timestamp is List<Timestamp>) {
-      return jsonEncode(
-        timestamp.map(dateTime.serialize).toList(),
-      );
-    } else {
-      return null;
-    }
-  }
-
-  static Object? dateTimeFromJson(String? json) {
-    if (json == null) {
-      return null;
-    }
-    if (json.startsWith('[')) {
-      final decoded = jsonDecode(json) as List;
-      return decoded.cast<String>().map(dateTime.deserialize).toList();
-    } else {
-      return dateTime.deserialize(json);
-    }
-  }
-
   /// {@macro smithy.timestamp_format_httpdate}
   static const httpDate =
       TimestampSerializer._(TimestampSerializationFormat.httpDate);
@@ -200,6 +176,63 @@ class TimestampSerializer extends JsonConverter<Timestamp?, String?>
 
   @override
   String? toJson(Timestamp? object) {
+    return serialize(object);
+  }
+}
+
+/// A class which handles serialization/deserialization of [Timestamp] objects
+/// using the predefined formats specified by [TimestampSerializationFormat].
+class TimestampListSerializer extends JsonConverter<List<Timestamp>?, String?>
+    implements
+        Serializer<List<Timestamp>?, String?>,
+        Deserializer<String?, List<Timestamp>?> {
+  const TimestampListSerializer._(this.format);
+
+  /// The format to use for serialization/deserialization.
+  final TimestampSerializationFormat format;
+
+  /// {@macro smithy.timestamp_format_datetime}
+  static const dateTime =
+      TimestampListSerializer._(TimestampSerializationFormat.dateTime);
+
+  /// {@macro smithy.timestamp_format_httpdate}
+  static const httpDate =
+      TimestampListSerializer._(TimestampSerializationFormat.httpDate);
+
+  /// {@macro smithy.timestamp_format_epochseconds}
+  static const epochSeconds =
+      TimestampListSerializer._(TimestampSerializationFormat.epochSeconds);
+
+  @override
+  List<Timestamp>? deserialize(String? data) {
+    if (data == null) {
+      return null;
+    }
+    final list = (jsonDecode(data) as List?)?.cast<String>();
+    final decoded = list?.map((el) {
+      return Timestamp.parse(data, format: format);
+    }).toList();
+    if (decoded == null) {
+      return null;
+    }
+    return TimestampList(decoded);
+  }
+
+  @override
+  String? serialize(List<Timestamp>? input) {
+    if (input == null) {
+      return null;
+    }
+    return jsonEncode(input);
+  }
+
+  @override
+  List<Timestamp>? fromJson(String? json) {
+    return deserialize(json);
+  }
+
+  @override
+  String? toJson(List<Timestamp>? object) {
     return serialize(object);
   }
 }
