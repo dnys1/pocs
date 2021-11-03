@@ -55,9 +55,9 @@ void main(List<String> args) async {
   final AWSCredentialScope scope =
       AWSCredentialScope(region: region, service: 'cognito-idp');
   final AWSSigV4Signer signer = AWSSigV4Signer(credentials);
-  final List<int> body = utf8.encode(json.encode({
-    'UserPoolId': userPoolId,
-  }));
+final List<int> body = json.encode({
+  'UserPoolId': userPoolId,
+}).codeUnits;
   final AWSHttpRequest sigRequest = AWSHttpRequest(
     method: HttpMethod.post,
     host: 'cognito-idp.$region.amazonaws.com',
