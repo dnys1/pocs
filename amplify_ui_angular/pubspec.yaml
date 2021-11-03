@@ -1,0 +1,26 @@
+name: amplify_ui_angular
+description: AngularDart UI components for Amplify apps.
+version: 0.1.0
+
+environment:
+  sdk: '>=2.13.0 <3.0.0'
+
+dependencies:
+  angular: ^7.0.2
+  angular_forms: ^4.0.1
+  built_collection: ^5.0.0
+  built_value: ^8.0.0
+  meta: ^1.7.0
+
+dependency_overrides:
+  analyzer: ^2.0.0
+
+dev_dependencies:
+  amplify_lints: ^1.0.0
+  angular_test: ^4.0.1
+  build_runner: ^2.0.0
+  build_web_compilers: ^3.2.1
+  built_value_generator: ^8.0.0
+  mockito: ^5.0.0
+  pageloader: ^4.0.0
+  test: ^1.16.0
