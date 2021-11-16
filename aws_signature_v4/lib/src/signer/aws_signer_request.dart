@@ -6,7 +6,6 @@ class AWSSignerRequest<T extends AWSBaseHttpRequest> {
   const AWSSignerRequest(
     this.request, {
     required this.credentialScope,
-    this.presignedUrl,
     this.normalizePath,
     this.omitSessionTokenFromSigning,
     ServiceConfiguration? serviceConfiguration,
@@ -16,7 +15,6 @@ class AWSSignerRequest<T extends AWSBaseHttpRequest> {
 
   final T request;
   final AWSCredentialScope credentialScope;
-  final bool? presignedUrl;
   final bool? normalizePath;
   final bool? omitSessionTokenFromSigning;
   final ServiceConfiguration serviceConfiguration;

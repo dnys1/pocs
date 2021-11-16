@@ -10,8 +10,6 @@ dependencies:
   async: ^2.6.0
   aws_common:
     path: ../aws_common
-  aws_credentials:
-    path: ../aws_credentials
   collection: ^1.15.0
   convert: ^3.0.0
   crypto: ^3.0.0

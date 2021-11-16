@@ -22,30 +22,26 @@ class AWSSigV4Signer {
     this.algorithm = AWSAlgorithm.hmacSha256,
   });
 
-  /// Creates the string-to-sign (STS) for the canonical request.
-  @visibleForTesting
-  String stringToSign({
-    required AWSAlgorithm algorithm,
-    required AWSCredentialScope credentialScope,
-    required CanonicalRequest canonicalRequest,
-  }) {
-    final sb = StringBuffer();
-    sb.writeln(algorithm);
-    sb.writeln(credentialScope.dateTime);
-    sb.writeln(credentialScope);
-    sb.write(canonicalRequest.hash);
-
-    return sb.toString();
+  /// Creates a presigned URL for the given [signerRequest].
+  AWSSignedRequest presign(AWSSignerRequest signerRequest) {
+    return _sign(signerRequest, presignedUrl: true);
   }
 
-  /// Signs the given [signerRequest].
+  /// Signs the given [signerRequest] using authorization headers.
   AWSSignedRequest sign(AWSSignerRequest signerRequest) {
+    return _sign(signerRequest, presignedUrl: false);
+  }
+
+  AWSSignedRequest _sign(
+    AWSSignerRequest signerRequest, {
+    required bool presignedUrl,
+  }) {
     final canonicalRequest = CanonicalRequest(
       request: signerRequest.request,
       credentials: credentials,
       credentialScope: signerRequest.credentialScope,
       normalizePath: signerRequest.normalizePath,
-      presignedUrl: signerRequest.presignedUrl,
+      presignedUrl: presignedUrl,
       omitSessionTokenFromSigning: signerRequest.omitSessionTokenFromSigning,
       algorithm: algorithm,
       expiresIn: signerRequest.expiresIn,
@@ -75,6 +71,22 @@ class AWSSigV4Signer {
       body: signedBody,
       canonicalRequest: canonicalRequest,
     );
+  }
+
+  /// Creates the string-to-sign (STS) for the canonical request.
+  @visibleForTesting
+  String stringToSign({
+    required AWSAlgorithm algorithm,
+    required AWSCredentialScope credentialScope,
+    required CanonicalRequest canonicalRequest,
+  }) {
+    final sb = StringBuffer();
+    sb.writeln(algorithm);
+    sb.writeln(credentialScope.dateTime);
+    sb.writeln(credentialScope);
+    sb.write(canonicalRequest.hash);
+
+    return sb.toString();
   }
 
   /// Builds a signed request from [canonicalRequest] and [signatureStream].

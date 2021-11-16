@@ -1,6 +1,7 @@
 import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:aws_signature_v4/src/configuration/service_configuration.dart';
 import 'package:collection/collection.dart';
+import 'package:http/http.dart';
 import 'package:test/test.dart';
 
 import 'context.dart';
@@ -130,13 +131,14 @@ class SignerTest {
     final signerRequest = AWSSignerRequest(
       request,
       credentialScope: credentialScope,
-      presignedUrl: presignedUrl,
       normalizePath: context.normalize,
       omitSessionTokenFromSigning: context.omitSessionToken,
       expiresIn: context.expirationInSeconds,
       serviceConfiguration: serviceConfiguration,
     );
-    final AWSSignedRequest signedRequest = signer.sign(signerRequest);
+    final AWSSignedRequest signedRequest = presignedUrl
+        ? signer.presign(signerRequest)
+        : signer.sign(signerRequest);
 
     group(method.string, () {
       test('canonical request', () {
@@ -178,15 +180,10 @@ class SignerTest {
           );
         });
         test('body', () async {
-          final body = await signedRequest.body.toList();
-          final expected = await testMethodData.signedRequest.body.toList();
-          expect(body.length, equals(expected.length));
-          for (var i = 0; i < body.length; i++) {
-            expect(
-              body[i],
-              orderedEquals(expected[i]),
-            );
-          }
+          final body = await ByteStream(signedRequest.body).toBytes();
+          final expected =
+              await ByteStream(testMethodData.signedRequest.body).toBytes();
+          expect(body, orderedEquals(expected));
         });
       });
     });
