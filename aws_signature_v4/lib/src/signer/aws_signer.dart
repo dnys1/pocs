@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:aws_signature_v4/aws_signature_v4.dart';
-import 'package:aws_signature_v4/src/request/canonical_request/authorization_header.dart';
+import 'package:aws_signature_v4/src/configuration/service_configuration.dart';
+import 'package:aws_signature_v4/src/credentials/credentials_provider.dart';
 import 'package:meta/meta.dart';
 
 /// {@template aws_sig_v4_signer}
@@ -13,62 +14,182 @@ import 'package:meta/meta.dart';
 class AWSSigV4Signer {
   static const terminationString = 'aws4_request';
 
-  final AWSCredentials credentials;
   final AWSAlgorithm algorithm;
+  final AWSCredentialsProvider credentialsProvider;
 
   /// {@macro aws_sig_v4_signer}
-  const AWSSigV4Signer(
-    this.credentials, {
+  const AWSSigV4Signer({
+    this.credentialsProvider = const AWSCredentialsProvider.environment(),
     this.algorithm = AWSAlgorithm.hmacSha256,
   });
 
-  /// Creates a presigned URL for the given [signerRequest].
-  AWSSignedRequest presign(AWSSignerRequest signerRequest) {
-    return _sign(signerRequest, presignedUrl: true);
+  /// Creates a presigned URL for the given [request].
+  Future<AWSSignedRequest> presign(
+    AWSHttpRequest request, {
+    required AWSCredentialScope credentialScope,
+    ServiceConfiguration serviceConfiguration =
+        const BaseServiceConfiguration(),
+    bool? normalizePath,
+    bool? omitSessionTokenFromSigning,
+    int? expiresIn,
+  }) async {
+    final credentials = await credentialsProvider.retrieve();
+    final payloadHash = await serviceConfiguration.hashPayload(request);
+    final contentLength = request.contentLength;
+    return _sign(
+      credentials,
+      request,
+      credentialScope: credentialScope,
+      serviceConfiguration: serviceConfiguration,
+      payloadHash: payloadHash,
+      contentLength: contentLength,
+      normalizePath: normalizePath,
+      omitSessionTokenFromSigning: omitSessionTokenFromSigning,
+      expiresIn: expiresIn,
+      presignedUrl: true,
+    );
   }
 
-  /// Signs the given [signerRequest] using authorization headers.
-  AWSSignedRequest sign(AWSSignerRequest signerRequest) {
-    return _sign(signerRequest, presignedUrl: false);
+  /// Creates a presigned URL synchronously for the given [request].
+  AWSSignedRequest presignSync(
+    AWSHttpRequest request, {
+    required AWSCredentialScope credentialScope,
+    ServiceConfiguration serviceConfiguration =
+        const BaseServiceConfiguration(),
+    bool? normalizePath,
+    bool? omitSessionTokenFromSigning,
+    int? expiresIn,
+  }) {
+    final credentials = credentialsProvider.retrieve();
+    if (credentials is! AWSCredentials) {
+      throw ArgumentError('Must use presign');
+    }
+    final payloadHash = serviceConfiguration.hashPayloadSync(request);
+    final contentLength = request.contentLength;
+    return _sign(
+      credentials,
+      request,
+      credentialScope: credentialScope,
+      serviceConfiguration: serviceConfiguration,
+      payloadHash: payloadHash,
+      contentLength: contentLength,
+      normalizePath: normalizePath,
+      omitSessionTokenFromSigning: omitSessionTokenFromSigning,
+      expiresIn: expiresIn,
+      presignedUrl: true,
+    );
+  }
+
+  /// Signs the given [request] using authorization headers.
+  Future<AWSSignedRequest> sign(
+    AWSBaseHttpRequest request, {
+    required AWSCredentialScope credentialScope,
+    ServiceConfiguration serviceConfiguration =
+        const BaseServiceConfiguration(),
+    bool? normalizePath,
+    bool? omitSessionTokenFromSigning,
+    int? expiresIn,
+  }) async {
+    final credentials = await credentialsProvider.retrieve();
+    final payloadHash = await serviceConfiguration.hashPayload(request);
+    final contentLength = await request.contentLength;
+    return _sign(
+      credentials,
+      request,
+      credentialScope: credentialScope,
+      serviceConfiguration: serviceConfiguration,
+      payloadHash: payloadHash,
+      contentLength: contentLength,
+      normalizePath: normalizePath,
+      omitSessionTokenFromSigning: omitSessionTokenFromSigning,
+      expiresIn: expiresIn,
+      presignedUrl: false,
+    );
+  }
+
+  /// Signs the given [request] synchronously using authorization headers.
+  AWSSignedRequest signSync(
+    AWSBaseHttpRequest request, {
+    required AWSCredentialScope credentialScope,
+    ServiceConfiguration serviceConfiguration =
+        const BaseServiceConfiguration(),
+    bool? normalizePath,
+    bool? omitSessionTokenFromSigning,
+    int? expiresIn,
+  }) {
+    final credentials = credentialsProvider.retrieve();
+    if (credentials is! AWSCredentials) {
+      throw ArgumentError('Must use sign');
+    }
+    final contentLength = request.hasContentLength
+        ? request.contentLength as int
+        : throw ArgumentError('Must use sign');
+    final payloadHash = serviceConfiguration.hashPayloadSync(request);
+    return _sign(
+      credentials,
+      request,
+      credentialScope: credentialScope,
+      serviceConfiguration: serviceConfiguration,
+      payloadHash: payloadHash,
+      contentLength: contentLength,
+      normalizePath: normalizePath,
+      omitSessionTokenFromSigning: omitSessionTokenFromSigning,
+      expiresIn: expiresIn,
+      presignedUrl: false,
+    );
   }
 
   AWSSignedRequest _sign(
-    AWSSignerRequest signerRequest, {
+    AWSCredentials credentials,
+    AWSBaseHttpRequest request, {
+    required AWSCredentialScope credentialScope,
+    required String payloadHash,
+    required int contentLength,
+    ServiceConfiguration serviceConfiguration =
+        const BaseServiceConfiguration(),
+    bool? normalizePath,
+    bool? omitSessionTokenFromSigning,
+    int? expiresIn,
     required bool presignedUrl,
   }) {
     final canonicalRequest = CanonicalRequest(
-      request: signerRequest.request,
+      request: request,
       credentials: credentials,
-      credentialScope: signerRequest.credentialScope,
-      normalizePath: signerRequest.normalizePath,
+      credentialScope: credentialScope,
+      payloadHash: payloadHash,
+      contentLength: contentLength,
+      normalizePath: normalizePath,
       presignedUrl: presignedUrl,
-      omitSessionTokenFromSigning: signerRequest.omitSessionTokenFromSigning,
+      omitSessionTokenFromSigning: omitSessionTokenFromSigning,
       algorithm: algorithm,
-      expiresIn: signerRequest.expiresIn,
-      configuration: signerRequest.serviceConfiguration,
+      expiresIn: expiresIn,
+      configuration: serviceConfiguration,
     );
     final signingKey = algorithm.deriveSigningKey(
       credentials,
-      signerRequest.credentialScope,
+      credentialScope,
     );
     final sts = stringToSign(
       algorithm: algorithm,
-      credentialScope: signerRequest.credentialScope,
+      credentialScope: credentialScope,
       canonicalRequest: canonicalRequest,
     );
     final seedSignature = algorithm.sign(sts, signingKey);
-    final signedBody = signerRequest.serviceConfiguration.signBody(
+    final signedBody = serviceConfiguration.signBody(
       algorithm: algorithm,
+      contentLength: contentLength,
       signingKey: signingKey,
       seedSignature: seedSignature,
-      credentialScope: signerRequest.credentialScope,
+      credentialScope: credentialScope,
       canonicalRequest: canonicalRequest,
     );
 
     return _buildSignedRequest(
-      credentialScope: signerRequest.credentialScope,
+      credentials: credentials,
+      credentialScope: credentialScope,
       signature: seedSignature,
       body: signedBody,
+      contentLength: contentLength,
       canonicalRequest: canonicalRequest,
     );
   }
@@ -89,11 +210,29 @@ class AWSSigV4Signer {
     return sb.toString();
   }
 
-  /// Builds a signed request from [canonicalRequest] and [signatureStream].
+  /// Creates an authorization header for a signed request.
+  @visibleForTesting
+  String createAuthorizationHeader({
+    required AWSCredentials credentials,
+    required AWSCredentialScope credentialScope,
+    required SignedHeaders signedHeaders,
+    required String signature,
+  }) {
+    return [
+      algorithm.id,
+      'Credential=${credentials.accessKeyId}/$credentialScope,',
+      'SignedHeaders=$signedHeaders,',
+      'Signature=$signature',
+    ].join(' ');
+  }
+
+  /// Builds a signed request from [canonicalRequest] and [signature].
   AWSSignedRequest _buildSignedRequest({
+    required AWSCredentials credentials,
     required CanonicalRequest canonicalRequest,
     required String signature,
     required Stream<List<int>> body,
+    required int contentLength,
     required AWSCredentialScope credentialScope,
   }) {
     // The signing process requires component keys be encoded. However, the
@@ -116,7 +255,6 @@ class AWSSigV4Signer {
       }
     } else {
       headers[AWSHeaders.authorization] = createAuthorizationHeader(
-        algorithm: algorithm,
         credentials: credentials,
         credentialScope: credentialScope,
         signedHeaders: canonicalRequest.signedHeaders,
@@ -135,7 +273,7 @@ class AWSSigV4Signer {
       host: originalRequest.host,
       path: originalRequest.path,
       body: body,
-      contentLength: originalRequest.contentLength,
+      contentLength: contentLength,
       headers: headers,
       queryParameters: queryParameters,
     );

@@ -39,33 +39,30 @@ class AppSyncApiKeyAuthorization extends ApiAuthorization {
 }
 
 class AppSyncIamAuthorization extends ApiAuthorization {
-  AppSyncIamAuthorization(this.credentials, {AWSSigV4Signer? signer})
-      : _signer = signer ?? AWSSigV4Signer(credentials),
+  AppSyncIamAuthorization(AWSCredentialsProvider _credentials)
+      : _signer = AWSSigV4Signer(credentialsProvider: _credentials),
         super._(ApiAuthorizationType.awsIAM);
 
-  final AWSCredentials credentials;
   final AWSSigV4Signer _signer;
 
   @override
-  Map<String, String> connectionHeaders(AWSHttpRequest request) =>
+  Future<Map<String, String>> connectionHeaders(AWSHttpRequest request) =>
       _headers(request);
 
   @override
-  Map<String, String> requestHeaders(AWSHttpRequest request) =>
+  Future<Map<String, String>> requestHeaders(AWSHttpRequest request) =>
       _headers(request);
 
-  Map<String, String> _headers(AWSHttpRequest request) {
+  Future<Map<String, String>> _headers(AWSHttpRequest request) async {
     final host = request.host;
     final region = host.split('.')[2];
     final credentialScope = AWSCredentialScope(
       region: region,
       service: 'appsync',
     );
-    final signedRequest = _signer.sign(
-      AWSSignerRequest(
-        request,
-        credentialScope: credentialScope,
-      ),
+    final signedRequest = await _signer.sign(
+      request,
+      credentialScope: credentialScope,
     );
     return signedRequest.headers;
   }
@@ -73,10 +70,8 @@ class AppSyncIamAuthorization extends ApiAuthorization {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is AppSyncIamAuthorization &&
-          credentials == other.credentials &&
-          _signer.algorithm == other._signer.algorithm;
+      other is AppSyncIamAuthorization && _signer == other._signer;
 
   @override
-  int get hashCode => credentials.hashCode ^ _signer.algorithm.hashCode;
+  int get hashCode => _signer.hashCode;
 }

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:aws_signature_v4/aws_signature_v4.dart';
+import 'package:aws_signature_v4/src/credentials/credentials_provider.dart';
 
 void main(List<String> args) async {
   final argParser = ArgParser();
@@ -54,7 +55,9 @@ void main(List<String> args) async {
       AWSCredentials(accessKeyId, secretAccessKey, sessionToken);
   final AWSCredentialScope scope =
       AWSCredentialScope(region: region, service: 'cognito-idp');
-  final AWSSigV4Signer signer = AWSSigV4Signer(credentials);
+  final AWSSigV4Signer signer = AWSSigV4Signer(
+    credentialsProvider: AWSCredentialsProvider(credentials),
+  );
   final List<int> body = json.encode({
     'UserPoolId': userPoolId,
   }).codeUnits;
@@ -70,11 +73,9 @@ void main(List<String> args) async {
     body: body,
   );
 
-  final AWSSignedRequest signedRequest = signer.sign(
-    AWSSignerRequest(
-      sigRequest,
-      credentialScope: scope,
-    ),
+  final AWSSignedRequest signedRequest = await signer.sign(
+    sigRequest,
+    credentialScope: scope,
   );
   final resp = await signedRequest.send();
   print(resp.body);

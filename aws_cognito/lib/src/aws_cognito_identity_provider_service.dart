@@ -13,11 +13,12 @@ class AWSCognitoIdentityProviderService {
     required String region,
     AWSSigV4Signer? signer,
     AWSCredentials? credentials,
-  })  : assert(
-          signer != null || credentials != null,
-          'Either an AWS signer or credentials must be provided.',
-        ),
-        _signer = signer ?? AWSSigV4Signer(credentials!),
+  })  : _signer = signer ??
+            AWSSigV4Signer(
+              credentialsProvider: credentials == null
+                  ? const AWSCredentialsProvider.environment()
+                  : AWSCredentialsProvider(credentials),
+            ),
         _region = region;
 
   Map<String, dynamic> _decode(String response) {
@@ -43,11 +44,9 @@ class AWSCognitoIdentityProviderService {
       },
       body: body,
     );
-    final AWSSignedRequest signedRequest = _signer.sign(
-      AWSSignerRequest(
-        sigRequest,
-        credentialScope: scope,
-      ),
+    final AWSSignedRequest signedRequest = await _signer.sign(
+      sigRequest,
+      credentialScope: scope,
     );
 
     final resp = await signedRequest.send();
@@ -81,11 +80,9 @@ class AWSCognitoIdentityProviderService {
       },
       body: body,
     );
-    final AWSSignedRequest signedRequest = _signer.sign(
-      AWSSignerRequest(
-        sigRequest,
-        credentialScope: scope,
-      ),
+    final AWSSignedRequest signedRequest = await _signer.sign(
+      sigRequest,
+      credentialScope: scope,
     );
 
     final resp = await signedRequest.send();

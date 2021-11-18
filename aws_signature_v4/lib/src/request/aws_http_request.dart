@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:async/async.dart';
 import 'package:aws_common/aws_common.dart';
 import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:aws_signature_v4/src/request/http_method.dart';
@@ -16,16 +19,16 @@ export 'http_method.dart';
 /// See also:
 /// - [AWSHttpRequest]
 /// - [AWSStreamedHttpRequest]
-@immutable
 abstract class AWSBaseHttpRequest with AWSEquatable {
   final HttpMethod method;
   final String host;
   final String path;
   final Map<String, String> queryParameters;
   final Map<String, String> headers;
-  final int contentLength;
 
   Stream<List<int>> get body;
+  FutureOr<int> get contentLength;
+  bool get hasContentLength;
 
   late final Uri uri = Uri(
     scheme: 'https',
@@ -41,7 +44,6 @@ abstract class AWSBaseHttpRequest with AWSEquatable {
     required this.path,
     Map<String, String>? queryParameters,
     Map<String, String>? headers,
-    required this.contentLength,
   })  : queryParameters = queryParameters ?? const {},
         headers = headers ?? const {};
 
@@ -52,13 +54,18 @@ abstract class AWSBaseHttpRequest with AWSEquatable {
         path,
         queryParameters,
         headers,
+        hasContentLength,
+        if (hasContentLength) contentLength,
       ];
 
   /// Creates a `package:http` request from this request.
   http.BaseRequest get httpRequest {
     final request = http.StreamedRequest(method.value, uri);
     request.headers.addAll(headers);
-    request.contentLength = contentLength;
+    var _contentLength = contentLength;
+    if (_contentLength is int) {
+      request.contentLength = _contentLength;
+    }
 
     body.listen(request.sink.add,
         onError: request.sink.addError,
@@ -89,6 +96,7 @@ abstract class AWSBaseHttpRequest with AWSEquatable {
 }
 
 /// {@macro aws_http_request}
+@immutable
 class AWSHttpRequest extends AWSBaseHttpRequest {
   /// {@macro aws_http_request}
   AWSHttpRequest({
@@ -99,19 +107,32 @@ class AWSHttpRequest extends AWSBaseHttpRequest {
     Map<String, String>? headers,
     List<int>? body,
   })  : bodyBytes = body ?? const [],
+        contentLength = body?.length ?? 0,
         super._(
           method: method,
           host: host,
           path: path,
           queryParameters: queryParameters,
           headers: headers,
-          contentLength: body?.length ?? 0,
         );
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        contentLength,
+        bodyBytes,
+      ];
 
   @override
   Stream<List<int>> get body => bodyBytes.isEmpty
       ? const http.ByteStream(Stream.empty())
       : http.ByteStream.fromBytes(bodyBytes);
+
+  @override
+  final int contentLength;
+
+  @override
+  bool get hasContentLength => true;
 
   /// The body bytes.
   final List<int> bodyBytes;
@@ -120,11 +141,12 @@ class AWSHttpRequest extends AWSBaseHttpRequest {
 /// {@template aws_http_streamed_request}
 /// A streaming HTTP request.
 /// {@endtemplate}
-class AWSStreamedHttpRequest extends AWSBaseHttpRequest {
+class AWSStreamedHttpRequest extends AWSBaseHttpRequest
+    implements StreamSplitter<List<int>> {
   /// @{macro aws_http_streamed_request}
   ///
   /// For signed requests, [body] is read once, in chunks, as it is sent to AWS.
-  /// It is required that [contentLength] be provided so that [body] does not
+  /// It is recommended that [contentLength] be provided so that [body] does not
   /// have to be read twice, since the content length must be known when
   /// calculating the signature.
   AWSStreamedHttpRequest({
@@ -133,17 +155,54 @@ class AWSStreamedHttpRequest extends AWSBaseHttpRequest {
     required String path,
     Map<String, String>? queryParameters,
     Map<String, String>? headers,
-    required this.body,
-    required int contentLength,
-  }) : super._(
+    required Stream<List<int>> body,
+    int? contentLength,
+  })  : _body = body,
+        _contentLength = contentLength,
+        super._(
           method: method,
           host: host,
           path: path,
           queryParameters: queryParameters,
           headers: headers,
-          contentLength: contentLength,
         );
 
+  /// Handles splitting [_body] into multiple single-subscription streams.
+  StreamSplitter<List<int>>? _splitter;
+
+  /// The original body.
+  final Stream<List<int>> _body;
+
   @override
-  final Stream<List<int>> body;
+  Stream<List<int>> get body => _splitter == null ? _body : split();
+
+  /// The number of times the body stream has been split.
+  @visibleForTesting
+  int debugNumSplits = 0;
+
+  /// Returns a copy of [body] in cases where the stream must be read multiple
+  /// times, e.g. when [contentLength] is not provided and the service requires
+  /// it.
+  @override
+  Stream<List<int>> split() {
+    debugNumSplits++;
+    return (_splitter ??= StreamSplitter(body)).split();
+  }
+
+  final int? _contentLength;
+
+  @override
+  bool get hasContentLength => _contentLength != null;
+
+  @override
+  late final FutureOr<int> contentLength = () {
+    var length = _contentLength;
+    if (length != null) {
+      return length;
+    }
+    return split().length;
+  }() as FutureOr<int>;
+
+  @override
+  Future<void> close() => _splitter?.close() ?? Future.value();
 }

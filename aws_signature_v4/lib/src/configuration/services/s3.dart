@@ -57,8 +57,7 @@ class S3ServiceConfiguration extends BaseServiceConfiguration {
           omitSessionToken: false,
         );
 
-  int _calculateContentLength(AWSBaseHttpRequest request) {
-    var decodedLength = request.contentLength;
+  int _calculateContentLength(AWSBaseHttpRequest request, int decodedLength) {
     var chunkedLength = 0;
     var metadataLength = 0;
     var numChunks = (decodedLength / chunkSize).ceil() + 1;
@@ -79,18 +78,27 @@ class S3ServiceConfiguration extends BaseServiceConfiguration {
     Map<String, String> base,
     CanonicalRequest canonicalRequest, {
     required AWSCredentials credentials,
+    required String payloadHash,
+    required int contentLength,
   }) {
-    super.apply(base, canonicalRequest, credentials: credentials);
+    super.apply(
+      base,
+      canonicalRequest,
+      credentials: credentials,
+      payloadHash: payloadHash,
+      contentLength: contentLength,
+    );
 
     if (chunked) {
       // Raw size of the data to be sent, before compression and without metadata.
-      base[AWSHeaders.decodedContentLength] =
-          '${canonicalRequest.request.contentLength}';
+      base[AWSHeaders.decodedContentLength] = contentLength.toString();
 
       if (encoding == Encoding.none) {
         base[AWSHeaders.contentEncoding] = 'aws-chunked';
-        base[AWSHeaders.contentLength] =
-            _calculateContentLength(canonicalRequest.request).toString();
+        base[AWSHeaders.contentLength] = _calculateContentLength(
+          canonicalRequest.request,
+          contentLength,
+        ).toString();
       } else {
         base[AWSHeaders.contentEncoding] = 'aws-chunked,${encoding.value}';
       }
@@ -98,16 +106,24 @@ class S3ServiceConfiguration extends BaseServiceConfiguration {
     }
 
     if (signPayload) {
-      base[AWSHeaders.contentSHA256] = canonicalRequest.payloadHash;
+      base[AWSHeaders.contentSHA256] = payloadHash;
     } else {
       base[AWSHeaders.contentSHA256] = 'UNSIGNED-PAYLOAD';
     }
   }
 
   @override
-  String hashPayload(AWSBaseHttpRequest request) {
+  Future<String> hashPayload(AWSBaseHttpRequest request) async {
     if (!chunked) {
       return super.hashPayload(request);
+    }
+    return hashPayloadSync(request);
+  }
+
+  @override
+  String hashPayloadSync(AWSBaseHttpRequest request) {
+    if (!chunked) {
+      return super.hashPayloadSync(request);
     }
     if (signPayload) {
       return _chunkedPayloadSeedHash;
@@ -118,6 +134,7 @@ class S3ServiceConfiguration extends BaseServiceConfiguration {
   @override
   Stream<List<int>> signBody({
     required AWSAlgorithm algorithm,
+    required int contentLength,
     required List<int> signingKey,
     required String seedSignature,
     required AWSCredentialScope credentialScope,
@@ -126,6 +143,7 @@ class S3ServiceConfiguration extends BaseServiceConfiguration {
     if (!chunked) {
       yield* super.signBody(
         algorithm: algorithm,
+        contentLength: contentLength,
         signingKey: signingKey,
         seedSignature: seedSignature,
         credentialScope: credentialScope,
@@ -139,7 +157,7 @@ class S3ServiceConfiguration extends BaseServiceConfiguration {
           ? canonicalRequest.request.body
           : canonicalRequest.request.body.transform(encoding.encoding.encoder),
     );
-    final decodedLength = canonicalRequest.request.contentLength;
+    final decodedLength = contentLength;
     var previousSignature = seedSignature;
     var chunkedLength = 0;
     while (true) {

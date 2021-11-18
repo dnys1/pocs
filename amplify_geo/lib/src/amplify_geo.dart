@@ -20,7 +20,9 @@ class AmplifyGeo {
     if (config == null) {
       throw StateError('Must call configure first');
     }
-    final signer = AWSSigV4Signer(credentials);
+    final signer = AWSSigV4Signer(
+      credentialsProvider: AWSCredentialsProvider(credentials),
+    );
 
     return (
       String url,
@@ -33,7 +35,7 @@ class AmplifyGeo {
 
       if (url.contains('amazonaws.com')) {
         final uri = Uri.parse(url);
-        final signerRequest = AWSSignerRequest(
+        final signedRequest = signer.presignSync(
           AWSHttpRequest(
             method: HttpMethod.get,
             host: uri.host,
@@ -47,9 +49,7 @@ class AmplifyGeo {
             region: config.region!,
             service: 'geo',
           ),
-          presignedUrl: true,
         );
-        final signedRequest = signer.sign(signerRequest);
         return {
           'url': signedRequest.toString(),
           'credentials': 'same-origin',

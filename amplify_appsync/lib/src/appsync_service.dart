@@ -14,11 +14,12 @@ class AWSAppSyncService {
     required String region,
     AWSSigV4Signer? signer,
     AWSCredentials? credentials,
-  })  : assert(
-          signer != null || credentials != null,
-          'Either an AWS signer or credentials must be provided.',
-        ),
-        _signer = signer ?? AWSSigV4Signer(credentials!),
+  })  : _signer = signer ??
+            AWSSigV4Signer(
+              credentialsProvider: credentials == null
+                  ? const AWSCredentialsProvider.environment()
+                  : AWSCredentialsProvider(credentials),
+            ),
         _region = region;
 
   Future<ListGraphqlApisOutput> listGraphQLApis(
@@ -36,11 +37,9 @@ class AWSAppSyncService {
         return MapEntry(key, value.toString());
       }),
     );
-    final AWSSignedRequest signedRequest = _signer.sign(
-      AWSSignerRequest(
-        request,
-        credentialScope: scope,
-      ),
+    final AWSSignedRequest signedRequest = await _signer.sign(
+      request,
+      credentialScope: scope,
     );
 
     final resp = await signedRequest.send();

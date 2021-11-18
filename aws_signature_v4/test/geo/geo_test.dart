@@ -1,4 +1,5 @@
 import 'package:aws_signature_v4/aws_signature_v4.dart';
+import 'package:aws_signature_v4/src/credentials/credentials_provider.dart';
 import 'package:test/test.dart';
 
 final _canonicalString = '''
@@ -35,7 +36,9 @@ void main() {
       AWSHeaders.host: 'maps.geo.us-west-2.amazonaws.com',
     },
   );
-  final signer = AWSSigV4Signer(credentials);
+  final signer = AWSSigV4Signer(
+    credentialsProvider: AWSCredentialsProvider(credentials),
+  );
 
   group('geo', () {
     test('Font', () {

@@ -22,7 +22,7 @@ class AWSSignedRequest extends AWSStreamedHttpRequest {
     Map<String, String>? queryParameters,
     Map<String, String>? headers,
     required Stream<List<int>> body,
-    required int contentLength,
+    int? contentLength,
   }) : super(
           method: method,
           host: host,

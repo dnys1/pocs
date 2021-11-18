@@ -86,11 +86,14 @@ class CanonicalRequest {
 
   final ServiceConfiguration configuration;
 
+  /// The payload content length.
+  final int contentLength;
+
   /// The computed hash of the canonical request.
   late final String hash = payloadEncoder.convert(utf8.encode(toString()));
 
   /// The payload hash.
-  late final String payloadHash = configuration.hashPayload(request);
+  final String payloadHash;
 
   /// {@macro canonical_request}
   CanonicalRequest({
@@ -98,6 +101,8 @@ class CanonicalRequest {
     required AWSCredentials credentials,
     required this.credentialScope,
     required this.algorithm,
+    this.contentLength = 0,
+    this.payloadHash = emptyPayloadHash,
     this.configuration = const BaseServiceConfiguration(),
     bool? normalizePath,
     bool? presignedUrl,
@@ -118,6 +123,8 @@ class CanonicalRequest {
         queryParameters,
         this,
         credentials: credentials,
+        payloadHash: payloadHash,
+        contentLength: contentLength,
       );
     } else {
       this.expiresIn = expiresIn;
@@ -125,6 +132,8 @@ class CanonicalRequest {
         headers,
         this,
         credentials: credentials,
+        payloadHash: payloadHash,
+        contentLength: contentLength,
       );
       canonicalHeaders = CanonicalHeaders(headers);
       signedHeaders = SignedHeaders(canonicalHeaders);

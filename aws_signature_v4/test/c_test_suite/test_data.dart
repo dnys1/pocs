@@ -1,5 +1,6 @@
 import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:aws_signature_v4/src/configuration/service_configuration.dart';
+import 'package:aws_signature_v4/src/credentials/credentials_provider.dart';
 import 'package:collection/collection.dart';
 import 'package:http/http.dart';
 import 'package:test/test.dart';
@@ -98,7 +99,10 @@ class SignerTest {
     this.headerTestData,
     this.queryTestData,
     this.serviceConfiguration = const BaseServiceConfiguration(),
-  })  : signer = AWSSigV4Signer(context.credentials, algorithm: algorithm),
+  })  : signer = AWSSigV4Signer(
+          credentialsProvider: AWSCredentialsProvider(context.credentials),
+          algorithm: algorithm,
+        ),
         credentialScope = AWSCredentialScope(
           dateTime: context.awsDateTime,
           region: context.region,
@@ -112,10 +116,14 @@ class SignerTest {
       return;
     }
     final presignedUrl = method == SignerTestMethod.query;
+    final payloadHash = serviceConfiguration.hashPayloadSync(request);
+    final contentLength = request.contentLength as int;
     final CanonicalRequest canonicalRequest = CanonicalRequest(
       request: request,
       credentials: context.credentials,
       credentialScope: credentialScope,
+      payloadHash: payloadHash,
+      contentLength: contentLength,
       algorithm: algorithm,
       presignedUrl: presignedUrl,
       normalizePath: context.normalize,
@@ -128,17 +136,23 @@ class SignerTest {
       credentialScope: credentialScope,
       canonicalRequest: canonicalRequest,
     );
-    final signerRequest = AWSSignerRequest(
-      request,
-      credentialScope: credentialScope,
-      normalizePath: context.normalize,
-      omitSessionTokenFromSigning: context.omitSessionToken,
-      expiresIn: context.expirationInSeconds,
-      serviceConfiguration: serviceConfiguration,
-    );
     final AWSSignedRequest signedRequest = presignedUrl
-        ? signer.presign(signerRequest)
-        : signer.sign(signerRequest);
+        ? signer.presignSync(
+            request as AWSHttpRequest,
+            credentialScope: credentialScope,
+            normalizePath: context.normalize,
+            omitSessionTokenFromSigning: context.omitSessionToken,
+            expiresIn: context.expirationInSeconds,
+            serviceConfiguration: serviceConfiguration,
+          )
+        : signer.signSync(
+            request,
+            credentialScope: credentialScope,
+            normalizePath: context.normalize,
+            omitSessionTokenFromSigning: context.omitSessionToken,
+            expiresIn: context.expirationInSeconds,
+            serviceConfiguration: serviceConfiguration,
+          );
 
     group(method.string, () {
       test('canonical request', () {

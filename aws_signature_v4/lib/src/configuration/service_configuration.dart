@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:aws_signature_v4/aws_signature_v4.dart';
+import 'package:http/http.dart';
 import 'package:meta/meta.dart';
 
 /// A description of an [AWSSigV4Signer] configuration.
@@ -26,14 +27,20 @@ abstract class ServiceConfiguration {
     Map<String, String> base,
     CanonicalRequest canonicalRequest, {
     required AWSCredentials credentials,
+    required String payloadHash,
+    required int contentLength,
   });
 
   /// Hashes the request payload for the canonical request.
-  String hashPayload(AWSBaseHttpRequest request);
+  Future<String> hashPayload(AWSBaseHttpRequest request);
 
-  /// Transforms the request body using [signer].
+  /// Hashes the request payload for the canonical request synchronously.
+  String hashPayloadSync(AWSBaseHttpRequest request);
+
+  /// Transforms the request body using the [signingKey] and [seedSignature].
   Stream<List<int>> signBody({
     required AWSAlgorithm algorithm,
+    required int contentLength,
     required List<int> signingKey,
     required String seedSignature,
     required AWSCredentialScope credentialScope,
@@ -55,6 +62,8 @@ class BaseServiceConfiguration extends ServiceConfiguration {
     Map<String, String> base,
     CanonicalRequest canonicalRequest, {
     required AWSCredentials credentials,
+    required String payloadHash,
+    required int contentLength,
   }) {
     final request = canonicalRequest.request;
     final presignedUrl = canonicalRequest.presignedUrl;
@@ -76,7 +85,7 @@ class BaseServiceConfiguration extends ServiceConfiguration {
         AWSHeaders.credential: '${credentials.accessKeyId}/$credentialScope',
       if (presignedUrl && expiresIn != null)
         AWSHeaders.expires: expiresIn.toString(),
-      if (includeBodyHash && canonicalRequest.request.contentLength > 0)
+      if (includeBodyHash && contentLength > 0)
         AWSHeaders.contentSHA256: canonicalRequest.payloadHash,
       if (credentials.sessionToken != null && !omitSessionTokenFromSigning)
         AWSHeaders.securityToken: credentials.sessionToken!,
@@ -84,12 +93,18 @@ class BaseServiceConfiguration extends ServiceConfiguration {
   }
 
   @override
-  String hashPayload(AWSBaseHttpRequest request) {
+  Future<String> hashPayload(AWSBaseHttpRequest request) async {
+    if (request is AWSStreamedHttpRequest) {
+      final payload = await ByteStream(request.split()).toBytes();
+      return payloadEncoder.convert(payload);
+    }
+    return hashPayloadSync(request);
+  }
+
+  @override
+  String hashPayloadSync(AWSBaseHttpRequest request) {
     if (request is! AWSHttpRequest) {
-      throw ArgumentError(
-        'Streaming requests cannot be hashed synchronously. Services needing '
-        'to support streaming requests should subclass BaseServiceConfiguration',
-      );
+      throw ArgumentError('Streaming requests cannot be hashed synchronously.');
     }
     return payloadEncoder.convert(request.bodyBytes);
   }
@@ -97,6 +112,7 @@ class BaseServiceConfiguration extends ServiceConfiguration {
   @override
   Stream<List<int>> signBody({
     required AWSAlgorithm algorithm,
+    required int contentLength,
     required List<int> signingKey,
     required String seedSignature,
     required AWSCredentialScope credentialScope,
