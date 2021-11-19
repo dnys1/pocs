@@ -19,7 +19,7 @@ class AWSSigV4Signer {
 
   /// {@macro aws_sig_v4_signer}
   const AWSSigV4Signer({
-    this.credentialsProvider = const AWSCredentialsProvider.environment(),
+    this.credentialsProvider = const AWSCredentialsProvider.dartEnvironment(),
     this.algorithm = AWSAlgorithm.hmacSha256,
   });
 

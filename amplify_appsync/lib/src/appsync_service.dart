@@ -17,7 +17,7 @@ class AWSAppSyncService {
   })  : _signer = signer ??
             AWSSigV4Signer(
               credentialsProvider: credentials == null
-                  ? const AWSCredentialsProvider.environment()
+                  ? const AWSCredentialsProvider.dartEnvironment()
                   : AWSCredentialsProvider(credentials),
             ),
         _region = region;

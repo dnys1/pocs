@@ -10,10 +10,10 @@ abstract class AWSCredentialsProvider {
   const factory AWSCredentialsProvider(AWSCredentials credentials) =
       StaticCredentialsProvider;
 
-  /// Creates an [EnvironmentCredentialsProvider] for credentials injected via
+  /// Creates an [DartEnvironmentCredentialsProvider] for credentials injected via
   /// the Dart environment.
-  const factory AWSCredentialsProvider.environment() =
-      EnvironmentCredentialsProvider;
+  const factory AWSCredentialsProvider.dartEnvironment() =
+      DartEnvironmentCredentialsProvider;
 
   /// Retrieves AWS credentials.
   FutureOr<AWSCredentials> retrieve();
@@ -37,9 +37,9 @@ class StaticCredentialsProvider extends AWSCredentialsProvider {
 /// Creates a [AWSCredentialsProvider] for a set of static, compile-time AWS
 /// credentials from the Dart environment.
 /// {@endtemplate}
-class EnvironmentCredentialsProvider extends AWSCredentialsProvider {
+class DartEnvironmentCredentialsProvider extends AWSCredentialsProvider {
   /// {@macro aws_signature_v4.environment_credentials_provider}
-  const EnvironmentCredentialsProvider() : super._();
+  const DartEnvironmentCredentialsProvider() : super._();
 
   @override
   AWSCredentials retrieve() {
