@@ -13,7 +13,7 @@ class CognitoPluginFactory
   const CognitoPluginFactory();
 
   @override
-  CognitoPluginConfig build(Map<String, dynamic> json) {
+  CognitoPluginConfig build(Map<String, Object?> json) {
     return CognitoPluginConfig.fromJson(json);
   }
 
@@ -24,13 +24,13 @@ class CognitoPluginFactory
 typedef CognitoUserPoolConfigs = Map<String, CognitoUserPoolConfig>;
 
 extension CognitoUserPoolConfigsX on CognitoUserPoolConfigs {
-  CognitoUserPoolConfig? get $default => this['Default'];
+  CognitoUserPoolConfig? get default$ => this['Default'];
 }
 
 typedef CognitoAuthConfigs = Map<String, CognitoAuthConfig>;
 
 extension CognitoAuthConfigsX on CognitoAuthConfigs {
-  CognitoAuthConfig? get $default => this['Default'];
+  CognitoAuthConfig? get default$ => this['Default'];
 }
 
 @awsSerializable
@@ -66,11 +66,11 @@ class CognitoPluginConfig
         auth,
       ];
 
-  factory CognitoPluginConfig.fromJson(Map<String, dynamic> json) =>
+  factory CognitoPluginConfig.fromJson(Map<String, Object?> json) =>
       _$CognitoPluginConfigFromJson(json);
 
   @override
-  Map<String, dynamic> toJson() => _$CognitoPluginConfigToJson(this);
+  Map<String, Object?> toJson() => _$CognitoPluginConfigToJson(this);
 }
 
 @awsSerializable
@@ -87,16 +87,16 @@ class CognitoIdentityCredentialsProvider with AWSEquatable, AWSSerializable {
   List<Object> get props => [poolId, region];
 
   factory CognitoIdentityCredentialsProvider.fromJson(
-    Map<String, dynamic> json,
+    Map<String, Object?> json,
   ) =>
       _$CognitoIdentityCredentialsProviderFromJson(json);
 
   @override
-  Map<String, dynamic> toJson() =>
+  Map<String, Object?> toJson() =>
       _$CognitoIdentityCredentialsProviderToJson(this);
 }
 
-typedef CredentialsProvider = Map<String, Map<String, dynamic>>;
+typedef CredentialsProvider = Map<String, Map<String, Object?>>;
 
 extension CredentialsProviderX on CredentialsProvider {
   CognitoCredentialsProviders? get cognitoIdentity {
@@ -107,7 +107,7 @@ extension CredentialsProviderX on CredentialsProvider {
     return cognitoIdentityMap.map(
       (key, json) => MapEntry(
         key,
-        CognitoIdentityCredentialsProvider.fromJson(json),
+        CognitoIdentityCredentialsProvider.fromJson((json as Map).cast()),
       ),
     );
   }
@@ -117,7 +117,7 @@ typedef CognitoCredentialsProviders
     = Map<String, CognitoIdentityCredentialsProvider>;
 
 extension CognitoCredentialsProvidersX on CognitoCredentialsProviders {
-  CognitoIdentityCredentialsProvider? get $default => this['Default'];
+  CognitoIdentityCredentialsProvider? get default$ => this['Default'];
 }
 
 @awsSerializable
@@ -135,11 +135,11 @@ class CognitoUserPoolConfig with AWSEquatable, AWSSerializable {
   @override
   List<Object?> get props => [poolId, appClientId, region];
 
-  factory CognitoUserPoolConfig.fromJson(Map<String, dynamic> json) =>
+  factory CognitoUserPoolConfig.fromJson(Map<String, Object?> json) =>
       _$CognitoUserPoolConfigFromJson(json);
 
   @override
-  Map<String, dynamic> toJson() => _$CognitoUserPoolConfigToJson(this);
+  Map<String, Object?> toJson() => _$CognitoUserPoolConfigToJson(this);
 }
 
 @amplifySerializable
@@ -154,11 +154,11 @@ class CognitoAuthConfig with AWSEquatable, AWSSerializable {
   @override
   List<Object?> get props => [oauth];
 
-  factory CognitoAuthConfig.fromJson(Map<String, dynamic> json) =>
+  factory CognitoAuthConfig.fromJson(Map<String, Object?> json) =>
       _$CognitoAuthConfigFromJson(json);
 
   @override
-  Map<String, dynamic> toJson() => _$CognitoAuthConfigToJson(this);
+  Map<String, Object?> toJson() => _$CognitoAuthConfigToJson(this);
 }
 
 @awsSerializable
@@ -190,9 +190,9 @@ class CognitoOAuthConfig with AWSEquatable, AWSSerializable {
         scopes,
       ];
 
-  factory CognitoOAuthConfig.fromJson(Map<String, dynamic> json) =>
+  factory CognitoOAuthConfig.fromJson(Map<String, Object?> json) =>
       _$CognitoOAuthConfigFromJson(json);
 
   @override
-  Map<String, dynamic> toJson() => _$CognitoOAuthConfigToJson(this);
+  Map<String, Object?> toJson() => _$CognitoOAuthConfigToJson(this);
 }

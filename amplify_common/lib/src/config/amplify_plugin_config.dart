@@ -7,7 +7,7 @@ abstract class AmplifyPluginConfig {
   const AmplifyPluginConfig._();
 
   String get name;
-  Map<String, dynamic> toJson();
+  Map<String, Object?> toJson();
 }
 
 /// Category plugins by name.
@@ -21,15 +21,15 @@ class UnknownPluginConfigFactory
   final String name;
 
   @override
-  UnknownPluginConfig build(Map<String, dynamic> json) {
+  UnknownPluginConfig build(Map<String, Object?> json) {
     return UnknownPluginConfig.fromJson(name, json);
   }
 }
 
-class UnknownPluginConfig extends DelegatingMap<String, dynamic>
+class UnknownPluginConfig extends DelegatingMap<String, Object?>
     with AWSSerializable, AWSEquatable
     implements AmplifyPluginConfig {
-  const UnknownPluginConfig(this.name, Map<String, dynamic> plugin)
+  const UnknownPluginConfig(this.name, Map<String, Object?> plugin)
       : super(plugin);
 
   @override
@@ -38,12 +38,12 @@ class UnknownPluginConfig extends DelegatingMap<String, dynamic>
   @override
   List<Object?> get props => [name, this];
 
-  factory UnknownPluginConfig.fromJson(String name, Map<String, dynamic> json) {
+  factory UnknownPluginConfig.fromJson(String name, Map<String, Object?> json) {
     return UnknownPluginConfig(name, json);
   }
 
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, Object?> toJson() {
     return this;
   }
 }

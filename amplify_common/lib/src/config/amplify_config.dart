@@ -1,3 +1,4 @@
+import 'package:amplify_common/src/config/analytics/analytics_config.dart';
 import 'package:amplify_common/src/config/api/api_config.dart';
 import 'package:amplify_common/src/config/auth/auth_config.dart';
 import 'package:amplify_common/src/util/serializable.dart';
@@ -17,6 +18,7 @@ class AmplifyConfig with AWSEquatable, AWSSerializable {
   final String version;
 
   final ApiConfig? api;
+  final AnalyticsConfig? analytics;
   final AuthConfig? auth;
   final GeoConfig? geo;
 
@@ -24,6 +26,7 @@ class AmplifyConfig with AWSEquatable, AWSSerializable {
     required this.userAgent,
     required this.version,
     this.api,
+    this.analytics,
     this.auth,
     this.geo,
   });
@@ -31,9 +34,9 @@ class AmplifyConfig with AWSEquatable, AWSSerializable {
   @override
   List<Object?> get props => [userAgent, version, api, auth];
 
-  factory AmplifyConfig.fromJson(Map<String, dynamic> json) =>
+  factory AmplifyConfig.fromJson(Map<String, Object?> json) =>
       _$AmplifyConfigFromJson(json);
 
   @override
-  Map<String, dynamic> toJson() => _$AmplifyConfigToJson(this);
+  Map<String, Object?> toJson() => _$AmplifyConfigToJson(this);
 }

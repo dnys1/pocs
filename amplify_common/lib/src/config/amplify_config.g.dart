@@ -13,6 +13,9 @@ AmplifyConfig _$AmplifyConfigFromJson(Map<String, dynamic> json) =>
       api: json['api'] == null
           ? null
           : ApiConfig.fromJson(json['api'] as Map<String, dynamic>),
+      analytics: json['analytics'] == null
+          ? null
+          : AnalyticsConfig.fromJson(json['analytics'] as Map<String, dynamic>),
       auth: json['auth'] == null
           ? null
           : AuthConfig.fromJson(json['auth'] as Map<String, dynamic>),
@@ -34,6 +37,7 @@ Map<String, dynamic> _$AmplifyConfigToJson(AmplifyConfig instance) {
   }
 
   writeNotNull('api', instance.api);
+  writeNotNull('analytics', instance.analytics);
   writeNotNull('auth', instance.auth);
   writeNotNull('geo', instance.geo);
   return val;

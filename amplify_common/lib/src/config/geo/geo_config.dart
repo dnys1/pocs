@@ -20,9 +20,9 @@ class GeoConfig with AWSEquatable, AWSSerializable {
   @override
   List<Object?> get props => [plugins];
 
-  factory GeoConfig.fromJson(Map<String, dynamic> json) =>
+  factory GeoConfig.fromJson(Map<String, Object?> json) =>
       _$GeoConfigFromJson(json);
 
   @override
-  Map<String, dynamic> toJson() => _$GeoConfigToJson(this);
+  Map<String, Object?> toJson() => _$GeoConfigToJson(this);
 }

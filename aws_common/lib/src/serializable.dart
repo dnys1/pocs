@@ -9,7 +9,7 @@ const awsSerializable = JsonSerializable(
 );
 
 mixin AWSSerializable on Object {
-  Map<String, dynamic> toJson();
+  Map<String, Object?> toJson();
 
   @override
   String toString() {

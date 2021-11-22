@@ -61,7 +61,7 @@ class _AmplifyGeoMapState extends State<AmplifyGeoMap> {
     try {
       final getIdRequest = await _idpSerivce.getId(
         identityPoolId: widget.config.auth!.cognitoPlugin!.credentialsProvider!
-            .cognitoIdentity!.$default!.poolId,
+            .cognitoIdentity!.default$!.poolId,
       );
       final response =
           await _idpSerivce.getCredentialsForIdentity(getIdRequest.identityId);
