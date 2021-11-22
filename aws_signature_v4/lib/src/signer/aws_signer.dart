@@ -24,7 +24,7 @@ class AWSSigV4Signer {
   });
 
   /// Creates a presigned URL for the given [request].
-  Future<AWSSignedRequest> presign(
+  Future<Uri> presign(
     AWSHttpRequest request, {
     required AWSCredentialScope credentialScope,
     ServiceConfiguration serviceConfiguration =
@@ -47,11 +47,11 @@ class AWSSigV4Signer {
       omitSessionTokenFromSigning: omitSessionTokenFromSigning,
       expiresIn: expiresIn,
       presignedUrl: true,
-    );
+    ).uri;
   }
 
   /// Creates a presigned URL synchronously for the given [request].
-  AWSSignedRequest presignSync(
+  Uri presignSync(
     AWSHttpRequest request, {
     required AWSCredentialScope credentialScope,
     ServiceConfiguration serviceConfiguration =
@@ -77,7 +77,7 @@ class AWSSigV4Signer {
       omitSessionTokenFromSigning: omitSessionTokenFromSigning,
       expiresIn: expiresIn,
       presignedUrl: true,
-    );
+    ).uri;
   }
 
   /// Signs the given [request] using authorization headers.
@@ -237,12 +237,12 @@ class AWSSigV4Signer {
   }) {
     // The signing process requires component keys be encoded. However, the
     // actual HTTP request should have the pre-encoded keys.
-    final queryParameters = canonicalRequest.queryParameters;
+    final queryParameters = Map.of(canonicalRequest.queryParameters);
 
     // Similar to query parameters, some header values are canonicalized for
     // signing. However their original values should be included in the
     // headers map of the HTTP request.
-    final headers = canonicalRequest.headers;
+    final headers = Map.of(canonicalRequest.headers);
 
     // If the session token was omitted from signing, include it now.
     final sessionToken = credentials.sessionToken;

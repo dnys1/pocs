@@ -136,23 +136,6 @@ class SignerTest {
       credentialScope: credentialScope,
       canonicalRequest: canonicalRequest,
     );
-    final AWSSignedRequest signedRequest = presignedUrl
-        ? signer.presignSync(
-            request as AWSHttpRequest,
-            credentialScope: credentialScope,
-            normalizePath: context.normalize,
-            omitSessionTokenFromSigning: context.omitSessionToken,
-            expiresIn: context.expirationInSeconds,
-            serviceConfiguration: serviceConfiguration,
-          )
-        : signer.signSync(
-            request,
-            credentialScope: credentialScope,
-            normalizePath: context.normalize,
-            omitSessionTokenFromSigning: context.omitSessionToken,
-            expiresIn: context.expirationInSeconds,
-            serviceConfiguration: serviceConfiguration,
-          );
 
     group(method.string, () {
       test('canonical request', () {
@@ -164,42 +147,71 @@ class SignerTest {
       test('sts', () {
         expect(stringToSign, equals(testMethodData.stringToSign));
       });
-      test('signature', () {
-        expect(signedRequest.signature, equals(testMethodData.signature));
-      });
-      group('signed request', () {
-        test('headers', () {
-          expect(
-            const MapEquality<String, String>(keys: CaseInsensitiveEquality())
-                .equals(
-              signedRequest.headers,
-              testMethodData.signedRequest.headers,
-            ),
-            isTrue,
+      if (presignedUrl) {
+        group('presigned url', () {
+          final Uri uri = signer.presignSync(
+            request as AWSHttpRequest,
+            credentialScope: credentialScope,
+            normalizePath: context.normalize,
+            omitSessionTokenFromSigning: context.omitSessionToken,
+            expiresIn: context.expirationInSeconds,
+            serviceConfiguration: serviceConfiguration,
           );
+
+          test('signature', () {
+            expect(
+              uri.queryParameters[AWSHeaders.signature],
+              equals(testMethodData.signature),
+            );
+          });
         });
-        test('path', () {
-          expect(
-            signedRequest.path,
-            equals(testMethodData.signedRequest.path),
+      } else {
+        group('signed request', () {
+          final AWSSignedRequest signedRequest = signer.signSync(
+            request,
+            credentialScope: credentialScope,
+            normalizePath: context.normalize,
+            omitSessionTokenFromSigning: context.omitSessionToken,
+            expiresIn: context.expirationInSeconds,
+            serviceConfiguration: serviceConfiguration,
           );
-        });
-        test('query parameters', () {
-          expect(
-            const MapEquality<String, String>().equals(
-              signedRequest.queryParameters,
-              testMethodData.signedRequest.queryParameters,
-            ),
-            isTrue,
-          );
-        });
-        test('body', () async {
-          final body = await ByteStream(signedRequest.body).toBytes();
-          final expected =
-              await ByteStream(testMethodData.signedRequest.body).toBytes();
-          expect(body, orderedEquals(expected));
-        });
-      });
+
+          test('signature', () {
+            expect(signedRequest.signature, equals(testMethodData.signature));
+          });
+          test('headers', () {
+            expect(
+              const MapEquality<String, String>(keys: CaseInsensitiveEquality())
+                  .equals(
+                signedRequest.headers,
+                testMethodData.signedRequest.headers,
+              ),
+              isTrue,
+            );
+          });
+          test('path', () {
+            expect(
+              signedRequest.path,
+              equals(testMethodData.signedRequest.path),
+            );
+          });
+          test('query parameters', () {
+            expect(
+              const MapEquality<String, String>().equals(
+                signedRequest.queryParameters,
+                testMethodData.signedRequest.queryParameters,
+              ),
+              isTrue,
+            );
+          });
+          test('body', () async {
+            final body = await ByteStream(signedRequest.body).toBytes();
+            final expected =
+                await ByteStream(testMethodData.signedRequest.body).toBytes();
+            expect(body, orderedEquals(expected));
+          });
+        }, skip: presignedUrl);
+      }
     });
   }
 
