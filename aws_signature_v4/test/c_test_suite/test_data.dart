@@ -98,7 +98,7 @@ class SignerTest {
     required this.request,
     this.headerTestData,
     this.queryTestData,
-    this.serviceConfiguration = const BaseServiceConfiguration(),
+    ServiceConfiguration? serviceConfiguration,
   })  : signer = AWSSigV4Signer(
           credentialsProvider: AWSCredentialsProvider(context.credentials),
           algorithm: algorithm,
@@ -107,7 +107,12 @@ class SignerTest {
           dateTime: context.awsDateTime,
           region: context.region,
           service: context.service,
-        );
+        ),
+        serviceConfiguration = serviceConfiguration ??
+            BaseServiceConfiguration(
+              normalizePath: context.normalize,
+              omitSessionToken: context.omitSessionToken,
+            );
 
   void _runMethod(SignerTestMethod method) {
     final testMethodData =
@@ -126,8 +131,6 @@ class SignerTest {
       contentLength: contentLength,
       algorithm: algorithm,
       presignedUrl: presignedUrl,
-      normalizePath: context.normalize,
-      omitSessionTokenFromSigning: context.omitSessionToken ?? false,
       expiresIn: context.expirationInSeconds,
       configuration: serviceConfiguration,
     );
@@ -152,8 +155,6 @@ class SignerTest {
           final Uri uri = signer.presignSync(
             request as AWSHttpRequest,
             credentialScope: credentialScope,
-            normalizePath: context.normalize,
-            omitSessionTokenFromSigning: context.omitSessionToken,
             expiresIn: context.expirationInSeconds,
             serviceConfiguration: serviceConfiguration,
           );
@@ -170,9 +171,6 @@ class SignerTest {
           final AWSSignedRequest signedRequest = signer.signSync(
             request,
             credentialScope: credentialScope,
-            normalizePath: context.normalize,
-            omitSessionTokenFromSigning: context.omitSessionToken,
-            expiresIn: context.expirationInSeconds,
             serviceConfiguration: serviceConfiguration,
           );
 

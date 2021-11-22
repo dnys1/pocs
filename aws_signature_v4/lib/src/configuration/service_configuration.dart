@@ -12,13 +12,14 @@ import 'package:meta/meta.dart';
 /// the [BaseServiceConfiguration].
 @sealed
 abstract class ServiceConfiguration {
-  final bool? normalizePath;
-  final bool? omitSessionToken;
+  final bool normalizePath;
+  final bool omitSessionToken;
 
   const ServiceConfiguration._({
-    this.normalizePath,
-    this.omitSessionToken,
-  });
+    bool? normalizePath,
+    bool? omitSessionToken,
+  })  : normalizePath = normalizePath ?? true,
+        omitSessionToken = omitSessionToken ?? false;
 
   /// Applies service-specific keys to [base] with values from [canonicalRequest]
   /// and [credentials].
@@ -30,6 +31,12 @@ abstract class ServiceConfiguration {
     required String payloadHash,
     required int contentLength,
   });
+
+  /// Whether to include the body hash in the signing process.
+  bool includeBodyHash(
+    CanonicalRequest request,
+    int contentLength,
+  );
 
   /// Hashes the request payload for the canonical request.
   Future<String> hashPayload(AWSBaseHttpRequest request);
@@ -72,7 +79,6 @@ class BaseServiceConfiguration extends ServiceConfiguration {
     final expiresIn = canonicalRequest.expiresIn;
     final omitSessionTokenFromSigning =
         canonicalRequest.omitSessionTokenFromSigning;
-    final includeBodyHash = !presignedUrl;
 
     base.addAll({
       if (!request.headers.containsKey(AWSHeaders.host))
@@ -85,11 +91,19 @@ class BaseServiceConfiguration extends ServiceConfiguration {
         AWSHeaders.credential: '${credentials.accessKeyId}/$credentialScope',
       if (presignedUrl && expiresIn != null)
         AWSHeaders.expires: expiresIn.toString(),
-      if (includeBodyHash && contentLength > 0)
+      if (includeBodyHash(canonicalRequest, contentLength))
         AWSHeaders.contentSHA256: canonicalRequest.payloadHash,
       if (credentials.sessionToken != null && !omitSessionTokenFromSigning)
         AWSHeaders.securityToken: credentials.sessionToken!,
     });
+  }
+
+  @override
+  bool includeBodyHash(
+    CanonicalRequest request,
+    int contentLength,
+  ) {
+    return !request.presignedUrl && contentLength > 0;
   }
 
   @override

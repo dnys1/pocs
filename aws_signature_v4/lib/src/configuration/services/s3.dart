@@ -53,7 +53,7 @@ class S3ServiceConfiguration extends BaseServiceConfiguration {
     this.encoding = Encoding.none,
   })  : chunkSize = max(chunkSize, _minChunkSize),
         super(
-          normalizePath: false,
+          normalizePath: true,
           omitSessionToken: false,
         );
 

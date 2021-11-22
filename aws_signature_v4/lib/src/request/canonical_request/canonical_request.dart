@@ -104,18 +104,15 @@ class CanonicalRequest {
     this.contentLength = 0,
     this.payloadHash = emptyPayloadHash,
     this.configuration = const BaseServiceConfiguration(),
-    bool? normalizePath,
-    bool? presignedUrl,
-    bool? omitSessionTokenFromSigning,
+    this.presignedUrl = false,
     int? expiresIn,
-  })  : normalizePath = normalizePath ?? true,
-        presignedUrl = presignedUrl ?? false,
-        omitSessionTokenFromSigning = omitSessionTokenFromSigning ?? false {
+  })  : normalizePath = configuration.normalizePath,
+        omitSessionTokenFromSigning = configuration.omitSessionToken {
     headers = Map.of(request.headers);
     queryParameters = Map.of(request.queryParameters);
 
     // Apply service configuration to appropriate values for request type.
-    if (this.presignedUrl) {
+    if (presignedUrl) {
       this.expiresIn = expiresIn ?? 600;
       canonicalHeaders = CanonicalHeaders(headers);
       signedHeaders = SignedHeaders(canonicalHeaders);

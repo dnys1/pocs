@@ -29,8 +29,6 @@ class AWSSigV4Signer {
     required AWSCredentialScope credentialScope,
     ServiceConfiguration serviceConfiguration =
         const BaseServiceConfiguration(),
-    bool? normalizePath,
-    bool? omitSessionTokenFromSigning,
     int? expiresIn,
   }) async {
     final credentials = await credentialsProvider.retrieve();
@@ -43,8 +41,6 @@ class AWSSigV4Signer {
       serviceConfiguration: serviceConfiguration,
       payloadHash: payloadHash,
       contentLength: contentLength,
-      normalizePath: normalizePath,
-      omitSessionTokenFromSigning: omitSessionTokenFromSigning,
       expiresIn: expiresIn,
       presignedUrl: true,
     ).uri;
@@ -56,8 +52,6 @@ class AWSSigV4Signer {
     required AWSCredentialScope credentialScope,
     ServiceConfiguration serviceConfiguration =
         const BaseServiceConfiguration(),
-    bool? normalizePath,
-    bool? omitSessionTokenFromSigning,
     int? expiresIn,
   }) {
     final credentials = credentialsProvider.retrieve();
@@ -73,8 +67,6 @@ class AWSSigV4Signer {
       serviceConfiguration: serviceConfiguration,
       payloadHash: payloadHash,
       contentLength: contentLength,
-      normalizePath: normalizePath,
-      omitSessionTokenFromSigning: omitSessionTokenFromSigning,
       expiresIn: expiresIn,
       presignedUrl: true,
     ).uri;
@@ -86,9 +78,6 @@ class AWSSigV4Signer {
     required AWSCredentialScope credentialScope,
     ServiceConfiguration serviceConfiguration =
         const BaseServiceConfiguration(),
-    bool? normalizePath,
-    bool? omitSessionTokenFromSigning,
-    int? expiresIn,
   }) async {
     final credentials = await credentialsProvider.retrieve();
     final payloadHash = await serviceConfiguration.hashPayload(request);
@@ -100,9 +89,6 @@ class AWSSigV4Signer {
       serviceConfiguration: serviceConfiguration,
       payloadHash: payloadHash,
       contentLength: contentLength,
-      normalizePath: normalizePath,
-      omitSessionTokenFromSigning: omitSessionTokenFromSigning,
-      expiresIn: expiresIn,
       presignedUrl: false,
     );
   }
@@ -113,9 +99,6 @@ class AWSSigV4Signer {
     required AWSCredentialScope credentialScope,
     ServiceConfiguration serviceConfiguration =
         const BaseServiceConfiguration(),
-    bool? normalizePath,
-    bool? omitSessionTokenFromSigning,
-    int? expiresIn,
   }) {
     final credentials = credentialsProvider.retrieve();
     if (credentials is! AWSCredentials) {
@@ -132,9 +115,6 @@ class AWSSigV4Signer {
       serviceConfiguration: serviceConfiguration,
       payloadHash: payloadHash,
       contentLength: contentLength,
-      normalizePath: normalizePath,
-      omitSessionTokenFromSigning: omitSessionTokenFromSigning,
-      expiresIn: expiresIn,
       presignedUrl: false,
     );
   }
@@ -147,8 +127,6 @@ class AWSSigV4Signer {
     required int contentLength,
     ServiceConfiguration serviceConfiguration =
         const BaseServiceConfiguration(),
-    bool? normalizePath,
-    bool? omitSessionTokenFromSigning,
     int? expiresIn,
     required bool presignedUrl,
   }) {
@@ -158,9 +136,7 @@ class AWSSigV4Signer {
       credentialScope: credentialScope,
       payloadHash: payloadHash,
       contentLength: contentLength,
-      normalizePath: normalizePath,
       presignedUrl: presignedUrl,
-      omitSessionTokenFromSigning: omitSessionTokenFromSigning,
       algorithm: algorithm,
       expiresIn: expiresIn,
       configuration: serviceConfiguration,
