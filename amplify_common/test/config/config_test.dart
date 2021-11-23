@@ -39,20 +39,20 @@ const expected = {
       plugins: {
         AppSyncPluginConfig.pluginKey: AppSyncPluginConfig({
           'API_KEY': AppSyncApiConfig(
-            endpointType: ApiEndpointType.graphQL,
+            endpointType: EndpointType.graphQL,
             endpoint: 'example.com',
             region: region,
             authorizationType: APIAuthorizationType.apiKey,
             apiKey: '12345',
           ),
           'AWS_IAM': AppSyncApiConfig(
-            endpointType: ApiEndpointType.graphQL,
+            endpointType: EndpointType.graphQL,
             endpoint: 'example.com',
             region: region,
             authorizationType: APIAuthorizationType.iam,
           ),
           'REST': AppSyncApiConfig(
-            endpointType: ApiEndpointType.rest,
+            endpointType: EndpointType.rest,
             endpoint: 'example.com',
             region: region,
             authorizationType: APIAuthorizationType.userPools,

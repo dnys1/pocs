@@ -8,7 +8,7 @@ part of 'api_config.dart';
 
 AppSyncApiConfig _$AppSyncApiConfigFromJson(Map<String, dynamic> json) =>
     AppSyncApiConfig(
-      endpointType: $enumDecode(_$ApiEndpointTypeEnumMap, json['endpointType']),
+      endpointType: $enumDecode(_$EndpointTypeEnumMap, json['endpointType']),
       endpoint: json['endpoint'] as String,
       region: json['region'] as String,
       authorizationType:
@@ -18,7 +18,7 @@ AppSyncApiConfig _$AppSyncApiConfigFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$AppSyncApiConfigToJson(AppSyncApiConfig instance) {
   final val = <String, dynamic>{
-    'endpointType': _$ApiEndpointTypeEnumMap[instance.endpointType],
+    'endpointType': _$EndpointTypeEnumMap[instance.endpointType],
     'endpoint': instance.endpoint,
     'region': instance.region,
     'authorizationType':
@@ -35,9 +35,9 @@ Map<String, dynamic> _$AppSyncApiConfigToJson(AppSyncApiConfig instance) {
   return val;
 }
 
-const _$ApiEndpointTypeEnumMap = {
-  ApiEndpointType.rest: 'REST',
-  ApiEndpointType.graphQL: 'GraphQL',
+const _$EndpointTypeEnumMap = {
+  EndpointType.rest: 'REST',
+  EndpointType.graphQL: 'GraphQL',
 };
 
 const _$APIAuthorizationTypeEnumMap = {

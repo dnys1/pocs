@@ -1,23 +1,9 @@
 import 'package:amplify_common/src/config/amplify_plugin_config.dart';
-import 'package:amplify_common/src/config/amplify_plugin_registry.dart';
 import 'package:amplify_common/src/util/serializable.dart';
 import 'package:aws_common/aws_common.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'amazon_location_services_config.g.dart';
-
-class AmazonLocationServicesPluginConfigFactory
-    extends AmplifyPluginConfigFactory {
-  const AmazonLocationServicesPluginConfigFactory();
-
-  @override
-  AmplifyPluginConfig build(Map<String, Object?> json) {
-    return AmazonLocationServicesPluginConfig.fromJson(json);
-  }
-
-  @override
-  String get name => AmazonLocationServicesPluginConfig.pluginKey;
-}
 
 @amplifySerializable
 class AmazonLocationServicesPluginConfig

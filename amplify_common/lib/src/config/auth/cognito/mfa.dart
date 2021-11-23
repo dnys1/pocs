@@ -1,6 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
 
-@JsonEnum()
 enum MfaType {
   @JsonValue('SMS')
   sms,
@@ -9,7 +8,6 @@ enum MfaType {
   totp,
 }
 
-@JsonEnum()
 enum MfaConfiguration {
   @JsonValue('OPTIONAL')
   optional,

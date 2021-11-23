@@ -10,10 +10,11 @@ PasswordProtectionSettings _$PasswordProtectionSettingsFromJson(
         Map<String, dynamic> json) =>
     PasswordProtectionSettings(
       passwordPolicyMinLength: json['passwordPolicyMinLength'] as int?,
-      passwordPolicyCharacters:
-          (json['passwordPolicyCharacters'] as List<dynamic>?)
+      passwordPolicyCharacters: (json['passwordPolicyCharacters']
+                  as List<dynamic>?)
               ?.map((e) => $enumDecode(_$PasswordPolicyCharactersEnumMap, e))
-              .toList(),
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$PasswordProtectionSettingsToJson(
@@ -27,11 +28,9 @@ Map<String, dynamic> _$PasswordProtectionSettingsToJson(
   }
 
   writeNotNull('passwordPolicyMinLength', instance.passwordPolicyMinLength);
-  writeNotNull(
-      'passwordPolicyCharacters',
-      instance.passwordPolicyCharacters
-          ?.map((e) => _$PasswordPolicyCharactersEnumMap[e])
-          .toList());
+  val['passwordPolicyCharacters'] = instance.passwordPolicyCharacters
+      .map((e) => _$PasswordPolicyCharactersEnumMap[e])
+      .toList();
   return val;
 }
 

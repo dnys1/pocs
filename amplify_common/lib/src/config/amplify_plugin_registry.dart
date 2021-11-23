@@ -2,7 +2,7 @@ import 'package:amplify_common/src/config/amplify_plugin_config.dart';
 import 'package:amplify_common/src/config/analytics/analytics_config.dart';
 import 'package:amplify_common/src/config/api/api_config.dart';
 import 'package:amplify_common/src/config/auth/auth_config.dart';
-import 'package:amplify_common/src/config/geo/amazon_location_services_config.dart';
+import 'package:amplify_common/src/config/geo/geo_config.dart';
 
 /// Default plugins known to Amplify. Users can register additional plugins
 /// through the [AmplifyPluginRegistry] interface.

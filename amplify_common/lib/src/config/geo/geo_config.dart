@@ -26,3 +26,16 @@ class GeoConfig with AWSEquatable<GeoConfig>, AWSSerializable {
   @override
   Map<String, Object?> toJson() => _$GeoConfigToJson(this);
 }
+
+class AmazonLocationServicesPluginConfigFactory
+    extends AmplifyPluginConfigFactory {
+  const AmazonLocationServicesPluginConfigFactory();
+
+  @override
+  AmplifyPluginConfig build(Map<String, Object?> json) {
+    return AmazonLocationServicesPluginConfig.fromJson(json);
+  }
+
+  @override
+  String get name => AmazonLocationServicesPluginConfig.pluginKey;
+}

@@ -1,7 +1,7 @@
 import 'package:amplify_common/amplify_common.dart';
 import 'package:amplify_common/src/config/auth/cognito/mfa.dart';
 import 'package:amplify_common/src/config/auth/cognito/social_provider.dart';
-import 'package:amplify_common/src/config/auth/cognito/user_attribute_key.dart';
+import 'package:amplify_common/src/auth/cognito/user_attribute_key.dart';
 import 'package:aws_common/aws_common.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -23,13 +23,17 @@ class CognitoAuthConfig with AWSEquatable<CognitoAuthConfig>, AWSSerializable {
   const CognitoAuthConfig({
     this.oAuth,
     this.authenticationFlowType,
-    this.usernameAttributes = const [],
     this.socialProviders = const [],
+    this.usernameAttributes = const [],
     this.signupAttributes = const [],
     this.passwordProtectionSettings,
     this.mfaConfiguration,
     this.mfaTypes,
     this.verificationMechanisms = const [],
+    @Deprecated('Use usernameAttributes instead')
+        this.loginMechanism = const [],
+    @Deprecated('Use usernameAttributes instead')
+        this.loginMechanisms = const [],
   });
 
   @JsonKey(name: 'OAuth')
@@ -40,6 +44,8 @@ class CognitoAuthConfig with AWSEquatable<CognitoAuthConfig>, AWSSerializable {
   )
   final AuthenticationFlowType? authenticationFlowType;
   final List<SocialProvider> socialProviders;
+  final List<CognitoUserAttributeKey> loginMechanism;
+  final List<CognitoUserAttributeKey> loginMechanisms;
   final List<CognitoUserAttributeKey> usernameAttributes;
   final List<CognitoUserAttributeKey> signupAttributes;
   final PasswordProtectionSettings? passwordProtectionSettings;
@@ -58,6 +64,8 @@ class CognitoAuthConfig with AWSEquatable<CognitoAuthConfig>, AWSSerializable {
         mfaConfiguration,
         mfaTypes,
         verificationMechanisms,
+        loginMechanism,
+        loginMechanisms,
       ];
 
   factory CognitoAuthConfig.fromJson(Map<String, Object?> json) =>

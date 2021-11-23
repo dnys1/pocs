@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-enum ApiEndpointType {
+enum EndpointType {
   @JsonValue('REST')
   rest,
 

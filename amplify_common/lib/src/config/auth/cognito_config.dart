@@ -19,7 +19,8 @@ export 'cognito/oauth.dart';
 export 'cognito/password_protection_settings.dart';
 export 'cognito/s3_transfer_utility.dart';
 export 'cognito/social_provider.dart';
-export 'cognito/user_attribute_key.dart';
+export '../../auth/cognito/user_attribute_key.dart'
+    hide CognitoUserAttributeKeyConverter;
 export 'cognito/user_pool.dart';
 
 part 'cognito_config.g.dart';

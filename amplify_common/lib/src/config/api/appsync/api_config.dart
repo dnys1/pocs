@@ -9,7 +9,7 @@ part 'api_config.g.dart';
 
 @amplifySerializable
 class AppSyncApiConfig with AWSEquatable<AppSyncApiConfig>, AWSSerializable {
-  final ApiEndpointType endpointType;
+  final EndpointType endpointType;
   final String endpoint;
   final String region;
   final APIAuthorizationType authorizationType;

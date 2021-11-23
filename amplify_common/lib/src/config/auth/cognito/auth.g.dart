@@ -42,6 +42,16 @@ CognitoAuthConfig _$CognitoAuthConfigFromJson(Map<String, dynamic> json) =>
                   .fromJson(e as String))
               .toList() ??
           const [],
+      loginMechanism: (json['loginMechanism'] as List<dynamic>?)
+              ?.map((e) => const CognitoUserAttributeKeyConverter()
+                  .fromJson(e as String))
+              .toList() ??
+          const [],
+      loginMechanisms: (json['loginMechanisms'] as List<dynamic>?)
+              ?.map((e) => const CognitoUserAttributeKeyConverter()
+                  .fromJson(e as String))
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$CognitoAuthConfigToJson(CognitoAuthConfig instance) {
@@ -58,6 +68,12 @@ Map<String, dynamic> _$CognitoAuthConfigToJson(CognitoAuthConfig instance) {
       _$AuthenticationFlowTypeEnumMap[instance.authenticationFlowType]);
   val['socialProviders'] =
       instance.socialProviders.map((e) => _$SocialProviderEnumMap[e]).toList();
+  val['loginMechanism'] = instance.loginMechanism
+      .map(const CognitoUserAttributeKeyConverter().toJson)
+      .toList();
+  val['loginMechanisms'] = instance.loginMechanisms
+      .map(const CognitoUserAttributeKeyConverter().toJson)
+      .toList();
   val['usernameAttributes'] = instance.usernameAttributes
       .map(const CognitoUserAttributeKeyConverter().toJson)
       .toList();
