@@ -19,9 +19,9 @@ class AuthConfig with AWSEquatable, AWSSerializable {
   @override
   List<Object?> get props => [plugins];
 
-  factory AuthConfig.fromJson(Map<String, dynamic> json) =>
+  factory AuthConfig.fromJson(Map<String, Object?> json) =>
       _$AuthConfigFromJson(json);
 
   @override
-  Map<String, dynamic> toJson() => _$AuthConfigToJson(this);
+  Map<String, Object?> toJson() => _$AuthConfigToJson(this);
 }

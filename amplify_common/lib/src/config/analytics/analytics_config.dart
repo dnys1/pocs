@@ -6,25 +6,25 @@ import 'package:collection/collection.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
-part 'appsync_config.dart';
-part 'api_config.g.dart';
+part 'analytics_config.g.dart';
+part 'pinpoint_config.dart';
 
 @amplifySerializable
-class ApiConfig with AWSEquatable, AWSSerializable {
-  const ApiConfig({required this.plugins});
+class AnalyticsConfig with AWSEquatable, AWSSerializable {
+  const AnalyticsConfig({required this.plugins});
 
   @JsonKey(fromJson: AmplifyPluginRegistry.pluginConfigsFromJson)
   final AmplifyPlugins plugins;
 
-  AppSyncPluginConfig? get appSyncPlugin =>
-      plugins['awsAPIPlugin'] as AppSyncPluginConfig?;
+  PinpointPluginConfig? get pinpointPlugin =>
+      plugins['awsPinpointAnalyticsPlugin'] as PinpointPluginConfig?;
 
   @override
   List<Object?> get props => [plugins];
 
-  factory ApiConfig.fromJson(Map<String, Object?> json) =>
-      _$ApiConfigFromJson(json);
+  factory AnalyticsConfig.fromJson(Map<String, Object?> json) =>
+      _$AnalyticsConfigFromJson(json);
 
   @override
-  Map<String, Object?> toJson() => _$ApiConfigToJson(this);
+  Map<String, Object?> toJson() => _$AnalyticsConfigToJson(this);
 }

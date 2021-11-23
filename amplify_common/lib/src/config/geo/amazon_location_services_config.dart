@@ -11,7 +11,7 @@ class AmazonLocationServicesPluginConfigFactory
   const AmazonLocationServicesPluginConfigFactory();
 
   @override
-  AmplifyPluginConfig build(Map<String, dynamic> json) {
+  AmplifyPluginConfig build(Map<String, Object?> json) {
     return AmazonLocationServicesPluginConfig.fromJson(json);
   }
 
@@ -29,7 +29,7 @@ class AmazonLocationServicesPluginConfig
   });
 
   factory AmazonLocationServicesPluginConfig.fromJson(
-          Map<String, dynamic> json) =>
+          Map<String, Object?> json) =>
       _$AmazonLocationServicesPluginConfigFromJson(json);
 
   static const pluginKey = 'amazon_location_services';
@@ -44,7 +44,7 @@ class AmazonLocationServicesPluginConfig
   List<Object?> get props => [];
 
   @override
-  Map<String, dynamic> toJson() =>
+  Map<String, Object?> toJson() =>
       _$AmazonLocationServicesPluginConfigToJson(this);
 }
 
@@ -65,11 +65,11 @@ class AmazonLocationServicesMaps with AWSEquatable, AWSSerializable {
 
   AmazonLocationServicesMap get defaultMap => items[$default]!;
 
-  factory AmazonLocationServicesMaps.fromJson(Map<String, dynamic> json) =>
+  factory AmazonLocationServicesMaps.fromJson(Map<String, Object?> json) =>
       _$AmazonLocationServicesMapsFromJson(json);
 
   @override
-  Map<String, dynamic> toJson() => _$AmazonLocationServicesMapsToJson(this);
+  Map<String, Object?> toJson() => _$AmazonLocationServicesMapsToJson(this);
 }
 
 @amplifySerializable
@@ -78,7 +78,7 @@ class AmazonLocationServicesMap with AWSEquatable, AWSSerializable {
     required this.style,
   });
 
-  factory AmazonLocationServicesMap.fromJson(Map<String, dynamic> json) =>
+  factory AmazonLocationServicesMap.fromJson(Map<String, Object?> json) =>
       _$AmazonLocationServicesMapFromJson(json);
 
   final String style;
@@ -87,5 +87,5 @@ class AmazonLocationServicesMap with AWSEquatable, AWSSerializable {
   List<Object?> get props => [style];
 
   @override
-  Map<String, dynamic> toJson() => _$AmazonLocationServicesMapToJson(this);
+  Map<String, Object?> toJson() => _$AmazonLocationServicesMapToJson(this);
 }

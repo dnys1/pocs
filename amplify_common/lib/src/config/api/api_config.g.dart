@@ -16,12 +16,11 @@ Map<String, dynamic> _$ApiConfigToJson(ApiConfig instance) => <String, dynamic>{
 
 AppSyncApiConfig _$AppSyncApiConfigFromJson(Map<String, dynamic> json) =>
     AppSyncApiConfig(
-      endpointType:
-          _$enumDecode(_$ApiEndpointTypeEnumMap, json['endpointType']),
+      endpointType: $enumDecode(_$ApiEndpointTypeEnumMap, json['endpointType']),
       endpoint: json['endpoint'] as String,
       region: json['region'] as String,
-      authorizationType: _$enumDecode(
-          _$ApiAuthorizationTypeEnumMap, json['authorizationType']),
+      authorizationType:
+          $enumDecode(_$ApiAuthorizationTypeEnumMap, json['authorizationType']),
       apiKey: json['apiKey'] as String?,
     );
 
@@ -42,32 +41,6 @@ Map<String, dynamic> _$AppSyncApiConfigToJson(AppSyncApiConfig instance) {
 
   writeNotNull('apiKey', instance.apiKey);
   return val;
-}
-
-K _$enumDecode<K, V>(
-  Map<K, V> enumValues,
-  Object? source, {
-  K? unknownValue,
-}) {
-  if (source == null) {
-    throw ArgumentError(
-      'A value must be provided. Supported values: '
-      '${enumValues.values.join(', ')}',
-    );
-  }
-
-  return enumValues.entries.singleWhere(
-    (e) => e.value == source,
-    orElse: () {
-      if (unknownValue == null) {
-        throw ArgumentError(
-          '`$source` is not one of the supported values: '
-          '${enumValues.values.join(', ')}',
-        );
-      }
-      return MapEntry(unknownValue, enumValues.values.first);
-    },
-  ).key;
 }
 
 const _$ApiEndpointTypeEnumMap = {
