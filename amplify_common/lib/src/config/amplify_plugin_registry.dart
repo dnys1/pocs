@@ -1,14 +1,14 @@
 import 'package:amplify_common/src/config/amplify_plugin_config.dart';
 import 'package:amplify_common/src/config/analytics/analytics_config.dart';
 import 'package:amplify_common/src/config/api/api_config.dart';
-import 'package:amplify_common/src/config/auth/cognito_config.dart';
+import 'package:amplify_common/src/config/auth/auth_config.dart';
 import 'package:amplify_common/src/config/geo/amazon_location_services_config.dart';
 
 /// Default plugins known to Amplify. Users can register additional plugins
 /// through the [AmplifyPluginRegistry] interface.
 const _defaultPlugins = <AmplifyPluginConfigFactory>[
   AppSyncPluginFactory(),
-  CognitoPluginFactory(),
+  CognitoPluginConfigFactory(),
   AmazonLocationServicesPluginConfigFactory(),
   PinpointPluginConfigFactory(),
 ];
@@ -17,11 +17,18 @@ const _defaultPlugins = <AmplifyPluginConfigFactory>[
 typedef PluginConfigFactory<T extends AmplifyPluginConfig> = T Function(
     Map<String, Object?>);
 
+/// {@template amplify_common.amplify_plugin_config_factory}
 /// A class for building plugins of type [T].
+/// {@endtemplate}
 abstract class AmplifyPluginConfigFactory<T extends AmplifyPluginConfig> {
+  /// {@macro amplify_common.amplify_plugin_config_factory}
   const AmplifyPluginConfigFactory();
 
+  /// The name of the plugin, as registered in the "plugins" dictionary of
+  /// the Amplify configuration.
   String get name;
+
+  /// Builder for a plugin config from a serialized JSON [Map].
   T build(Map<String, Object?> json);
 }
 
@@ -68,7 +75,7 @@ class AmplifyPluginRegistry {
   }
 
   /// Deserializes plugins from a json [Map].
-  static AmplifyPlugins pluginConfigsFromJson(dynamic json) {
+  static AmplifyPlugins pluginConfigsFromJson(Object? json) {
     if (json is! Map) {
       throw ArgumentError.value(
         json,
@@ -80,7 +87,7 @@ class AmplifyPluginRegistry {
       if (value is! Map) {
         throw ArgumentError.value(value, key, 'Invalid plugin');
       }
-      final plugin = shared.build(key, value.cast<String, Object?>());
+      final plugin = shared.build(key, value.cast());
       return MapEntry(key, plugin);
     });
   }

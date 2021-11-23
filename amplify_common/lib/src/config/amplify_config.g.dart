@@ -8,8 +8,8 @@ part of 'amplify_config.dart';
 
 AmplifyConfig _$AmplifyConfigFromJson(Map<String, dynamic> json) =>
     AmplifyConfig(
-      userAgent: json['UserAgent'] as String,
-      version: json['Version'] as String,
+      userAgent: json['UserAgent'] as String? ?? 'aws-amplify-cli/2.0',
+      version: json['Version'] as String? ?? '1.0',
       api: json['api'] == null
           ? null
           : ApiConfig.fromJson(json['api'] as Map<String, dynamic>),
@@ -22,6 +22,9 @@ AmplifyConfig _$AmplifyConfigFromJson(Map<String, dynamic> json) =>
       geo: json['geo'] == null
           ? null
           : GeoConfig.fromJson(json['geo'] as Map<String, dynamic>),
+      storage: json['storage'] == null
+          ? null
+          : StorageConfig.fromJson(json['storage'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$AmplifyConfigToJson(AmplifyConfig instance) {
@@ -36,9 +39,10 @@ Map<String, dynamic> _$AmplifyConfigToJson(AmplifyConfig instance) {
     }
   }
 
-  writeNotNull('api', instance.api);
-  writeNotNull('analytics', instance.analytics);
-  writeNotNull('auth', instance.auth);
-  writeNotNull('geo', instance.geo);
+  writeNotNull('api', instance.api?.toJson());
+  writeNotNull('analytics', instance.analytics?.toJson());
+  writeNotNull('auth', instance.auth?.toJson());
+  writeNotNull('geo', instance.geo?.toJson());
+  writeNotNull('storage', instance.storage?.toJson());
   return val;
 }

@@ -6,6 +6,7 @@ import 'json.dart';
 const awsSerializable = JsonSerializable(
   fieldRename: FieldRename.pascal,
   includeIfNull: false,
+  explicitToJson: true,
 );
 
 mixin AWSSerializable on Object {

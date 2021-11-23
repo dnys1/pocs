@@ -13,7 +13,7 @@ AnalyticsConfig _$AnalyticsConfigFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$AnalyticsConfigToJson(AnalyticsConfig instance) =>
     <String, dynamic>{
-      'plugins': instance.plugins,
+      'plugins': instance.plugins.map((k, e) => MapEntry(k, e.toJson())),
     };
 
 PinpointPluginConfig _$PinpointPluginConfigFromJson(
@@ -28,8 +28,8 @@ PinpointPluginConfig _$PinpointPluginConfigFromJson(
 Map<String, dynamic> _$PinpointPluginConfigToJson(
         PinpointPluginConfig instance) =>
     <String, dynamic>{
-      'pinpointAnalytics': instance.pinpointAnalytics,
-      'pinpointTargeting': instance.pinpointTargeting,
+      'pinpointAnalytics': instance.pinpointAnalytics.toJson(),
+      'pinpointTargeting': instance.pinpointTargeting.toJson(),
     };
 
 PinpointAnalytics _$PinpointAnalyticsFromJson(Map<String, dynamic> json) =>

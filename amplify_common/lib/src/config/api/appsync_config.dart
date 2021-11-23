@@ -1,29 +1,27 @@
-part of 'api_config.dart';
+import 'package:amplify_common/src/config/amplify_plugin_config.dart';
+import 'package:aws_common/aws_common.dart';
+import 'package:collection/collection.dart';
+import 'package:meta/meta.dart';
 
-/// Factory for [AppSyncPluginConfig].
-class AppSyncPluginFactory
-    extends AmplifyPluginConfigFactory<AppSyncPluginConfig> {
-  const AppSyncPluginFactory();
+import 'appsync/api_config.dart';
+import 'appsync/authorization_type.dart';
 
-  @override
-  AppSyncPluginConfig build(Map<String, Object?> json) {
-    return AppSyncPluginConfig.fromJson(json);
-  }
-
-  @override
-  String get name => 'awsAPIPlugin';
-}
+export 'appsync/api_config.dart';
+export 'appsync/authorization_type.dart';
+export 'appsync/endpoint_type.dart';
 
 /// A map of AppSync plugins keyed by the API name.
 @immutable
 class AppSyncPluginConfig extends DelegatingMap<String, AppSyncApiConfig>
-    with AWSSerializable, AWSEquatable
+    with AWSSerializable, AWSEquatable<AppSyncPluginConfig>
     implements AmplifyPluginConfig {
   const AppSyncPluginConfig(Map<String, AppSyncApiConfig> configs)
       : super(configs);
 
+  static const pluginKey = 'awsAPIPlugin';
+
   @override
-  String get name => 'awsAPIPlugin';
+  String get name => pluginKey;
 
   @override
   List<Object?> get props => [this];
@@ -43,7 +41,7 @@ class AppSyncPluginConfig extends DelegatingMap<String, AppSyncApiConfig>
 
   AppSyncApiConfig? get $default => entries
       .firstWhereOrNull(
-        (el) => el.value.authorizationType == ApiAuthorizationType.apiKey,
+        (el) => el.value.authorizationType == APIAuthorizationType.apiKey,
       )
       ?.value;
 
@@ -55,36 +53,4 @@ class AppSyncPluginConfig extends DelegatingMap<String, AppSyncApiConfig>
 
   @override
   int get hashCode => const MapEquality<String, AppSyncApiConfig>().hash(this);
-}
-
-@amplifySerializable
-class AppSyncApiConfig with AWSEquatable, AWSSerializable {
-  final ApiEndpointType endpointType;
-  final String endpoint;
-  final String region;
-  final ApiAuthorizationType authorizationType;
-  final String? apiKey;
-
-  const AppSyncApiConfig({
-    required this.endpointType,
-    required this.endpoint,
-    required this.region,
-    required this.authorizationType,
-    this.apiKey,
-  });
-
-  @override
-  List<Object?> get props => [
-        endpointType,
-        endpoint,
-        region,
-        authorizationType,
-        apiKey,
-      ];
-
-  factory AppSyncApiConfig.fromJson(Map<String, Object?> json) =>
-      _$AppSyncApiConfigFromJson(json);
-
-  @override
-  Map<String, Object?> toJson() => _$AppSyncApiConfigToJson(this);
 }

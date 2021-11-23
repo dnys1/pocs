@@ -12,5 +12,5 @@ AuthConfig _$AuthConfigFromJson(Map<String, dynamic> json) => AuthConfig(
 
 Map<String, dynamic> _$AuthConfigToJson(AuthConfig instance) =>
     <String, dynamic>{
-      'plugins': instance.plugins,
+      'plugins': instance.plugins.map((k, e) => MapEntry(k, e.toJson())),
     };

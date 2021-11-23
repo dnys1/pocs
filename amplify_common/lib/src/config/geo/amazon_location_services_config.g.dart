@@ -27,7 +27,7 @@ Map<String, dynamic> _$AmazonLocationServicesPluginConfigToJson(
   }
 
   writeNotNull('region', instance.region);
-  writeNotNull('maps', instance.maps);
+  writeNotNull('maps', instance.maps?.toJson());
   return val;
 }
 
@@ -44,7 +44,7 @@ AmazonLocationServicesMaps _$AmazonLocationServicesMapsFromJson(
 Map<String, dynamic> _$AmazonLocationServicesMapsToJson(
         AmazonLocationServicesMaps instance) =>
     <String, dynamic>{
-      'items': instance.items,
+      'items': instance.items.map((k, e) => MapEntry(k, e.toJson())),
       'default': instance.$default,
     };
 

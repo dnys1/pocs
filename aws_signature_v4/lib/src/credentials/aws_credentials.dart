@@ -7,7 +7,7 @@ part 'aws_credentials.g.dart';
 ///
 /// Temporary credentials must include an STS [sessionToken].
 @JsonSerializable(fieldRename: FieldRename.snake)
-class AWSCredentials with AWSEquatable, AWSSerializable {
+class AWSCredentials with AWSEquatable<AWSCredentials>, AWSSerializable {
   final String accessKeyId;
   final String secretAccessKey;
 

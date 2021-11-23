@@ -1,7 +1,7 @@
 import 'package:aws_common/aws_common.dart';
 import 'package:aws_signature_v4/src/configuration/validator.dart';
 
-abstract class ServiceHeader with AWSEquatable {
+abstract class ServiceHeader with AWSEquatable<ServiceHeader> {
   /// The header map key.
   final String key;
 

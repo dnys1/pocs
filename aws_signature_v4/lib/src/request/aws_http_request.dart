@@ -19,7 +19,7 @@ export 'http_method.dart';
 /// See also:
 /// - [AWSHttpRequest]
 /// - [AWSStreamedHttpRequest]
-abstract class AWSBaseHttpRequest with AWSEquatable {
+abstract class AWSBaseHttpRequest with AWSEquatable<AWSBaseHttpRequest> {
   final HttpMethod method;
   final String host;
   final String path;

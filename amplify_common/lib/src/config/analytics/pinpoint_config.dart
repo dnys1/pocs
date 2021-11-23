@@ -1,8 +1,11 @@
 part of 'analytics_config.dart';
 
-/// Factory for [PinpointPluginConfig].
+/// {@template amplify_common.pinpoint_plugin_config_factory}
+/// A factory for [PinpointPluginConfig].
+/// {@endtemplate}
 class PinpointPluginConfigFactory
     extends AmplifyPluginConfigFactory<PinpointPluginConfig> {
+  /// {@macro amplify_common.pinpoint_plugin_config_factory}
   const PinpointPluginConfigFactory();
 
   @override
@@ -11,17 +14,24 @@ class PinpointPluginConfigFactory
   }
 
   @override
-  String get name => 'awsPinpointAnalyticsPlugin';
+  String get name => PinpointPluginConfig.pluginKey;
 }
 
+/// {@template amplify_common.config.pinpoint_plugin_config}
+/// The AWS Pinpoint plugin configuration.
+/// {@endtemplate}
 @amplifySerializable
 class PinpointPluginConfig
-    with AWSEquatable, AWSSerializable
+    with AWSEquatable<PinpointPluginConfig>, AWSSerializable
     implements AmplifyPluginConfig {
+  /// {@macro amplify_common.config.pinpoint_plugin_config}
   const PinpointPluginConfig({
     required this.pinpointAnalytics,
     required this.pinpointTargeting,
   });
+
+  /// The plugin's configuration key.
+  static const pluginKey = 'awsPinpointAnalyticsPlugin';
 
   final PinpointAnalytics pinpointAnalytics;
   final PinpointTargeting pinpointTargeting;
@@ -36,11 +46,11 @@ class PinpointPluginConfig
   Map<String, Object?> toJson() => _$PinpointPluginConfigToJson(this);
 
   @override
-  String get name => 'awsPinpointAnalyticsPlugin';
+  String get name => pluginKey;
 }
 
 @amplifySerializable
-class PinpointAnalytics with AWSEquatable, AWSSerializable {
+class PinpointAnalytics with AWSEquatable<PinpointAnalytics>, AWSSerializable {
   const PinpointAnalytics({
     required this.appId,
     required this.region,
@@ -60,7 +70,7 @@ class PinpointAnalytics with AWSEquatable, AWSSerializable {
 }
 
 @amplifySerializable
-class PinpointTargeting with AWSEquatable, AWSSerializable {
+class PinpointTargeting with AWSEquatable<PinpointTargeting>, AWSSerializable {
   const PinpointTargeting({
     required this.region,
   });

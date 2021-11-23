@@ -1,41 +1,32 @@
 import 'package:amplify_common/amplify_common.dart';
 import 'package:amplify_common/src/config/amplify_plugin_config.dart';
-import 'package:amplify_common/src/config/amplify_plugin_registry.dart';
-import 'package:amplify_common/src/util/serializable.dart';
+import 'package:amplify_common/src/config/analytics/analytics_config.dart';
+import 'package:amplify_common/src/config/api/appsync_config.dart';
+import 'package:amplify_common/src/config/auth/cognito/auth.dart';
+import 'package:amplify_common/src/config/auth/cognito/s3_transfer_utility.dart';
 import 'package:aws_common/aws_common.dart';
-import 'package:json_annotation/json_annotation.dart';
+
+import 'cognito/credentials_provider.dart';
+import 'cognito/identity_manager.dart';
+import 'cognito/user_pool.dart';
+
+export 'cognito/auth.dart';
+export 'cognito/authentication_flow_type.dart';
+export 'cognito/credentials_provider.dart';
+export 'cognito/identity_manager.dart';
+export 'cognito/mfa.dart';
+export 'cognito/oauth.dart';
+export 'cognito/password_protection_settings.dart';
+export 'cognito/s3_transfer_utility.dart';
+export 'cognito/social_provider.dart';
+export 'cognito/user_attribute_key.dart';
+export 'cognito/user_pool.dart';
 
 part 'cognito_config.g.dart';
 
-/// Factory for [CognitoPlugin].
-class CognitoPluginFactory
-    extends AmplifyPluginConfigFactory<CognitoPluginConfig> {
-  const CognitoPluginFactory();
-
-  @override
-  CognitoPluginConfig build(Map<String, Object?> json) {
-    return CognitoPluginConfig.fromJson(json);
-  }
-
-  @override
-  String get name => CognitoPluginConfig.pluginKey;
-}
-
-typedef CognitoUserPoolConfigs = Map<String, CognitoUserPoolConfig>;
-
-extension CognitoUserPoolConfigsX on CognitoUserPoolConfigs {
-  CognitoUserPoolConfig? get default$ => this['Default'];
-}
-
-typedef CognitoAuthConfigs = Map<String, CognitoAuthConfig>;
-
-extension CognitoAuthConfigsX on CognitoAuthConfigs {
-  CognitoAuthConfig? get default$ => this['Default'];
-}
-
 @awsSerializable
 class CognitoPluginConfig
-    with AWSEquatable, AWSSerializable
+    with AWSEquatable<CognitoPluginConfig>, AWSSerializable
     implements AmplifyPluginConfig {
   static const pluginKey = 'awsCognitoAuthPlugin';
 
@@ -44,26 +35,41 @@ class CognitoPluginConfig
 
   final String userAgent;
   final String version;
-  final CredentialsProvider? credentialsProvider;
 
-  @JsonKey(name: 'CognitoUserPool')
-  final CognitoUserPoolConfigs? userPool;
+  final CognitoIdentityManagers? identityManager;
+  final CredentialsProvider? credentialsProvider;
+  final CognitoUserPoolConfigs? cognitoUserPool;
   final CognitoAuthConfigs? auth;
+  final Map<String, AppSyncApiConfig>? appSync;
+  final Map<String, PinpointAnalytics>? pinpointAnalytics;
+  final Map<String, PinpointTargeting>? pinpointTargeting;
+  final Map<String, S3TransferUtility>? s3TransferUtility;
 
   const CognitoPluginConfig({
-    required this.userAgent,
-    required this.version,
+    this.userAgent = 'aws-amplify-cli/0.1.0',
+    this.version = '0.1.0',
+    this.identityManager,
     this.credentialsProvider,
-    this.userPool,
+    this.cognitoUserPool,
     this.auth,
+    this.appSync,
+    this.pinpointAnalytics,
+    this.pinpointTargeting,
+    this.s3TransferUtility,
   });
 
   @override
   List<Object?> get props => [
         userAgent,
         version,
-        userPool,
+        identityManager,
+        credentialsProvider,
+        cognitoUserPool,
         auth,
+        appSync,
+        pinpointAnalytics,
+        pinpointTargeting,
+        s3TransferUtility,
       ];
 
   factory CognitoPluginConfig.fromJson(Map<String, Object?> json) =>
@@ -71,128 +77,4 @@ class CognitoPluginConfig
 
   @override
   Map<String, Object?> toJson() => _$CognitoPluginConfigToJson(this);
-}
-
-@awsSerializable
-class CognitoIdentityCredentialsProvider with AWSEquatable, AWSSerializable {
-  final String poolId;
-  final String region;
-
-  const CognitoIdentityCredentialsProvider({
-    required this.poolId,
-    required this.region,
-  });
-
-  @override
-  List<Object> get props => [poolId, region];
-
-  factory CognitoIdentityCredentialsProvider.fromJson(
-    Map<String, Object?> json,
-  ) =>
-      _$CognitoIdentityCredentialsProviderFromJson(json);
-
-  @override
-  Map<String, Object?> toJson() =>
-      _$CognitoIdentityCredentialsProviderToJson(this);
-}
-
-typedef CredentialsProvider = Map<String, Map<String, Object?>>;
-
-extension CredentialsProviderX on CredentialsProvider {
-  CognitoCredentialsProviders? get cognitoIdentity {
-    final cognitoIdentityMap = this['CognitoIdentity'];
-    if (cognitoIdentityMap == null) {
-      return null;
-    }
-    return cognitoIdentityMap.map(
-      (key, json) => MapEntry(
-        key,
-        CognitoIdentityCredentialsProvider.fromJson((json as Map).cast()),
-      ),
-    );
-  }
-}
-
-typedef CognitoCredentialsProviders
-    = Map<String, CognitoIdentityCredentialsProvider>;
-
-extension CognitoCredentialsProvidersX on CognitoCredentialsProviders {
-  CognitoIdentityCredentialsProvider? get default$ => this['Default'];
-}
-
-@awsSerializable
-class CognitoUserPoolConfig with AWSEquatable, AWSSerializable {
-  final String poolId;
-  final String appClientId;
-  final String region;
-
-  const CognitoUserPoolConfig({
-    required this.poolId,
-    required this.appClientId,
-    required this.region,
-  });
-
-  @override
-  List<Object?> get props => [poolId, appClientId, region];
-
-  factory CognitoUserPoolConfig.fromJson(Map<String, Object?> json) =>
-      _$CognitoUserPoolConfigFromJson(json);
-
-  @override
-  Map<String, Object?> toJson() => _$CognitoUserPoolConfigToJson(this);
-}
-
-@amplifySerializable
-class CognitoAuthConfig with AWSEquatable, AWSSerializable {
-  @JsonKey(name: 'OAuth')
-  final CognitoOAuthConfig? oauth;
-
-  const CognitoAuthConfig({
-    this.oauth,
-  });
-
-  @override
-  List<Object?> get props => [oauth];
-
-  factory CognitoAuthConfig.fromJson(Map<String, Object?> json) =>
-      _$CognitoAuthConfigFromJson(json);
-
-  @override
-  Map<String, Object?> toJson() => _$CognitoAuthConfigToJson(this);
-}
-
-@awsSerializable
-class CognitoOAuthConfig with AWSEquatable, AWSSerializable {
-  final String webDomain;
-  final String appClientId;
-
-  @JsonKey(name: 'SignInRedirectURI')
-  final Uri signInRedirectUri;
-
-  @JsonKey(name: 'SignOutRedirectURI')
-  final Uri signOutRedirectUri;
-  final List<String> scopes;
-
-  const CognitoOAuthConfig({
-    required this.webDomain,
-    required this.appClientId,
-    required this.signInRedirectUri,
-    required this.signOutRedirectUri,
-    required this.scopes,
-  });
-
-  @override
-  List<Object?> get props => [
-        webDomain,
-        appClientId,
-        signInRedirectUri,
-        signOutRedirectUri,
-        scopes,
-      ];
-
-  factory CognitoOAuthConfig.fromJson(Map<String, Object?> json) =>
-      _$CognitoOAuthConfigFromJson(json);
-
-  @override
-  Map<String, Object?> toJson() => _$CognitoOAuthConfigToJson(this);
 }

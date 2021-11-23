@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:amplify_common/src/config/api/endpoint_type.dart';
+import 'package:amplify_common/src/config/api/appsync/authorization_type.dart';
 import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:meta/meta.dart';
 
@@ -8,14 +8,14 @@ import 'package:meta/meta.dart';
 abstract class ApiAuthorization {
   const ApiAuthorization._(this.type);
 
-  final ApiAuthorizationType type;
+  final APIAuthorizationType type;
   FutureOr<Map<String, String>> connectionHeaders(AWSHttpRequest request);
   FutureOr<Map<String, String>> requestHeaders(AWSHttpRequest request);
 }
 
 class AppSyncApiKeyAuthorization extends ApiAuthorization {
   const AppSyncApiKeyAuthorization(this.apiKey)
-      : super._(ApiAuthorizationType.apiKey);
+      : super._(APIAuthorizationType.apiKey);
 
   final String apiKey;
 
@@ -41,7 +41,7 @@ class AppSyncApiKeyAuthorization extends ApiAuthorization {
 class AppSyncIamAuthorization extends ApiAuthorization {
   AppSyncIamAuthorization(AWSCredentialsProvider _credentials)
       : _signer = AWSSigV4Signer(credentialsProvider: _credentials),
-        super._(ApiAuthorizationType.awsIAM);
+        super._(APIAuthorizationType.iam);
 
   final AWSSigV4Signer _signer;
 

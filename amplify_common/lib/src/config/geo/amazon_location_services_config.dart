@@ -21,7 +21,7 @@ class AmazonLocationServicesPluginConfigFactory
 
 @amplifySerializable
 class AmazonLocationServicesPluginConfig
-    with AWSEquatable, AWSSerializable
+    with AWSEquatable<AmazonLocationServicesPluginConfig>, AWSSerializable
     implements AmplifyPluginConfig {
   const AmazonLocationServicesPluginConfig({
     this.region,
@@ -49,7 +49,8 @@ class AmazonLocationServicesPluginConfig
 }
 
 @amplifySerializable
-class AmazonLocationServicesMaps with AWSEquatable, AWSSerializable {
+class AmazonLocationServicesMaps
+    with AWSEquatable<AmazonLocationServicesMaps>, AWSSerializable {
   const AmazonLocationServicesMaps({
     required this.items,
     required this.$default,
@@ -73,7 +74,8 @@ class AmazonLocationServicesMaps with AWSEquatable, AWSSerializable {
 }
 
 @amplifySerializable
-class AmazonLocationServicesMap with AWSEquatable, AWSSerializable {
+class AmazonLocationServicesMap
+    with AWSEquatable<AmazonLocationServicesMap>, AWSSerializable {
   const AmazonLocationServicesMap({
     required this.style,
   });

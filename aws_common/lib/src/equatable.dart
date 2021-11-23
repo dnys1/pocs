@@ -1,12 +1,12 @@
 import 'package:collection/collection.dart';
 
-mixin AWSEquatable on Object {
+mixin AWSEquatable<T extends AWSEquatable<T>> on Object {
   List<Object?> get props;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is AWSEquatable &&
+      other is T &&
           const DeepCollectionEquality.unordered().equals(props, other.props);
 
   @override

@@ -11,5 +11,5 @@ GeoConfig _$GeoConfigFromJson(Map<String, dynamic> json) => GeoConfig(
     );
 
 Map<String, dynamic> _$GeoConfigToJson(GeoConfig instance) => <String, dynamic>{
-      'plugins': instance.plugins,
+      'plugins': instance.plugins.map((k, e) => MapEntry(k, e.toJson())),
     };
