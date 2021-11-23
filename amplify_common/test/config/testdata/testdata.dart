@@ -1,3 +1,5 @@
+// GENERATED FILE. DO NOT MODIFY BY HAND.
+
 class TestData {
   const TestData(this.name, this.config);
 
