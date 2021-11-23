@@ -1,6 +1,9 @@
 /// Common support library for AWS packages.
 library aws_common;
 
-export 'src/equatable.dart';
-export 'src/json.dart';
-export 'src/serializable.dart';
+// Utils
+export 'src/util/debug.dart';
+export 'src/util/equatable.dart';
+export 'src/util/json.dart';
+export 'src/util/print.dart';
+export 'src/util/serializable.dart';

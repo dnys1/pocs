@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:aws_common/aws_common.dart';
 import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:aws_signature_v4/src/configuration/service_configuration.dart';
 import 'package:aws_signature_v4/src/credentials/credentials_provider.dart';
 import 'package:meta/meta.dart';
+
+part 'zone.dart';
 
 /// {@template aws_sig_v4_signer}
 /// The main class for signing requests made to AWS services.
@@ -31,19 +34,21 @@ class AWSSigV4Signer {
         const BaseServiceConfiguration(),
     int? expiresIn,
   }) async {
-    final credentials = await credentialsProvider.retrieve();
-    final payloadHash = await serviceConfiguration.hashPayload(request);
-    final contentLength = request.contentLength;
-    return _sign(
-      credentials,
-      request,
-      credentialScope: credentialScope,
-      serviceConfiguration: serviceConfiguration,
-      payloadHash: payloadHash,
-      contentLength: contentLength,
-      expiresIn: expiresIn,
-      presignedUrl: true,
-    ).uri;
+    return _signZoned(() async {
+      final credentials = await credentialsProvider.retrieve();
+      final payloadHash = await serviceConfiguration.hashPayload(request);
+      final contentLength = request.contentLength;
+      return _sign(
+        credentials,
+        request,
+        credentialScope: credentialScope,
+        serviceConfiguration: serviceConfiguration,
+        payloadHash: payloadHash,
+        contentLength: contentLength,
+        expiresIn: expiresIn,
+        presignedUrl: true,
+      ).uri;
+    });
   }
 
   /// Creates a presigned URL synchronously for the given [request].
@@ -54,22 +59,24 @@ class AWSSigV4Signer {
         const BaseServiceConfiguration(),
     int? expiresIn,
   }) {
-    final credentials = credentialsProvider.retrieve();
-    if (credentials is! AWSCredentials) {
-      throw ArgumentError('Must use presign');
-    }
-    final payloadHash = serviceConfiguration.hashPayloadSync(request);
-    final contentLength = request.contentLength;
-    return _sign(
-      credentials,
-      request,
-      credentialScope: credentialScope,
-      serviceConfiguration: serviceConfiguration,
-      payloadHash: payloadHash,
-      contentLength: contentLength,
-      expiresIn: expiresIn,
-      presignedUrl: true,
-    ).uri;
+    return _signZoned(() {
+      final credentials = credentialsProvider.retrieve();
+      if (credentials is! AWSCredentials) {
+        throw ArgumentError('Must use presign');
+      }
+      final payloadHash = serviceConfiguration.hashPayloadSync(request);
+      final contentLength = request.contentLength;
+      return _sign(
+        credentials,
+        request,
+        credentialScope: credentialScope,
+        serviceConfiguration: serviceConfiguration,
+        payloadHash: payloadHash,
+        contentLength: contentLength,
+        expiresIn: expiresIn,
+        presignedUrl: true,
+      ).uri;
+    });
   }
 
   /// Signs the given [request] using authorization headers.
@@ -79,18 +86,20 @@ class AWSSigV4Signer {
     ServiceConfiguration serviceConfiguration =
         const BaseServiceConfiguration(),
   }) async {
-    final credentials = await credentialsProvider.retrieve();
-    final payloadHash = await serviceConfiguration.hashPayload(request);
-    final contentLength = await request.contentLength;
-    return _sign(
-      credentials,
-      request,
-      credentialScope: credentialScope,
-      serviceConfiguration: serviceConfiguration,
-      payloadHash: payloadHash,
-      contentLength: contentLength,
-      presignedUrl: false,
-    );
+    return _signZoned(() async {
+      final credentials = await credentialsProvider.retrieve();
+      final payloadHash = await serviceConfiguration.hashPayload(request);
+      final contentLength = await request.contentLength;
+      return _sign(
+        credentials,
+        request,
+        credentialScope: credentialScope,
+        serviceConfiguration: serviceConfiguration,
+        payloadHash: payloadHash,
+        contentLength: contentLength,
+        presignedUrl: false,
+      );
+    });
   }
 
   /// Signs the given [request] synchronously using authorization headers.
@@ -100,23 +109,25 @@ class AWSSigV4Signer {
     ServiceConfiguration serviceConfiguration =
         const BaseServiceConfiguration(),
   }) {
-    final credentials = credentialsProvider.retrieve();
-    if (credentials is! AWSCredentials) {
-      throw ArgumentError('Must use sign');
-    }
-    final contentLength = request.hasContentLength
-        ? request.contentLength as int
-        : throw ArgumentError('Must use sign');
-    final payloadHash = serviceConfiguration.hashPayloadSync(request);
-    return _sign(
-      credentials,
-      request,
-      credentialScope: credentialScope,
-      serviceConfiguration: serviceConfiguration,
-      payloadHash: payloadHash,
-      contentLength: contentLength,
-      presignedUrl: false,
-    );
+    return _signZoned(() {
+      final credentials = credentialsProvider.retrieve();
+      if (credentials is! AWSCredentials) {
+        throw ArgumentError('Must use sign');
+      }
+      final contentLength = request.hasContentLength
+          ? request.contentLength as int
+          : throw ArgumentError('Must use sign');
+      final payloadHash = serviceConfiguration.hashPayloadSync(request);
+      return _sign(
+        credentials,
+        request,
+        credentialScope: credentialScope,
+        serviceConfiguration: serviceConfiguration,
+        payloadHash: payloadHash,
+        contentLength: contentLength,
+        presignedUrl: false,
+      );
+    });
   }
 
   AWSSignedRequest _sign(
