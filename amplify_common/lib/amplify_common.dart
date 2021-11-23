@@ -11,6 +11,10 @@ export 'src/auth/user_attribute_key.dart';
 // Config
 export 'src/config/amplify_config.dart';
 
+// -- Analytics
+export 'src/config/analytics/analytics_config.dart' show AnalyticsConfig;
+export 'src/config/analytics/pinpoint_config.dart';
+
 // -- API
 export 'src/config/api/api_config.dart' show ApiConfig;
 export 'src/config/api/appsync_config.dart';

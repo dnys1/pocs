@@ -1,21 +1,8 @@
-part of 'analytics_config.dart';
+import 'package:amplify_common/amplify_common.dart';
+import 'package:amplify_common/src/config/amplify_plugin_config.dart';
+import 'package:aws_common/aws_common.dart';
 
-/// {@template amplify_common.pinpoint_plugin_config_factory}
-/// A factory for [PinpointPluginConfig].
-/// {@endtemplate}
-class PinpointPluginConfigFactory
-    extends AmplifyPluginConfigFactory<PinpointPluginConfig> {
-  /// {@macro amplify_common.pinpoint_plugin_config_factory}
-  const PinpointPluginConfigFactory();
-
-  @override
-  PinpointPluginConfig build(Map<String, Object?> json) {
-    return PinpointPluginConfig.fromJson(json);
-  }
-
-  @override
-  String get name => PinpointPluginConfig.pluginKey;
-}
+part 'pinpoint_config.g.dart';
 
 /// {@template amplify_common.config.pinpoint_plugin_config}
 /// The AWS Pinpoint plugin configuration.

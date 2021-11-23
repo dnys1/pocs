@@ -14,13 +14,13 @@ CognitoAuthConfig _$CognitoAuthConfigFromJson(Map<String, dynamic> json) =>
       authenticationFlowType: $enumDecodeNullable(
           _$AuthenticationFlowTypeEnumMap, json['authenticationFlowType'],
           unknownValue: JsonKey.nullForUndefinedEnumValue),
+      socialProviders: (json['socialProviders'] as List<dynamic>?)
+              ?.map((e) => $enumDecode(_$SocialProviderEnumMap, e))
+              .toList() ??
+          const [],
       usernameAttributes: (json['usernameAttributes'] as List<dynamic>?)
               ?.map((e) => const CognitoUserAttributeKeyConverter()
                   .fromJson(e as String))
-              .toList() ??
-          const [],
-      socialProviders: (json['socialProviders'] as List<dynamic>?)
-              ?.map((e) => $enumDecode(_$SocialProviderEnumMap, e))
               .toList() ??
           const [],
       signupAttributes: (json['signupAttributes'] as List<dynamic>?)

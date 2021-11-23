@@ -3,14 +3,25 @@ import 'package:amplify_common/src/config/analytics/analytics_config.dart';
 import 'package:amplify_common/src/config/api/api_config.dart';
 import 'package:amplify_common/src/config/auth/auth_config.dart';
 import 'package:amplify_common/src/config/geo/geo_config.dart';
+import 'package:amplify_common/src/config/storage/storage_config.dart';
 
 /// Default plugins known to Amplify. Users can register additional plugins
 /// through the [AmplifyPluginRegistry] interface.
 const _defaultPlugins = <AmplifyPluginConfigFactory>[
+  // API
   AppSyncPluginFactory(),
-  CognitoPluginConfigFactory(),
-  AmazonLocationServicesPluginConfigFactory(),
+
+  // Analytics
   PinpointPluginConfigFactory(),
+
+  // Auth
+  CognitoPluginConfigFactory(),
+
+  // Geo
+  AmazonLocationServicesPluginConfigFactory(),
+
+  // Storage
+  S3PluginConfigFactory(),
 ];
 
 /// A builder for Amplify plugins.
