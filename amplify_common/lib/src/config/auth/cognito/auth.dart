@@ -1,21 +1,22 @@
+//
+// Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// A copy of the License is located at
+//
+//  http://aws.amazon.com/apache2.0
+//
+// or in the "license" file accompanying this file. This file is distributed
+// on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+// express or implied. See the License for the specific language governing
+// permissions and limitations under the License.
+//
+
 import 'package:amplify_common/amplify_common.dart';
-import 'package:amplify_common/src/config/auth/cognito/mfa.dart';
-import 'package:amplify_common/src/config/auth/cognito/social_provider.dart';
-import 'package:amplify_common/src/auth/cognito/user_attribute_key.dart';
-import 'package:aws_common/aws_common.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import 'authentication_flow_type.dart';
-import 'oauth.dart';
-import 'password_protection_settings.dart';
-
 part 'auth.g.dart';
-
-typedef CognitoAuthConfigs = Map<String, CognitoAuthConfig>;
-
-extension CognitoAuthConfigsX on CognitoAuthConfigs {
-  CognitoAuthConfig? get default$ => this['Default'];
-}
 
 @amplifySerializable
 @CognitoUserAttributeKeyConverter()
@@ -23,17 +24,15 @@ class CognitoAuthConfig with AWSEquatable<CognitoAuthConfig>, AWSSerializable {
   const CognitoAuthConfig({
     this.oAuth,
     this.authenticationFlowType,
-    this.socialProviders = const [],
-    this.usernameAttributes = const [],
-    this.signupAttributes = const [],
+    this.socialProviders,
+    this.usernameAttributes,
+    this.signupAttributes,
     this.passwordProtectionSettings,
     this.mfaConfiguration,
     this.mfaTypes,
-    this.verificationMechanisms = const [],
-    @Deprecated('Use usernameAttributes instead')
-        this.loginMechanism = const [],
-    @Deprecated('Use usernameAttributes instead')
-        this.loginMechanisms = const [],
+    this.verificationMechanisms,
+    @Deprecated('Use usernameAttributes instead') this.loginMechanism,
+    @Deprecated('Use usernameAttributes instead') this.loginMechanisms,
   });
 
   @JsonKey(name: 'OAuth')
@@ -43,29 +42,29 @@ class CognitoAuthConfig with AWSEquatable<CognitoAuthConfig>, AWSSerializable {
     unknownEnumValue: JsonKey.nullForUndefinedEnumValue,
   )
   final AuthenticationFlowType? authenticationFlowType;
-  final List<SocialProvider> socialProviders;
-  final List<CognitoUserAttributeKey> loginMechanism;
-  final List<CognitoUserAttributeKey> loginMechanisms;
-  final List<CognitoUserAttributeKey> usernameAttributes;
-  final List<CognitoUserAttributeKey> signupAttributes;
+  final List<SocialProvider>? socialProviders;
+  final List<CognitoUserAttributeKey>? loginMechanism;
+  final List<CognitoUserAttributeKey>? loginMechanisms;
+  final List<CognitoUserAttributeKey>? usernameAttributes;
+  final List<CognitoUserAttributeKey>? signupAttributes;
   final PasswordProtectionSettings? passwordProtectionSettings;
   final MfaConfiguration? mfaConfiguration;
   final List<MfaType>? mfaTypes;
-  final List<CognitoUserAttributeKey> verificationMechanisms;
+  final List<CognitoUserAttributeKey>? verificationMechanisms;
 
   @override
   List<Object?> get props => [
         oAuth,
         authenticationFlowType,
         socialProviders,
+        loginMechanism,
+        loginMechanisms,
         usernameAttributes,
         signupAttributes,
         passwordProtectionSettings,
         mfaConfiguration,
         mfaTypes,
         verificationMechanisms,
-        loginMechanism,
-        loginMechanisms,
       ];
 
   factory CognitoAuthConfig.fromJson(Map<String, Object?> json) =>

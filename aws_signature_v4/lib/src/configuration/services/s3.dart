@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:async/async.dart';
 import 'package:aws_signature_v4/aws_signature_v4.dart';
-import 'package:aws_signature_v4/src/configuration/service_configuration.dart';
 import 'package:aws_signature_v4/src/configuration/service_header.dart';
 import 'package:aws_signature_v4/src/configuration/validator.dart';
 import 'package:convert/convert.dart';
@@ -13,7 +11,6 @@ import 'package:crypto/crypto.dart';
 
 enum Encoding {
   none,
-  gzip,
 }
 
 extension on Encoding {
@@ -21,8 +18,6 @@ extension on Encoding {
 
   Codec<List<int>, List<int>> get encoding {
     switch (this) {
-      case Encoding.gzip:
-        return gzip;
       case Encoding.none:
         return IdentityCodec();
     }
@@ -173,14 +168,15 @@ class S3ServiceConfiguration extends BaseServiceConfiguration {
       final stringToSign = sb.toString();
 
       final chunkSignature = algorithm.sign(stringToSign, signingKey);
-      final cb = BytesBuilder();
-      cb.add(size.toRadixString(16).codeUnits);
-      cb.add(_sigSep);
-      cb.add(chunkSignature.codeUnits);
-      cb.add(_sep);
-      cb.add(chunk);
-      cb.add(_sep);
-      yield cb.toBytes();
+      final bytes = <int>[
+        ...size.toRadixString(16).codeUnits,
+        ..._sigSep,
+        ...chunkSignature.codeUnits,
+        ..._sep,
+        ...chunk,
+        ..._sep,
+      ];
+      yield bytes;
 
       previousSignature = chunkSignature;
       chunkedLength += size;

@@ -1,12 +1,20 @@
-import 'package:amplify_common/src/config/analytics/analytics_config.dart';
-import 'package:amplify_common/src/config/api/api_config.dart';
-import 'package:amplify_common/src/config/auth/auth_config.dart';
-import 'package:amplify_common/src/config/storage/storage_config.dart';
-import 'package:amplify_common/src/util/serializable.dart';
-import 'package:aws_common/aws_common.dart';
-import 'package:json_annotation/json_annotation.dart';
+//
+// Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// A copy of the License is located at
+//
+//  http://aws.amazon.com/apache2.0
+//
+// or in the "license" file accompanying this file. This file is distributed
+// on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+// express or implied. See the License for the specific language governing
+// permissions and limitations under the License.
+//
 
-import 'geo/geo_config.dart';
+import 'package:amplify_common/amplify_common.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 part 'amplify_config.g.dart';
 
@@ -30,9 +38,6 @@ class AmplifyConfig with AWSEquatable<AmplifyConfig>, AWSSerializable {
   /// The Auth category configuration, if available.
   final AuthConfig? auth;
 
-  /// The Geo category configuration, if available.
-  final GeoConfig? geo;
-
   /// The Storage category configuration, if available.
   final StorageConfig? storage;
 
@@ -43,12 +48,18 @@ class AmplifyConfig with AWSEquatable<AmplifyConfig>, AWSSerializable {
     this.api,
     this.analytics,
     this.auth,
-    this.geo,
     this.storage,
   });
 
   @override
-  List<Object?> get props => [userAgent, version, api, auth];
+  List<Object?> get props => [
+        userAgent,
+        version,
+        api,
+        analytics,
+        auth,
+        storage,
+      ];
 
   factory AmplifyConfig.fromJson(Map<String, Object?> json) =>
       _$AmplifyConfigFromJson(json);

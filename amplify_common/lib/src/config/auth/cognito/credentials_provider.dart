@@ -1,29 +1,54 @@
-import 'package:aws_common/aws_common.dart';
+//
+// Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// A copy of the License is located at
+//
+//  http://aws.amazon.com/apache2.0
+//
+// or in the "license" file accompanying this file. This file is distributed
+// on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+// express or implied. See the License for the specific language governing
+// permissions and limitations under the License.
+//
+
+import 'package:amplify_common/amplify_common.dart';
+import 'package:amplify_common/src/config/config_map.dart';
 
 part 'credentials_provider.g.dart';
 
-typedef CredentialsProvider = Map<String, Map<String, Object?>>;
+class CredentialsProviders extends AWSConfigMap {
+  const CredentialsProviders(
+    Map<String, AWSSerializable> providers,
+  ) : super(providers);
 
-extension CredentialsProviderX on CredentialsProvider {
-  CognitoCredentialsProviders? get cognitoIdentity {
-    final cognitoIdentityMap = this['CognitoIdentity'];
-    if (cognitoIdentityMap is! Map<String, Object?>) {
-      return null;
-    }
-    return cognitoIdentityMap.map(
-      (key, json) => MapEntry(
-        key,
-        CognitoIdentityCredentialsProvider.fromJson((json as Map).cast()),
-      ),
-    );
+  factory CredentialsProviders.fromJson(Map<String, Object?> json) {
+    final providers = json.map((key, value) {
+      if (value is! Map<String, Object?>) {
+        throw ArgumentError.value(
+          json,
+          key,
+          '${value.runtimeType} is not a Map',
+        );
+      }
+      if (key == 'CognitoIdentity') {
+        final configs = AWSConfigMap.fromJson(
+          value,
+          (json) =>
+              CognitoIdentityCredentialsProvider.fromJson((json as Map).cast()),
+        );
+        return MapEntry(key, configs);
+      }
+      return MapEntry(key, SerializableMap(value));
+    });
+    return CredentialsProviders(providers);
   }
-}
 
-typedef CognitoCredentialsProviders
-    = Map<String, CognitoIdentityCredentialsProvider>;
-
-extension CognitoCredentialsProvidersX on CognitoCredentialsProviders {
-  CognitoIdentityCredentialsProvider? get default$ => this['Default'];
+  @override
+  CognitoIdentityCredentialsProvider? get default$ => (this['CognitoIdentity']
+          as AWSConfigMap<CognitoIdentityCredentialsProvider>?)
+      ?.default$;
 }
 
 @awsSerializable

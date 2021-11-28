@@ -1,21 +1,32 @@
-import 'package:amplify_common/amplify_common.dart';
-import 'package:aws_common/aws_common.dart';
-import 'package:json_annotation/json_annotation.dart';
+//
+// Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// A copy of the License is located at
+//
+//  http://aws.amazon.com/apache2.0
+//
+// or in the "license" file accompanying this file. This file is distributed
+// on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+// express or implied. See the License for the specific language governing
+// permissions and limitations under the License.
+//
 
-import 'authorization_type.dart';
-import 'endpoint_type.dart';
+import 'package:amplify_common/amplify_common.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 part 'api_config.g.dart';
 
 @amplifySerializable
-class AppSyncApiConfig with AWSEquatable<AppSyncApiConfig>, AWSSerializable {
+class AWSApiConfig with AWSEquatable<AWSApiConfig>, AWSSerializable {
   final EndpointType endpointType;
   final String endpoint;
   final String region;
   final APIAuthorizationType authorizationType;
   final String? apiKey;
 
-  const AppSyncApiConfig({
+  const AWSApiConfig({
     required this.endpointType,
     required this.endpoint,
     required this.region,
@@ -32,9 +43,9 @@ class AppSyncApiConfig with AWSEquatable<AppSyncApiConfig>, AWSSerializable {
         apiKey,
       ];
 
-  factory AppSyncApiConfig.fromJson(Map<String, Object?> json) =>
-      _$AppSyncApiConfigFromJson(json);
+  factory AWSApiConfig.fromJson(Map<String, Object?> json) =>
+      _$AWSApiConfigFromJson(json);
 
   @override
-  Map<String, Object?> toJson() => _$AppSyncApiConfigToJson(this);
+  Map<String, Object?> toJson() => _$AWSApiConfigToJson(this);
 }

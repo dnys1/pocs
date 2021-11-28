@@ -1,3 +1,18 @@
+//
+// Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// A copy of the License is located at
+//
+//  http://aws.amazon.com/apache2.0
+//
+// or in the "license" file accompanying this file. This file is distributed
+// on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+// express or implied. See the License for the specific language governing
+// permissions and limitations under the License.
+//
+
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
 part of 'cognito_config.dart';
@@ -10,41 +25,52 @@ CognitoPluginConfig _$CognitoPluginConfigFromJson(Map<String, dynamic> json) =>
     CognitoPluginConfig(
       userAgent: json['UserAgent'] as String? ?? 'aws-amplify-cli/0.1.0',
       version: json['Version'] as String? ?? '0.1.0',
-      identityManager: (json['IdentityManager'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(
-            k, CognitoIdentityManager.fromJson(e as Map<String, dynamic>)),
-      ),
-      credentialsProvider:
-          (json['CredentialsProvider'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, e as Map<String, dynamic>),
-      ),
-      cognitoUserPool: (json['CognitoUserPool'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(
-            k, CognitoUserPoolConfig.fromJson(e as Map<String, dynamic>)),
-      ),
-      auth: (json['Auth'] as Map<String, dynamic>?)?.map(
-        (k, e) =>
-            MapEntry(k, CognitoAuthConfig.fromJson(e as Map<String, dynamic>)),
-      ),
-      appSync: (json['AppSync'] as Map<String, dynamic>?)?.map(
-        (k, e) =>
-            MapEntry(k, AppSyncApiConfig.fromJson(e as Map<String, dynamic>)),
-      ),
-      pinpointAnalytics:
-          (json['PinpointAnalytics'] as Map<String, dynamic>?)?.map(
-        (k, e) =>
-            MapEntry(k, PinpointAnalytics.fromJson(e as Map<String, dynamic>)),
-      ),
-      pinpointTargeting:
-          (json['PinpointTargeting'] as Map<String, dynamic>?)?.map(
-        (k, e) =>
-            MapEntry(k, PinpointTargeting.fromJson(e as Map<String, dynamic>)),
-      ),
-      s3TransferUtility:
-          (json['S3TransferUtility'] as Map<String, dynamic>?)?.map(
-        (k, e) =>
-            MapEntry(k, S3TransferUtility.fromJson(e as Map<String, dynamic>)),
-      ),
+      identityManager: json['IdentityManager'] == null
+          ? null
+          : AWSConfigMap<CognitoIdentityManager>.fromJson(
+              json['IdentityManager'] as Map<String, dynamic>,
+              (value) => CognitoIdentityManager.fromJson(
+                  value as Map<String, dynamic>)),
+      credentialsProvider: json['CredentialsProvider'] == null
+          ? null
+          : CredentialsProviders.fromJson(
+              json['CredentialsProvider'] as Map<String, dynamic>),
+      cognitoUserPool: json['CognitoUserPool'] == null
+          ? null
+          : AWSConfigMap<CognitoUserPoolConfig>.fromJson(
+              json['CognitoUserPool'] as Map<String, dynamic>,
+              (value) => CognitoUserPoolConfig.fromJson(
+                  value as Map<String, dynamic>)),
+      auth: json['Auth'] == null
+          ? null
+          : AWSConfigMap<CognitoAuthConfig>.fromJson(
+              json['Auth'] as Map<String, dynamic>,
+              (value) =>
+                  CognitoAuthConfig.fromJson(value as Map<String, dynamic>)),
+      appSync: json['AppSync'] == null
+          ? null
+          : AWSConfigMap<CognitoAppSyncConfig>.fromJson(
+              json['AppSync'] as Map<String, dynamic>,
+              (value) =>
+                  CognitoAppSyncConfig.fromJson(value as Map<String, dynamic>)),
+      pinpointAnalytics: json['PinpointAnalytics'] == null
+          ? null
+          : AWSConfigMap<CognitoPinpointAnalyticsConfig>.fromJson(
+              json['PinpointAnalytics'] as Map<String, dynamic>,
+              (value) => CognitoPinpointAnalyticsConfig.fromJson(
+                  value as Map<String, dynamic>)),
+      pinpointTargeting: json['PinpointTargeting'] == null
+          ? null
+          : AWSConfigMap<CognitoPinpointTargetingConfig>.fromJson(
+              json['PinpointTargeting'] as Map<String, dynamic>,
+              (value) => CognitoPinpointTargetingConfig.fromJson(
+                  value as Map<String, dynamic>)),
+      s3TransferUtility: json['S3TransferUtility'] == null
+          ? null
+          : AWSConfigMap<S3TransferUtility>.fromJson(
+              json['S3TransferUtility'] as Map<String, dynamic>,
+              (value) =>
+                  S3TransferUtility.fromJson(value as Map<String, dynamic>)),
     );
 
 Map<String, dynamic> _$CognitoPluginConfigToJson(CognitoPluginConfig instance) {
@@ -59,19 +85,13 @@ Map<String, dynamic> _$CognitoPluginConfigToJson(CognitoPluginConfig instance) {
     }
   }
 
-  writeNotNull('IdentityManager',
-      instance.identityManager?.map((k, e) => MapEntry(k, e.toJson())));
-  writeNotNull('CredentialsProvider', instance.credentialsProvider);
-  writeNotNull('CognitoUserPool',
-      instance.cognitoUserPool?.map((k, e) => MapEntry(k, e.toJson())));
-  writeNotNull('Auth', instance.auth?.map((k, e) => MapEntry(k, e.toJson())));
-  writeNotNull(
-      'AppSync', instance.appSync?.map((k, e) => MapEntry(k, e.toJson())));
-  writeNotNull('PinpointAnalytics',
-      instance.pinpointAnalytics?.map((k, e) => MapEntry(k, e.toJson())));
-  writeNotNull('PinpointTargeting',
-      instance.pinpointTargeting?.map((k, e) => MapEntry(k, e.toJson())));
-  writeNotNull('S3TransferUtility',
-      instance.s3TransferUtility?.map((k, e) => MapEntry(k, e.toJson())));
+  writeNotNull('IdentityManager', instance.identityManager?.toJson());
+  writeNotNull('CredentialsProvider', instance.credentialsProvider?.toJson());
+  writeNotNull('CognitoUserPool', instance.cognitoUserPool?.toJson());
+  writeNotNull('Auth', instance.auth?.toJson());
+  writeNotNull('AppSync', instance.appSync?.toJson());
+  writeNotNull('PinpointAnalytics', instance.pinpointAnalytics?.toJson());
+  writeNotNull('PinpointTargeting', instance.pinpointTargeting?.toJson());
+  writeNotNull('S3TransferUtility', instance.s3TransferUtility?.toJson());
   return val;
 }

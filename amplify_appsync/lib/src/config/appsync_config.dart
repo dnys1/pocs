@@ -51,11 +51,17 @@ class AppSyncConfig {
     String? apiName,
     ApiAuthorization? authorization,
   }) {
-    final appSyncPlugin = amplifyConfig.api!.appSyncPlugin!;
-    final AppSyncApiConfig appSyncConfig =
-        apiName == null ? appSyncPlugin.values.single : appSyncPlugin[apiName]!;
+    final appSyncPlugin = amplifyConfig.api?.awsPlugin;
+    if (appSyncPlugin == null) {
+      throw ArgumentError('No API registered for this config');
+    }
+    final AWSApiConfig? appSyncConfig =
+        apiName == null ? appSyncPlugin.default$ : appSyncPlugin[apiName];
+    if (appSyncConfig == null) {
+      throw ArgumentError('Could not locate ${apiName ?? 'default'} API');
+    }
     final authType = appSyncConfig.authorizationType;
-    if (authType == ApiAuthorizationType.apiKey) {
+    if (authType == APIAuthorizationType.apiKey) {
       ArgumentError.checkNotNull(appSyncConfig.apiKey);
       authorization ??= AppSyncApiKeyAuthorization(appSyncConfig.apiKey!);
     } else {

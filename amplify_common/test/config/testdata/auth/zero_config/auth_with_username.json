@@ -12,15 +12,15 @@
                 "CredentialsProvider": {
                     "CognitoIdentity": {
                         "Default": {
-                            "PoolId": "us-west-2:f6ce0d11-75af-477a-958b-41f91447dff9",
+                            "PoolId": "us-west-2:my-poolid-id",
                             "Region": "us-west-2"
                         }
                     }
                 },
                 "CognitoUserPool": {
                     "Default": {
-                        "PoolId": "us-west-2_AbcDefGHi",
-                        "AppClientId": "client_id",
+                        "PoolId": "us-west-2_my_up_id",
+                        "AppClientId": "auth_app_client_id",
                         "Region": "us-west-2"
                     }
                 },

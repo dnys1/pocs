@@ -1,15 +1,29 @@
-import 'package:amplify_common/src/config/amplify_plugin_config.dart';
-import 'package:amplify_common/src/config/analytics/analytics_config.dart';
-import 'package:amplify_common/src/config/api/api_config.dart';
-import 'package:amplify_common/src/config/auth/auth_config.dart';
-import 'package:amplify_common/src/config/geo/geo_config.dart';
-import 'package:amplify_common/src/config/storage/storage_config.dart';
+//
+// Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// A copy of the License is located at
+//
+//  http://aws.amazon.com/apache2.0
+//
+// or in the "license" file accompanying this file. This file is distributed
+// on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+// express or implied. See the License for the specific language governing
+// permissions and limitations under the License.
+//
+
+import 'amplify_plugin_config.dart';
+import 'analytics/pinpoint_config.dart';
+import 'api/aws_api_config.dart';
+import 'auth/cognito_config.dart';
+import 'storage/s3_config.dart';
 
 /// Default plugins known to Amplify. Users can register additional plugins
 /// through the [AmplifyPluginRegistry] interface.
 const _defaultPlugins = <AmplifyPluginConfigFactory>[
   // API
-  AppSyncPluginFactory(),
+  AWSApiPluginConfigFactory(),
 
   // Analytics
   PinpointPluginConfigFactory(),
@@ -17,16 +31,9 @@ const _defaultPlugins = <AmplifyPluginConfigFactory>[
   // Auth
   CognitoPluginConfigFactory(),
 
-  // Geo
-  AmazonLocationServicesPluginConfigFactory(),
-
   // Storage
   S3PluginConfigFactory(),
 ];
-
-/// A builder for Amplify plugins.
-typedef PluginConfigFactory<T extends AmplifyPluginConfig> = T Function(
-    Map<String, Object?>);
 
 /// {@template amplify_common.amplify_plugin_config_factory}
 /// A class for building plugins of type [T].
@@ -86,7 +93,7 @@ class AmplifyPluginRegistry {
   }
 
   /// Deserializes plugins from a json [Map].
-  static AmplifyPlugins pluginConfigsFromJson(Object? json) {
+  static Map<String, AmplifyPluginConfig> pluginConfigsFromJson(Object? json) {
     if (json is! Map) {
       throw ArgumentError.value(
         json,

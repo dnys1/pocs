@@ -1,17 +1,51 @@
+//
+// Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// A copy of the License is located at
+//
+//  http://aws.amazon.com/apache2.0
+//
+// or in the "license" file accompanying this file. This file is distributed
+// on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+// express or implied. See the License for the specific language governing
+// permissions and limitations under the License.
+//
+
 import 'package:amplify_common/amplify_common.dart';
 import 'package:amplify_common/src/config/amplify_plugin_config.dart';
-import 'package:aws_common/aws_common.dart';
+import 'package:amplify_common/src/config/amplify_plugin_registry.dart';
+import 'package:meta/meta.dart';
 
 part 'pinpoint_config.g.dart';
 
-/// {@template amplify_common.config.pinpoint_plugin_config}
+/// {@template amplify_common.pinpoint_plugin_config_factory}
+/// Configuration factory for [PinpointPluginConfig].
+/// {@endtemplate}
+@internal
+class PinpointPluginConfigFactory
+    extends AmplifyPluginConfigFactory<PinpointPluginConfig> {
+  /// {@macro amplify_common.pinpoint_plugin_config_factory}
+  const PinpointPluginConfigFactory();
+
+  @override
+  PinpointPluginConfig build(Map<String, Object?> json) {
+    return PinpointPluginConfig.fromJson(json);
+  }
+
+  @override
+  String get name => PinpointPluginConfig.pluginKey;
+}
+
+/// {@template amplify_common.pinpoint_plugin_config}
 /// The AWS Pinpoint plugin configuration.
 /// {@endtemplate}
 @amplifySerializable
 class PinpointPluginConfig
     with AWSEquatable<PinpointPluginConfig>, AWSSerializable
     implements AmplifyPluginConfig {
-  /// {@macro amplify_common.config.pinpoint_plugin_config}
+  /// {@macro amplify_common.pinpoint_plugin_config}
   const PinpointPluginConfig({
     required this.pinpointAnalytics,
     required this.pinpointTargeting,

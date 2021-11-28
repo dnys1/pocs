@@ -16,7 +16,6 @@ export 'src/graphql/graphql_response.dart';
 export 'src/graphql/graphql_response_error.dart';
 
 // Model
-export 'src/model/authentication_type.dart';
 export 'src/model/graphql_apis.dart';
 export 'src/model/list_graphql_apis_input.dart';
 export 'src/model/list_graphql_apis_output.dart';

@@ -1,8 +1,10 @@
 import 'package:aws_common/aws_common.dart';
 import 'package:collection/collection.dart';
 
-class GraphQLResponseErrors extends DelegatingList<GraphQLResponseError> implements Exception {
-  const GraphQLResponseErrors(List<GraphQLResponseError> errors) : super(errors);
+class GraphQLResponseErrors extends DelegatingList<GraphQLResponseError>
+    implements Exception {
+  const GraphQLResponseErrors(List<GraphQLResponseError> errors)
+      : super(errors);
 }
 
 /// {@template graphql_response_error}
@@ -11,7 +13,8 @@ class GraphQLResponseErrors extends DelegatingList<GraphQLResponseError> impleme
 ///
 /// [locations] and [path] may be null.
 /// {@endtemplate}
-class GraphQLResponseError with AWSSerializable, AWSEquatable {
+class GraphQLResponseError
+    with AWSEquatable<GraphQLResponseError>, AWSSerializable {
   /// The description of the error.
   final String message;
 
@@ -57,7 +60,8 @@ class GraphQLResponseError with AWSSerializable, AWSEquatable {
 /// [line] and [column] correspond to the beginning of the syntax element associated
 /// with the error.
 /// {@endtemplate}
-class GraphQLResponseErrorLocation with AWSSerializable, AWSEquatable {
+class GraphQLResponseErrorLocation
+    with AWSEquatable<GraphQLResponseErrorLocation>, AWSSerializable {
   /// The line in the GraphQL request document where the error-causing syntax
   /// element starts.
   final int line;

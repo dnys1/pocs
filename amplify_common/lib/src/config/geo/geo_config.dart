@@ -1,41 +1,27 @@
 import 'package:amplify_common/amplify_common.dart';
-import 'package:amplify_common/src/config/amplify_plugin_config.dart';
-import 'package:amplify_common/src/config/amplify_plugin_registry.dart';
-import 'package:aws_common/aws_common.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:amplify_common/src/config/config_map.dart';
+
+import 'amazon_location_services_config.dart';
+
+export 'amazon_location_services_config.dart'
+    hide AmazonLocationServicesPluginConfigFactory;
 
 part 'geo_config.g.dart';
 
 @amplifySerializable
-class GeoConfig with AWSEquatable<GeoConfig>, AWSSerializable {
-  const GeoConfig({required this.plugins});
+class GeoConfig extends AmplifyPluginConfigMap {
+  const GeoConfig({
+    required Map<String, AmplifyPluginConfig> plugins,
+  }) : super(plugins);
 
-  @JsonKey(fromJson: AmplifyPluginRegistry.pluginConfigsFromJson)
-  final AmplifyPlugins plugins;
-
+  @override
   AmazonLocationServicesPluginConfig? get awsPlugin =>
       plugins[AmazonLocationServicesPluginConfig.pluginKey]
           as AmazonLocationServicesPluginConfig?;
-
-  @override
-  List<Object?> get props => [plugins];
 
   factory GeoConfig.fromJson(Map<String, Object?> json) =>
       _$GeoConfigFromJson(json);
 
   @override
   Map<String, Object?> toJson() => _$GeoConfigToJson(this);
-}
-
-class AmazonLocationServicesPluginConfigFactory
-    extends AmplifyPluginConfigFactory {
-  const AmazonLocationServicesPluginConfigFactory();
-
-  @override
-  AmplifyPluginConfig build(Map<String, Object?> json) {
-    return AmazonLocationServicesPluginConfig.fromJson(json);
-  }
-
-  @override
-  String get name => AmazonLocationServicesPluginConfig.pluginKey;
 }

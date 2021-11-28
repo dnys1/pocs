@@ -1,51 +1,43 @@
-import 'package:amplify_common/amplify_common.dart';
-import 'package:amplify_common/src/config/amplify_plugin_config.dart';
-import 'package:amplify_common/src/config/amplify_plugin_registry.dart';
-import 'package:aws_common/aws_common.dart';
-import 'package:json_annotation/json_annotation.dart';
+//
+// Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// A copy of the License is located at
+//
+//  http://aws.amazon.com/apache2.0
+//
+// or in the "license" file accompanying this file. This file is distributed
+// on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+// express or implied. See the License for the specific language governing
+// permissions and limitations under the License.
+//
 
-import 's3_config.dart';
+import 'package:amplify_common/amplify_common.dart';
+import 'package:amplify_common/src/config/config_map.dart';
+
+export 's3_config.dart' hide S3PluginConfigFactory;
 
 part 'storage_config.g.dart';
 
-/// {@template amplify_common.config.storage_config}
+/// {@template amplify_common.storage_config}
 /// The Storage category configuration.
 /// {@endtemplate}
 @amplifySerializable
-class StorageConfig with AWSEquatable<StorageConfig>, AWSSerializable {
-  /// {@macro amplify_common.config.storage_config}
-  const StorageConfig({required this.plugins});
-
-  /// All Storage category plugin configurations.
-  @JsonKey(fromJson: AmplifyPluginRegistry.pluginConfigsFromJson)
-  final AmplifyPlugins plugins;
-
-  /// The AWS S3 plugin configuration, if available.
-  // S3PluginConfig? get pinpointPlugin =>
-  //     plugins[S3PluginConfig.pluginKey] as S3PluginConfig?;
-
-  @override
-  List<Object?> get props => [plugins];
+class StorageConfig extends AmplifyPluginConfigMap {
+  /// {@macro amplify_common.storage_config}
+  const StorageConfig({
+    required Map<String, AmplifyPluginConfig> plugins,
+  }) : super(plugins);
 
   factory StorageConfig.fromJson(Map<String, Object?> json) =>
       _$StorageConfigFromJson(json);
 
+  /// The AWS S3 plugin configuration, if available.
+  @override
+  S3PluginConfig? get awsPlugin =>
+      plugins[S3PluginConfig.pluginKey] as S3PluginConfig?;
+
   @override
   Map<String, Object?> toJson() => _$StorageConfigToJson(this);
-}
-
-/// {@template amplify_common.s3_plugin_config_factory}
-/// A factory for [S3PluginConfig].
-/// {@endtemplate}
-class S3PluginConfigFactory extends AmplifyPluginConfigFactory<S3PluginConfig> {
-  /// {@macro amplify_common.s3_plugin_config_factory}
-  const S3PluginConfigFactory();
-
-  @override
-  S3PluginConfig build(Map<String, Object?> json) {
-    return S3PluginConfig.fromJson(json);
-  }
-
-  @override
-  String get name => S3PluginConfig.pluginKey;
 }

@@ -1,43 +1,46 @@
+//
+// Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// A copy of the License is located at
+//
+//  http://aws.amazon.com/apache2.0
+//
+// or in the "license" file accompanying this file. This file is distributed
+// on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+// express or implied. See the License for the specific language governing
+// permissions and limitations under the License.
+//
+
 import 'package:amplify_common/amplify_common.dart';
 import 'package:amplify_common/src/config/amplify_plugin_config.dart';
 import 'package:amplify_common/src/config/amplify_plugin_registry.dart';
-import 'package:aws_common/aws_common.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:amplify_common/src/config/config_map.dart';
 
-import 'appsync_config.dart';
+import 'aws_api_config.dart';
+export 'aws_api_config.dart' hide AWSApiPluginConfigFactory;
 
 part 'api_config.g.dart';
 
+/// {@template amplify_common.api_config}
+/// The API category configuration.
+/// {@endtemplate}
 @amplifySerializable
-class ApiConfig with AWSEquatable<ApiConfig>, AWSSerializable {
-  const ApiConfig({required this.plugins});
-
-  @JsonKey(fromJson: AmplifyPluginRegistry.pluginConfigsFromJson)
-  final AmplifyPlugins plugins;
-
-  AppSyncPluginConfig? get appSyncPlugin =>
-      plugins[AppSyncPluginConfig.pluginKey] as AppSyncPluginConfig?;
-
-  @override
-  List<Object?> get props => [plugins];
+class ApiConfig extends AmplifyPluginConfigMap {
+  /// {@macro amplify_common.api_config}
+  const ApiConfig({
+    required Map<String, AmplifyPluginConfig> plugins,
+  }) : super(plugins);
 
   factory ApiConfig.fromJson(Map<String, Object?> json) =>
       _$ApiConfigFromJson(json);
 
+  /// The AWS API plugin configuration, if available.
+  @override
+  AWSApiPluginConfig? get awsPlugin =>
+      plugins[AWSApiPluginConfig.pluginKey] as AWSApiPluginConfig?;
+
   @override
   Map<String, Object?> toJson() => _$ApiConfigToJson(this);
-}
-
-/// Factory for [AppSyncPluginConfig].
-class AppSyncPluginFactory
-    extends AmplifyPluginConfigFactory<AppSyncPluginConfig> {
-  const AppSyncPluginFactory();
-
-  @override
-  AppSyncPluginConfig build(Map<String, Object?> json) {
-    return AppSyncPluginConfig.fromJson(json);
-  }
-
-  @override
-  String get name => AppSyncPluginConfig.pluginKey;
 }

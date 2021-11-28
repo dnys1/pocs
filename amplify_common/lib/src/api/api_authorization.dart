@@ -1,8 +1,9 @@
 import 'dart:async';
 
-import 'package:amplify_common/src/config/api/appsync/authorization_type.dart';
 import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:meta/meta.dart';
+
+import 'authorization_type.dart';
 
 @immutable
 abstract class ApiAuthorization {
@@ -74,4 +75,33 @@ class AppSyncIamAuthorization extends ApiAuthorization {
 
   @override
   int get hashCode => _signer.hashCode;
+}
+
+class AppSyncOidcAuthorization extends ApiAuthorization {
+  const AppSyncOidcAuthorization(this.getCredentials)
+      : super._(APIAuthorizationType.oidc);
+
+  final Future<String?> Function() getCredentials;
+
+  @override
+  Future<Map<String, String>> connectionHeaders(AWSHttpRequest request) async {
+    final credentials = await getCredentials();
+    if (credentials == null) {
+      throw Exception('Could not retrieve credentials');
+    }
+    return {
+      'Authorization': credentials,
+    };
+  }
+
+  @override
+  Future<Map<String, String>> requestHeaders(AWSHttpRequest request) async {
+    final credentials = await getCredentials();
+    if (credentials == null) {
+      throw Exception('Could not retrieve credentials');
+    }
+    return {
+      'Authorization': credentials,
+    };
+  }
 }
