@@ -1,0 +1,27 @@
+<component name="libraryTable">
+  <library name="Dart SDK">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.dvm/darts/dev/lib/async" />
+      <root url="file://$USER_HOME$/.dvm/darts/dev/lib/cli" />
+      <root url="file://$USER_HOME$/.dvm/darts/dev/lib/collection" />
+      <root url="file://$USER_HOME$/.dvm/darts/dev/lib/convert" />
+      <root url="file://$USER_HOME$/.dvm/darts/dev/lib/core" />
+      <root url="file://$USER_HOME$/.dvm/darts/dev/lib/developer" />
+      <root url="file://$USER_HOME$/.dvm/darts/dev/lib/ffi" />
+      <root url="file://$USER_HOME$/.dvm/darts/dev/lib/html" />
+      <root url="file://$USER_HOME$/.dvm/darts/dev/lib/indexed_db" />
+      <root url="file://$USER_HOME$/.dvm/darts/dev/lib/io" />
+      <root url="file://$USER_HOME$/.dvm/darts/dev/lib/isolate" />
+      <root url="file://$USER_HOME$/.dvm/darts/dev/lib/js" />
+      <root url="file://$USER_HOME$/.dvm/darts/dev/lib/js_util" />
+      <root url="file://$USER_HOME$/.dvm/darts/dev/lib/math" />
+      <root url="file://$USER_HOME$/.dvm/darts/dev/lib/mirrors" />
+      <root url="file://$USER_HOME$/.dvm/darts/dev/lib/svg" />
+      <root url="file://$USER_HOME$/.dvm/darts/dev/lib/typed_data" />
+      <root url="file://$USER_HOME$/.dvm/darts/dev/lib/web_audio" />
+      <root url="file://$USER_HOME$/.dvm/darts/dev/lib/web_gl" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

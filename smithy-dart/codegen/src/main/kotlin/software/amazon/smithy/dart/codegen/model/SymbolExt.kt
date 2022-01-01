@@ -23,6 +23,9 @@ object SymbolProperty {
     // the original shape the symbol was created from
     const val SHAPE_KEY: String = "shape"
 
+    // Whether the symbol is a builtin
+    const val BUILT_IN_KEY: String = "builtin"
+
     // Mutable collection type
     const val MUTABLE_COLLECTION_FUNCTION: String = "mutableCollectionType"
 
@@ -46,6 +49,11 @@ val Symbol.isBoxed: Boolean
  */
 val Symbol.isNotBoxed: Boolean
     get() = !isBoxed
+
+/**
+ * Creates a boxed version of `this`.
+ */
+fun Symbol.boxed(): Symbol = toBuilder().putProperty(SymbolProperty.BOXED_KEY, true).build()
 
 /**
  * Gets the default value for the symbol if present, else null

@@ -6,59 +6,41 @@
 package software.amazon.smithy.dart.codegen.lang
 
 import software.amazon.smithy.codegen.core.Symbol
+import software.amazon.smithy.codegen.core.SymbolReference
+import software.amazon.smithy.dart.codegen.model.DartPackage
 import software.amazon.smithy.dart.codegen.model.buildSymbol
+import sun.jvm.hotspot.debugger.cdbg.Sym
 
 /**
- * Builtin dart:core types
+ * Dart SDK types
  */
 object DartTypes {
-    val BigInt: Symbol = builtInSymbol("BigInt")
-    val bool: Symbol = builtInSymbol("bool")
-    val DateTime: Symbol = builtInSymbol("DateTime")
-    val double: Symbol = builtInSymbol("double")
-    val Duration: Symbol = builtInSymbol("Duration")
-    val int: Symbol = builtInSymbol("int")
-    val List: Symbol = builtInSymbol("List")
-    val Map: Symbol = builtInSymbol("Map")
-    val Null: Symbol = builtInSymbol("Null")
-    val num: Symbol = builtInSymbol("num")
-    val Object: Symbol = builtInSymbol("Object")
-    val RegExp: Symbol = builtInSymbol("RegExp")
-    val Set: Symbol = builtInSymbol("Set")
-    val String: Symbol = builtInSymbol("String")
-    val void: Symbol = builtInSymbol("void")
+    // Core types
+    val BigInt: Symbol = DartPackage.CORE.symbol("BigInt")
+    val bool: Symbol = DartPackage.CORE.symbol("bool")
+    val DateTime: Symbol = DartPackage.CORE.symbol("DateTime")
+    val double: Symbol = DartPackage.CORE.symbol("double")
+    val Duration: Symbol = DartPackage.CORE.symbol("Duration")
+    val int: Symbol = DartPackage.CORE.symbol("int")
+    fun List(ref: SymbolReference): Symbol = DartPackage.CORE.symbol("List", refs = listOf(ref))
+    fun List(ref: Symbol): Symbol = List(SymbolReference(ref))
+    fun Map(key: SymbolReference, value: SymbolReference): Symbol = DartPackage.CORE.symbol("Map", refs = listOf(key, value))
+    fun Map(key: Symbol, value: Symbol): Symbol = Map(SymbolReference(key), SymbolReference(value))
+    val Never: Symbol = DartPackage.CORE.symbol("Never")
+    val Null: Symbol = DartPackage.CORE.symbol("Null")
+    val num: Symbol = DartPackage.CORE.symbol("num")
+    val Object: Symbol = DartPackage.CORE.symbol("Object")
+    val RegExp: Symbol = DartPackage.CORE.symbol("RegExp")
+    fun Set(ref: SymbolReference): Symbol = DartPackage.CORE.symbol("Set", refs = listOf(ref))
+    fun Set(ref: Symbol): Symbol = Set(SymbolReference(ref))
+    val String: Symbol = DartPackage.CORE.symbol("String")
+    val void: Symbol = DartPackage.CORE.symbol("void")
 
-
-    /**
-     * A (non-exhaustive) set of builtin dart:core symbols
-     */
-    val All: Set<Symbol> = setOf(
-        Null,
-        void,
-
-        BigInt,
-        bool,
-        DateTime,
-        Duration,
-        DateTime,
-        double,
-        Duration,
-        int,
-        num,
-        Object,
-        RegExp,
-        String,
-
-        List,
-        Map,
-        Set,
-    )
-}
-
-private fun builtInSymbol(symbol: String, ns: String = "dart.core"): Symbol = buildSymbol {
-    name = symbol
-    namespace = ns
-    nullable = false
+    // Async types
+    fun Future(ref: SymbolReference): Symbol = DartPackage.ASYNC.symbol("Future", refs = listOf(ref))
+    fun Future(ref: Symbol): Symbol = Future(SymbolReference(ref))
+    fun Stream(ref: SymbolReference): Symbol = DartPackage.ASYNC.symbol("Stream", refs = listOf(ref))
+    fun Stream(ref: Symbol): Symbol = Stream(SymbolReference(ref))
 }
 
 /**
@@ -69,9 +51,9 @@ private fun builtInSymbol(symbol: String, ns: String = "dart.core"): Symbol = bu
 fun isValidDartIdentifier(s: String): Boolean {
     s.forEachIndexed { idx, chr ->
         val isLetterOrUnderscore = chr.isLetter() || chr == '_'
-        when (idx) {
-            0 -> if (!isLetterOrUnderscore) return false
-            else -> if (!isLetterOrUnderscore && !chr.isDigit()) return false
+        return when (idx) {
+            0 -> isLetterOrUnderscore
+            else -> isLetterOrUnderscore || chr.isDigit()
         }
     }
     return true
@@ -81,7 +63,7 @@ fun isValidDartIdentifier(s: String): Boolean {
  * Flag indicating if this symbol is a Kotlin built-in symbol
  */
 val Symbol.isBuiltIn: Boolean
-    get() = namespace.startsWith("dart.core")
+    get() = getProperty("builtin").orElse(false) == true
 
 /**
  * Escape characters in strings to ensure they are treated as pure literals.
@@ -91,4 +73,4 @@ fun String.toEscapedLiteral(): String = replace("\$", "\\$")
 /**
  * Return true if string is valid package namespace, false otherwise.
  */
-fun String.isValidPackageName() = isNotEmpty() && all { it.isLetterOrDigit() || it == '.' }
+fun String.isValidPackageName() = isNotEmpty() && all { it.isLetterOrDigit() || it == '_' }

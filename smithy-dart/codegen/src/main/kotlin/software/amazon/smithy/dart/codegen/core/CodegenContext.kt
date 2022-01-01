@@ -7,8 +7,6 @@ package software.amazon.smithy.dart.codegen.core
 
 import software.amazon.smithy.codegen.core.SymbolProvider
 import software.amazon.smithy.dart.codegen.DartSettings
-import software.amazon.smithy.dart.codegen.integration.DartIntegration
-import software.amazon.smithy.dart.codegen.rendering.protocol.ProtocolGenerator
 import software.amazon.smithy.model.Model
 import software.amazon.smithy.model.shapes.Shape
 
@@ -19,8 +17,6 @@ interface CodegenContext {
     val model: Model
     val symbolProvider: SymbolProvider
     val settings: DartSettings
-    val protocolGenerator: ProtocolGenerator?
-    val integrations: List<DartIntegration>
 }
 
 /**
@@ -29,9 +25,7 @@ interface CodegenContext {
 data class GenerationContext(
     override val model: Model,
     override val symbolProvider: SymbolProvider,
-    override val settings: DartSettings,
-    override val protocolGenerator: ProtocolGenerator? = null,
-    override val integrations: List<DartIntegration> = listOf()
+    override val settings: DartSettings
 ) : CodegenContext
 
 /**
@@ -50,11 +44,9 @@ data class RenderingContext<T : Shape>(
     val shape: T?,
     override val model: Model,
     override val symbolProvider: SymbolProvider,
-    override val settings: DartSettings,
-    override val protocolGenerator: ProtocolGenerator? = null,
-    override val integrations: List<DartIntegration> = listOf(),
+    override val settings: DartSettings
 ) : CodegenContext {
 
     constructor(otherCtx: CodegenContext, writer: DartWriter, shape: T?) :
-        this(writer, shape, otherCtx.model, otherCtx.symbolProvider, otherCtx.settings, otherCtx.protocolGenerator, otherCtx.integrations)
+        this(writer, shape, otherCtx.model, otherCtx.symbolProvider, otherCtx.settings)
 }

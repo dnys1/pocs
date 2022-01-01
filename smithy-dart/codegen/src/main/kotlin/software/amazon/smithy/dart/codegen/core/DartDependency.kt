@@ -6,8 +6,7 @@ import software.amazon.smithy.codegen.core.SymbolDependency
 import software.amazon.smithy.codegen.core.SymbolDependencyContainer
 
 // root namespace for the runtime
-const val RUNTIME_ROOT_NS = "aws.smithy.dart.runtime"
-const val SMITHY_TEST_NS = "aws.smithy.dart.smithy_test"
+const val RUNTIME_ROOT_NS = "aws.smithy"
 
 val RUNTIME_VERSION: String = System.getProperty("smithy.dart.codegen.clientRuntimeVersion", getDefaultRuntimeVersion())
 
@@ -28,10 +27,8 @@ data class DartDependency(
     val version: String? = null
 ): SymbolDependencyContainer {
     companion object {
-        val core = DartDependency(RUNTIME_ROOT_NS, "aws_smithy_dart_runtime", RUNTIME_VERSION)
-        val http = DartDependency("package.http", "http", "^0.13.0")
-        val smithyTest = DartDependency("package.smithy_test", "smithy_test", RUNTIME_VERSION)
-        val test = DartDependency("package.test", "test", "any")
+        val CORE = DartDependency(RUNTIME_ROOT_NS, "aws_smithy", RUNTIME_VERSION)
+        val HTTP = DartDependency("package.http", "http", "^0.13.0")
     }
 
     override fun getDependencies(): List<SymbolDependency> {

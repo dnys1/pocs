@@ -1,3 +1,4 @@
 {
-    "typescript.validate.enable": false
+    "typescript.validate.enable": false,
+    "dart.sdkPath": "/Users/nydillon/.dvm/darts/2.16.0-6.0.dev"
 }

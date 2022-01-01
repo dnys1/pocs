@@ -4,6 +4,7 @@ import software.amazon.smithy.codegen.core.*
 import software.amazon.smithy.dart.codegen.DartSettings
 import software.amazon.smithy.dart.codegen.lang.dartReservedWords
 import software.amazon.smithy.dart.codegen.model.*
+import software.amazon.smithy.dart.codegen.utils.getOrNull
 import software.amazon.smithy.model.Model
 import software.amazon.smithy.model.shapes.*
 import software.amazon.smithy.model.traits.BoxTrait
@@ -19,8 +20,8 @@ import java.util.logging.Logger
 class DartSymbolProvider(private val model: Model, private val settings: DartSettings) :
     SymbolProvider,
     ShapeVisitor<Symbol> {
-    private val rootNamespace = settings.pkg.name
-    private val service = model.expectShape<ServiceShape>(settings.service)
+    private val rootNamespace = settings.pubspec.name
+    private val service: ServiceShape? = model.getShape(settings.service).getOrNull() as ServiceShape?
     private val logger = Logger.getLogger(javaClass.name)
     private val escaper: ReservedWordSymbolProvider.Escaper
 
@@ -40,14 +41,12 @@ class DartSymbolProvider(private val model: Model, private val settings: DartSet
 
     companion object {
         /**
-         * Determines if a new Kotlin type is generated for a given shape. Generally only structures, unions, and enums
+         * Determines if a new Dart type is generated for a given shape. Generally only structures, unions, and enums
          * result in a type being generated. Strings, ints, etc are mapped to builtins
          */
-        fun isTypeGeneratedForShape(shape: Shape): Boolean = when {
+        fun isTypeGeneratedForShape(shape: Shape): Boolean =
             // pretty much anything we visit in CodegenVisitor (we don't care about service shape here though)
-            shape.isEnum || shape.isStructureShape || shape.isUnionShape -> true
-            else -> false
-        }
+            shape.isEnum || shape.isStructureShape || shape.isUnionShape
     }
 
     override fun toSymbol(shape: Shape): Symbol {
@@ -73,7 +72,7 @@ class DartSymbolProvider(private val model: Model, private val settings: DartSet
     override fun doubleShape(shape: DoubleShape): Symbol = numberShape(shape, "double")
 
     private fun numberShape(shape: Shape, typeName: String, defaultValue: String = "0"): Symbol =
-        createSymbolBuilder(shape, typeName, namespace = "dart.core")
+        createSymbolBuilder(shape, typeName)
             .defaultValue(defaultValue)
             .build()
 
@@ -95,8 +94,8 @@ class DartSymbolProvider(private val model: Model, private val settings: DartSet
 
     fun createEnumSymbol(shape: StringShape): Symbol {
         val namespace = "$rootNamespace.model"
-        return createSymbolBuilder(shape, shape.defaultName(service), namespace, boxed = true)
-            .definitionFile("${shape.defaultName(service)}.kt")
+        return createSymbolBuilder(shape, shape.defaultName(service), namespace)
+            .definitionFile("${shape.defaultName(service).snakeCase()}.dart")
             .build()
     }
 
@@ -107,7 +106,7 @@ class DartSymbolProvider(private val model: Model, private val settings: DartSet
         val name = shape.defaultName(service)
         val namespace = "$rootNamespace.model"
         val builder = createSymbolBuilder(shape, name, namespace, boxed = true)
-            .definitionFile("$name.kt")
+            .definitionFile("${name.snakeCase()}.dart")
 
         // add a reference to each member symbol
         addDeclareMemberReferences(builder, shape.allMembers.values)
@@ -194,7 +193,7 @@ class DartSymbolProvider(private val model: Model, private val settings: DartSet
         val name = shape.defaultName(service)
         val namespace = "$rootNamespace.model"
         val builder = createSymbolBuilder(shape, name, namespace, boxed = true)
-            .definitionFile("$name.kt")
+            .definitionFile("${name.snakeCase()}.dart")
 
         // add a reference to each member symbol
         addDeclareMemberReferences(builder, shape.allMembers.values)
@@ -210,10 +209,10 @@ class DartSymbolProvider(private val model: Model, private val settings: DartSet
     }
 
     override fun serviceShape(shape: ServiceShape): Symbol {
-        val serviceName = clientName(settings.sdkId)
+        val serviceName = clientName(settings.pubspec.name)
         return createSymbolBuilder(shape, "${serviceName}Client")
             .namespace(rootNamespace, ".")
-            .definitionFile("${serviceName}Client.kt").build()
+            .definitionFile("${serviceName.snakeCase()}_client.dart").build()
     }
 
     /**

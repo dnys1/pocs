@@ -225,7 +225,7 @@ class ShapeValueGenerator(
         override fun numberNode(node: NumberNode) {
             when (currShape.type) {
                 ShapeType.TIMESTAMP -> {
-                    writer.addImport("${DartDependency.core.namespace}.time", "Instant")
+                    writer.addImport("${DartDependency.CORE.namespace}.time", "Instant")
                     writer.writeInline("Instant.fromEpochSeconds(#L, 0)", node.value)
                 }
 

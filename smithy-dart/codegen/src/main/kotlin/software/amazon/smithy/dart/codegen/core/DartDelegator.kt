@@ -10,14 +10,13 @@ import software.amazon.smithy.codegen.core.SymbolDependency
 import software.amazon.smithy.codegen.core.SymbolProvider
 import software.amazon.smithy.codegen.core.SymbolReference
 import software.amazon.smithy.dart.codegen.DartSettings
-import software.amazon.smithy.dart.codegen.integration.DartIntegration
 import software.amazon.smithy.dart.codegen.utils.namespaceToPath
 import software.amazon.smithy.model.Model
 import software.amazon.smithy.model.shapes.Shape
 import java.nio.file.Paths
 
-const val DEFAULT_SOURCE_SET_ROOT = "./src/main/kotlin/"
-private const val DEFAULT_TEST_SOURCE_SET_ROOT = "./src/test/kotlin/"
+const val DEFAULT_SOURCE_SET_ROOT = "./lib/src/"
+private const val DEFAULT_TEST_SOURCE_SET_ROOT = "./test/"
 
 /**
  * Manages writers for Dart files.
@@ -27,7 +26,6 @@ class DartDelegator(
     private val model: Model,
     val fileManifest: FileManifest,
     private val symbolProvider: SymbolProvider,
-    private val integrations: List<DartIntegration> = listOf()
 ) {
 
     private val writers: MutableMap<String, DartWriter> = mutableMapOf()
@@ -88,16 +86,6 @@ class DartDelegator(
         writer.dependencies.addAll(symbol.dependencies)
         writer.pushState()
 
-        // shape is stored in the property bag when generated, if it's there pull it back out
-        val shape = symbol.getProperty("shape", Shape::class.java)
-        if (shape.isPresent) {
-            // Allow integrations to do things like add onSection callbacks.
-            // these onSection callbacks are removed when popState is called.
-            for (integration in integrations) {
-                integration.onShapeWriterUse(settings, model, symbolProvider, writer, shape.get())
-            }
-        }
-
         block(writer)
         writer.popState()
     }
@@ -136,17 +124,7 @@ class DartDelegator(
         val formattedFilename = Paths.get(root, filename).normalize().toString()
         val needsNewline = writers.containsKey(formattedFilename)
         val writer = writers.getOrPut(formattedFilename) {
-            val kotlinWriter = DartWriter(namespace)
-
-            // Register all integrations [SectionWriterBindings] on the writer.
-            integrations.forEach { integration ->
-                integration.sectionWriters.forEach { (sectionId, sectionWriter) ->
-                    kotlinWriter.registerSectionWriter(sectionId) { writer: DartWriter, previousValue: String? ->
-                        sectionWriter.write(writer, previousValue)
-                    }
-                }
-            }
-            kotlinWriter
+            DartWriter()
         }
 
         if (needsNewline) {

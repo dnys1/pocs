@@ -9,6 +9,7 @@ import software.amazon.smithy.codegen.core.Symbol
 import software.amazon.smithy.dart.codegen.core.*
 import software.amazon.smithy.dart.codegen.lang.DartTypes
 import software.amazon.smithy.dart.codegen.lang.isValidDartIdentifier
+import software.amazon.smithy.dart.codegen.model.boxed
 import software.amazon.smithy.dart.codegen.model.expectTrait
 import software.amazon.smithy.dart.codegen.model.hasTrait
 import software.amazon.smithy.model.shapes.StringShape
@@ -16,7 +17,7 @@ import software.amazon.smithy.model.traits.EnumDefinition
 import software.amazon.smithy.model.traits.EnumTrait
 
 /**
- * Generates a Kotlin sealed class from a Smithy enum string
+ * Generates a Dart sealed class from a Smithy enum string
  *
  * For example, given the following Smithy model:
  *
@@ -30,64 +31,7 @@ import software.amazon.smithy.model.traits.EnumTrait
  *
  * We will generate the following Kotlin code:
  *
- * ```
- * sealed class SimpleYesNo {
- *     abstract val value: kotlin.String
- *
- *     object Yes: SimpleYesNo() {
- *         override val value: kotlin.String = "YES"
- *         override fun toString(): kotlin.String = value
- *     }
- *
- *     object No: SimpleYesNo() {
- *         override val value: kotlin.String = "NO"
- *         override fun toString(): kotlin.String = value
- *     }
- *
- *     data class SdkUnknown(override val value: kotlin.String): SimpleYesNo() {
- *         override fun toString(): kotlin.String = value
- *     }
- *
- *     companion object {
- *
- *         fun fromValue(str: kotlin.String): SimpleYesNo = when(str) {
- *             "YES" -> Yes
- *             "NO" -> No
- *             else -> SdkUnknown(str)
- *         }
- *
- *         fun values(): List<SimpleYesNo> = listOf(Yes, No)
- *     }
- * }
- *
- * sealed class TypedYesNo {
- *     abstract val value: kotlin.String
- *
- *     object Yes: TypedYesNo() {
- *         override val value: kotlin.String = "Yes"
- *         override fun toString(): kotlin.String = value
- *     }
- *
- *     object No: TypedYesNo() {
- *         override val value: kotlin.String = "No"
- *         override fun toString(): kotlin.String = value
- *     }
- *
- *     data class SdkUnknown(override val value: kotlin.String): TypedYesNo() {
- *         override fun toString(): kotlin.String = value
- *     }
- *
- *     companion object {
- *
- *         fun fromValue(str: kotlin.String): TypedYesNo = when(str) {
- *             "Yes" -> Yes
- *             "No" -> No
- *             else -> SdkUnknown(str)
- *         }
- *
- *         fun values(): List<TypedYesNo> = listOf(Yes, No)
- *     }
- * }
+ * ```dart
  * ```
  */
 class EnumGenerator(val shape: StringShape, val symbol: Symbol, val writer: DartWriter) {
@@ -109,76 +53,86 @@ class EnumGenerator(val shape: StringShape, val symbol: Symbol, val writer: Dart
         writer.renderDocumentation(shape)
         writer.renderAnnotations(shape)
         // NOTE: The smithy spec only allows string shapes to apply to a string shape at the moment
-        writer.withBlock("enum ${symbol.name} {", "}") {
+        writer.withBlock("class ${symbol.name} extends SmithyEnum<${symbol.name}> {", "}") {
             val sortedDefinitions = enumTrait
                 .values
                 .sortedBy { it.name.orElse(it.value) }
 
-            sortedDefinitions.forEach {
-                generateSealedClassVariant(it)
-                write("")
+            // Render private constructor
+            writer.withBlock("const #T._(int index, String name, String value)", "", symbol) {
+                write(": super(index, name, value);")
             }
 
-            if (generatedNames.contains("SdkUnknown")) throw CodegenException("generating SdkUnknown would cause duplicate variant for enum shape: $shape")
+            // Render the `unknown` constructor
+            writer.write("const #T.unknown(String value) : super.unknown(value);", symbol)
 
-            // generate the unknown which will always be last
-            writer.withBlock("data class SdkUnknown(override val value: #Q) : #Q() {", "}", DartTypes.String, symbol) {
-                renderToStringOverride()
+            sortedDefinitions.forEachIndexed { index, enumDefinition ->
+                generateEnumVariant(index, enumDefinition)
             }
 
+            writer.docs {
+                write("All values of [#T].", symbol)
+            }
+            openBlock("static #T values = [", DartTypes.List(symbol))
+                .call {
+                    sortedDefinitions.forEach {
+                        val variantName = getVariantName(it)
+                        write("${variantName},")
+                    }
+                }
+                .closeBlock("];")
+
+            // Create `toString` override
             write("")
+            writer.write("@override\n#T toString() => value;", DartTypes.String)
+        }
 
-            // generate the fromValue() static method
-            writer.dokka("Convert a raw value to one of the sealed variants or an unknown")
-            openBlock("factory #Q.fromValue(#Q value) {", DartTypes.String, symbol)
-                .call {
-                    sortedDefinitions.forEach { definition ->
-                        val variantName = getVariantName(definition)
-                        write("\"${definition.value}\" -> $variantName")
-                    }
-                }
-                .write("else -> SdkUnknown(str)")
-                .closeBlock("}")
-                .write("")
+        writer.withBlock("extension \$#T on #T {", "}", symbol, DartTypes.List(symbol)) {
+            // Generate `byName` utility
+            write(
+                "#T byName(#T name) => firstWhereOrNull((el) => el.name == name);",
+                symbol.boxed(),
+                DartTypes.String.boxed(),
+            )
 
-            writer.dokka("Get a list of all possible variants")
-            openBlock("fun values(): #Q<#Q> = listOf(", DartTypes.List, symbol)
-                .call {
-                    sortedDefinitions.forEachIndexed { idx, definition ->
-                        val variantName = getVariantName(definition)
-                        val suffix = if (idx < sortedDefinitions.size - 1) "," else ""
-                        write("${variantName}$suffix")
-                    }
+            // Generate `byValue` utility
+            writer.withBlock(
+                "#T byValue(#T value) {", "}",
+                symbol.boxed(),
+                DartTypes.String.boxed(),
+            ) {
+                write("if (value == null) return null;")
+                withBlock("return firstWhere(", ");") {
+                    write("(el) => el.value == value,")
+                    write("orElse: () => #T.unknown(value),", symbol)
                 }
-                .closeBlock(")")
+            }
         }
     }
 
-    private fun renderToStringOverride() {
-        // override to string to use the enum constant value
-        writer.write("override fun toString(): #Q = value", DartTypes.String)
-    }
-
-    private fun generateSealedClassVariant(definition: EnumDefinition) {
+    private fun generateEnumVariant(index: Int, definition: EnumDefinition) {
         writer.renderEnumDefinitionDocumentation(definition)
         val variantName = getVariantName(definition)
         if (!generatedNames.add(variantName)) {
             throw CodegenException("prefixing invalid enum value to form a valid Kotlin identifier causes generated sealed class names to not be unique: $variantName; shape=$shape")
         }
 
-        writer.openBlock("object $variantName : #Q() {", symbol)
-            .write("override val value: #Q = #S", DartTypes.String, definition.value)
-            .call { renderToStringOverride() }
-            .closeBlock("}")
+        writer.write(
+            "static const $variantName = " +
+                    "${symbol.name}._(#L, #S, #S);", index, variantName, definition.value
+        )
     }
 
     private fun getVariantName(definition: EnumDefinition): String {
         val identifierName = definition.variantName()
+        if (identifierName == "unknown") {
+            return "unknown$"
+        }
 
         if (!isValidDartIdentifier(identifierName)) {
-            // prefixing didn't fix it, this must be a value since EnumDefinition.name MUST be a valid identifier
+            // suffixing didn't fix it, this must be a value since EnumDefinition.name MUST be a valid identifier
             // already, see: https://awslabs.github.io/smithy/1.0/spec/core/constraint-traits.html#enum-trait
-            throw CodegenException("$identifierName is not a valid Kotlin identifier and cannot be automatically fixed with a prefix. Fix by customizing the model for $shape or giving the enum definition a name.")
+            throw CodegenException("$identifierName is not a valid Dart identifier and cannot be automatically fixed with a prefix. Fix by customizing the model for $shape or giving the enum definition a name.")
         }
 
         return identifierName

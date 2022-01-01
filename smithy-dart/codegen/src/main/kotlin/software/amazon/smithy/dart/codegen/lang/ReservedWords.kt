@@ -9,10 +9,10 @@ import software.amazon.smithy.codegen.core.ReservedWords
 import software.amazon.smithy.codegen.core.ReservedWordsBuilder
 
 /**
- * Get the Kotlin language reserved words
+ * Get the Dart language reserved words
  */
 fun dartReservedWords(): ReservedWords = ReservedWordsBuilder().apply {
-    hardReservedWords.forEach { put(it, "`$it`") }
+    hardReservedWords.forEach { put(it, "$it\$") }
 }.build()
 
 val hardReservedWords = listOf(

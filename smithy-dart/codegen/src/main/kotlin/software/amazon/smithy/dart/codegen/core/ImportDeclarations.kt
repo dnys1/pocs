@@ -10,18 +10,18 @@ import software.amazon.smithy.codegen.core.Symbol
 typealias FullyQualifiedSymbolName = Pair<String, String>
 
 internal fun Symbol.toFullyQualifiedSymbolName() = namespace to name
+
 /**
- * Container and formatter for Kotlin imports
+ * Container and formatter for Dart imports
  */
 class ImportDeclarations {
 
-    fun addImport(packageName: String, symbolName: String, alias: String = "") {
-        val canonicalAlias = if (alias == symbolName) "" else alias
-        imports.add(ImportStatement(packageName, symbolName, canonicalAlias))
+    fun addImport(packageName: String, symbolName: String, alias: String? = null) {
+        imports.add(ImportStatement(packageName, symbolName, alias))
     }
 
     fun symbolCollides(packageName: String, symbolName: String): Boolean =
-        imports.any { it.alias == "" && it.symbolName == symbolName && it.packageName != packageName && symbolName != "*" }
+        imports.any { it.alias == null && it.symbolName == symbolName && it.packageName != packageName && symbolName != "*" }
 
     override fun toString(): String {
         if (imports.isEmpty()) {
@@ -37,13 +37,13 @@ class ImportDeclarations {
     private val imports: MutableSet<ImportStatement> = mutableSetOf()
 }
 
-private data class ImportStatement(val packageName: String, val symbolName: String, val alias: String) {
+private data class ImportStatement(val packageName: String, val symbolName: String, val alias: String? = null) {
     val statement: String
         get() {
-            return if (alias != "" && alias != symbolName) {
-                "import $packageName.$symbolName as $alias"
+            return if (alias != null && alias.isNotEmpty()) {
+                "import 'package:$packageName/$packageName.dart' as $alias;"
             } else {
-                "import $packageName.$symbolName"
+                "import 'package:$packageName/$packageName.dart';"
             }
         }
 

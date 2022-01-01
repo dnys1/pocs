@@ -8,12 +8,13 @@ package software.amazon.smithy.dart.codegen.core
 import software.amazon.smithy.dart.codegen.utils.splitOnWordBoundaries
 import software.amazon.smithy.dart.codegen.utils.toCamelCase
 import software.amazon.smithy.dart.codegen.utils.toPascalCase
-import software.amazon.smithy.kotlin.codegen.lang.isValidDartIdentifier
+import software.amazon.smithy.dart.codegen.lang.isValidDartIdentifier
 import software.amazon.smithy.model.shapes.MemberShape
 import software.amazon.smithy.model.shapes.OperationShape
 import software.amazon.smithy.model.shapes.ServiceShape
 import software.amazon.smithy.model.shapes.Shape
 import software.amazon.smithy.model.traits.EnumDefinition
+import software.amazon.smithy.utils.StringUtils
 import java.util.logging.Logger
 
 // (somewhat) centralized naming rules
@@ -22,7 +23,11 @@ import java.util.logging.Logger
  * Get the default name for a shape (for code generation).  Delegates to
  * Smithy to rename shapes when configured to do so in the model.
  */
-fun Shape.defaultName(serviceShape: ServiceShape): String = id.getName(serviceShape).toPascalCase()
+fun Shape.defaultName(serviceShape: ServiceShape?): String {
+    return serviceShape?.let {
+        id.getName(it).toPascalCase()
+    } ?: id.name.toPascalCase()
+}
 
 /**
  * Get the default name for a member shape (for code generation)
@@ -46,19 +51,29 @@ private fun String.sanitizeClientName(): String =
 fun clientName(raw: String): String = raw.sanitizeClientName().toPascalCase()
 
 /**
+ * Capitalizes the string by upper-casing the first character and lower-casing the remainder.
+ */
+fun String.capitalize() = lowercase().replaceFirstChar { c -> c.uppercaseChar() }
+
+/**
+ * Transforms the string to snake_case.
+ */
+fun String.snakeCase() = splitOnWordBoundaries().joinToString("_") { it.lowercase() }
+
+/**
  * Get the (un-validated) name of an enum variant from the trait definition
  */
 fun EnumDefinition.variantName(): String {
     val identifier = name.orElseGet {
         // we don't want to be doing this...name your enums people
-        Logger.getLogger("NamingUtils").also {
-            it.warning("Using EnumDefinition.value to derive generated identifier name: $value")
-        }
+        Logger
+            .getLogger("NamingUtils")
+            .warning("Using EnumDefinition.value to derive generated identifier name: $value")
         value
     }
         .splitOnWordBoundaries()
         .fold(StringBuilder()) { acc, x ->
-            val curr = x.lowercase().replaceFirstChar { c -> c.uppercaseChar() }
+            val curr = if(acc.isEmpty()) x.lowercase() else x.capitalize()
             if (acc.isNotEmpty() && acc.last().isDigit() && x.first().isDigit()) {
                 // split on word boundaries created distinct words for adjacent digits e.g. "11.4" -> ["11" "4"]
                 // separate these out with _ as they are likely versions strings of some sort where a separation
@@ -72,8 +87,8 @@ fun EnumDefinition.variantName(): String {
 
     return when (isValidDartIdentifier(identifier)) {
         true -> identifier
-        // attempt to prefix it (e.g. `0` -> `_0`)
-        false -> "_$identifier"
+        // suffix it with $
+        false -> "$identifier\$"
     }
 }
 

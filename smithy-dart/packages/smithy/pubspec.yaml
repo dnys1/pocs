@@ -7,7 +7,7 @@ environment:
 
 dependencies:
   aws_common:
-    path: ../../../aws_common
+    path: ../../../pocs/aws_common
   collection: ^1.15.0
   fixnum: ^1.0.0
   http: ^0.13.0
