@@ -21,10 +21,3 @@ abstract class AWSHeaders {
   static const target = 'X-Amz-Target';
   static const transferEncoding = 'Transfer-Encoding';
 }
-
-/// Common header values used in AWS requests.
-abstract class AWSHeaderValues {
-  const AWSHeaderValues._();
-
-  static const defaultContentType = 'application/x-amz-json-1.1';
-}

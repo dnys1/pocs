@@ -1,6 +1,5 @@
+import 'package:aws_common/aws_common.dart';
 import 'package:aws_signature_v4/aws_signature_v4.dart';
-
-export 'package:aws_signature_v4/src/request/http_method.dart';
 
 /// {@template aws_sig_v4_signed_request}
 /// A signed [AWSBaseHttpRequest].

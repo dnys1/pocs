@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:aws_common/aws_common.dart';
 import 'package:aws_signature_v4/aws_signature_v4.dart';
-import 'package:aws_signature_v4/src/credentials/credentials_provider.dart';
 
 void main(List<String> args) async {
   final argParser = ArgParser();
@@ -67,7 +67,7 @@ void main(List<String> args) async {
     path: '/',
     headers: {
       AWSHeaders.target: 'AWSCognitoIdentityProviderService.DescribeUserPool',
-      AWSHeaders.contentType: AWSHeaderValues.defaultContentType,
+      AWSHeaders.contentType: 'application/x-amz-json-1.1',
       AWSHeaders.contentLength: body.length.toString(),
     },
     body: body,

@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:async/async.dart';
+import 'package:aws_common/aws_common.dart';
 import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:aws_signature_v4/src/configuration/service_header.dart';
 import 'package:aws_signature_v4/src/configuration/validator.dart';
@@ -33,8 +35,8 @@ class S3ServiceConfiguration extends BaseServiceConfiguration {
 
   static const _chunkedPayloadSeedHash = 'STREAMING-AWS4-HMAC-SHA256-PAYLOAD';
   static const _unsignedChunkedPayloadSeedHash = 'UNSIGNED-PAYLOAD';
-  static final _sigSep = ';chunk-signature='.codeUnits;
-  static final _sep = '\r\n'.codeUnits;
+  static final _sigSep = Uint8List.fromList(';chunk-signature='.codeUnits);
+  static final _sep = Uint8List.fromList('\r\n'.codeUnits);
 
   final bool signPayload;
   final bool chunked;
@@ -97,7 +99,6 @@ class S3ServiceConfiguration extends BaseServiceConfiguration {
       } else {
         base[AWSHeaders.contentEncoding] = 'aws-chunked,${encoding.value}';
       }
-      // base[AWSHeaders.transferEncoding] = 'chunked';
     }
 
     if (signPayload) {
@@ -168,15 +169,14 @@ class S3ServiceConfiguration extends BaseServiceConfiguration {
       final stringToSign = sb.toString();
 
       final chunkSignature = algorithm.sign(stringToSign, signingKey);
-      final bytes = <int>[
-        ...size.toRadixString(16).codeUnits,
-        ..._sigSep,
-        ...chunkSignature.codeUnits,
-        ..._sep,
-        ...chunk,
-        ..._sep,
-      ];
-      yield bytes;
+      final bytes = BytesBuilder(copy: false)
+        ..add(size.toRadixString(16).codeUnits)
+        ..add(_sigSep)
+        ..add(chunkSignature.codeUnits)
+        ..add(_sep)
+        ..add(chunk)
+        ..add(_sep);
+      yield bytes.takeBytes();
 
       previousSignature = chunkSignature;
       chunkedLength += size;
@@ -188,7 +188,7 @@ class S3ServiceConfiguration extends BaseServiceConfiguration {
   }
 }
 
-class S3ServiceHeader extends ServiceHeader {
+class S3ServiceHeader extends ServiceHeader<S3ServiceHeader> {
   const S3ServiceHeader._(
     String key,
     Validator<String> valueValidator,

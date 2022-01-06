@@ -46,16 +46,16 @@ class _ValueValidator<T extends Object> extends Validator<T> {
   @override
   void validate(T input) {
     if (input != value) {
-      throw ValidationException('Expected value: $value');
+      throw ValidationException('Expected $this');
     }
   }
 
   @override
   String toString() {
     if (T == String) {
-      return '"$value"';
+      return 'Value: "$value"';
     }
-    return '$value';
+    return 'Value: $value';
   }
 }
 
@@ -74,7 +74,7 @@ class _OneOfValidator<T extends Object> extends Validator<T> {
         return false;
       }
     })) {
-      throw ValidationException('Expected one of: $values');
+      throw ValidationException('Expected $this');
     }
   }
 
@@ -97,7 +97,7 @@ class _AllOfValidator<T extends Object> extends Validator<T> {
         return false;
       }
     })) {
-      throw ValidationException('Expected all of: $values');
+      throw ValidationException('Expected $this');
     }
   }
 

@@ -1,14 +1,12 @@
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:aws_common/aws_common.dart';
 import 'package:aws_signature_v4/aws_signature_v4.dart';
-import 'package:aws_signature_v4/src/configuration/service_configuration.dart';
 import 'package:collection/collection.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart';
-
-import '../aws_http_request.dart';
 
 part 'canonical_headers.dart';
 part 'canonical_query_parameters.dart';

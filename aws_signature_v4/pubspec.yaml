@@ -1,21 +1,25 @@
 name: aws_signature_v4
 description: Dart implementation of the AWS Signature Version 4 algorithm.
 version: 0.1.0
-publish_to: none
+homepage: https://github.com/awslabs/aws-sdk-dart
+issue_tracker: https://github.com/awslabs/aws-sdk-dart/issues
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   async: ^2.6.0
-  aws_common:
-    path: ../aws_common
+  aws_common: ^0.1.0
   collection: ^1.15.0
   convert: ^3.0.0
   crypto: ^3.0.0
   http: ^0.13.0
   json_annotation: ^4.3.0
   meta: ^1.0.0
+
+# dependency_overrides:
+#   aws_common:
+#     path: ../aws_common
 
 dev_dependencies:
   args: ^2.2.0

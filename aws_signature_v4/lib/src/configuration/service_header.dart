@@ -1,7 +1,7 @@
 import 'package:aws_common/aws_common.dart';
 import 'package:aws_signature_v4/src/configuration/validator.dart';
 
-abstract class ServiceHeader with AWSEquatable<ServiceHeader> {
+abstract class ServiceHeader<T extends ServiceHeader<T>> with AWSEquatable<T> {
   /// The header map key.
   final String key;
 
@@ -11,14 +11,7 @@ abstract class ServiceHeader with AWSEquatable<ServiceHeader> {
   const ServiceHeader(this.key, this.validator);
 
   @override
-  List<Object?> get props => [
-        key,
-        validator,
-
-        // To distinguish between keys of the same value but from
-        // different service configurations.
-        runtimeType,
-      ];
+  List<Object?> get props => [T, key, validator];
 
   @override
   String toString() => key;
